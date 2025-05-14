@@ -1,0 +1,21 @@
+- Example Projects -------------------------------------------------------------
+
+Assuming that Love is added to your environment path, all projects can be run
+directly from this folder via Love. For example:
+
+love platformer
+
+- Licensing --------------------------------------------------------------------
+
+All code and assets, including system image resources (the crosshairs and bitmap
+font files), that make up the MintCrate library are licensed under the MIT
+license (see repository root for this file).
+
+The Lua code provided within the example files within this folder fall under the
+MIT license, as well.
+
+The images, music, and sounds within these example projects, however, are
+copyrighted material and do not fall under the MIT license. They are provided
+solely for educational purposes and as a means to demonstrate how to use
+MintCrate in a more meaningful and understandable way. As such, please refrain
+from using them within your own projects.
