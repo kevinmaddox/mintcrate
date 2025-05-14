@@ -23,8 +23,7 @@ ToDo List
 [ ] Fix hitbox rectangle drawing
 [x] Change resource paths to res/active, res/backdrop, etc. & store in vars
 [x] Add function: setResourcePaths(pathActives, pathBackdrops, etc.)
-[ ] Look more into forwarding Love events to the engine (to reduce boilerplate)
-[ ] Room background color is different from window background color
+[x] Room background color is different from window background color
 [ ] Graphical tearing at 1x & 3x scale (non-integral camera position issue?)
 [ ] Add validation to functions
 [ ] Saving/loading data

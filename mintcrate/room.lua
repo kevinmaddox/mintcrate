@@ -23,7 +23,7 @@ function Room:new(roomWidth, roomHeight)
   self._roomHeight = roomHeight
   
   -- Background color (clear color)
-  love.graphics.setBackgroundColor(0, 0, 0)
+  self._backgroundColor = {r = 0, g = 0, b = 0}
   
   return o
 end
@@ -83,7 +83,15 @@ end
 -- @param {number} g The color's green value (0 - 255).
 -- @param {number} b The color's blue value (0 - 255).
 function Room:setBackgroundColor(r, g, b)
-  love.graphics.setBackgroundColor(love.math.colorFromBytes(r, g, b))
+  local r, g, b = love.math.colorFromBytes(r, g, b)
+  self._backgroundColor = {r = r, g = g, b = b}
+end
+
+function Room:_getBackgroundColor()
+  return
+    self._backgroundColor.r,
+    self._backgroundColor.g,
+    self._backgroundColor.b
 end
 
 -- -----------------------------------------------------------------------------

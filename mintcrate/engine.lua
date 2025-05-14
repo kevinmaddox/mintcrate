@@ -835,12 +835,20 @@ end
 
 -- Renders the current room (entities and debug visuals).
 function Engine:sys_draw()
+  -- Clear out-of-bounds areas to black.
+  love.graphics.clear(0, 0, 0)
+  
+  -- Clip game area view.
   love.graphics.setScissor(
     self._gfxOffsetX * self._gfxScale,
     self._gfxOffsetY * self._gfxScale,
     self._baseWidth * self._gfxScale,
     self._baseHeight * self._gfxScale
   )
+  
+  -- Clear only the game area with the room color.
+  local r, g, b = self._currentRoom:_getBackgroundColor()
+  love.graphics.clear(r, g, b)
   
   love.graphics.push()
   
