@@ -22,8 +22,6 @@ function love.load()
     {r =  255, g = 0, b = 255},
   })
   
-  mint:showAllDebugOverlays(true)
-  
   -- Inputs
   input = mint:addInputHandler()
   input:setJoystickNumber(1)

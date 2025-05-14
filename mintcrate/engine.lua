@@ -38,6 +38,16 @@ function Engine:new(
   -- Constants
   o._COLLIDER_SHAPES = {RECTANGLE = 0, CIRCLE = 1}
   
+  -- Resource directory paths
+  o._resPaths = {
+    actives = "res/actives/",
+    backdrops = "res/backdrops/",
+    fonts = "res/fonts/",
+    music = "res/music/",
+    sounds = "res/sounds/",
+    tilemaps = "res/tilemaps/"
+  }
+  
   -- Base game width/height
   o._baseWidth = baseWidth
   o._baseHeight = baseHeight
@@ -163,6 +173,20 @@ end
 -- Methods for loading game resources
 -- -----------------------------------------------------------------------------
 
+-- Specifies paths for loading resource files (all paths must end with a slash).
+-- @param {table} resourcePaths Paths for where to find resource files.
+-- @param {table} resourcePaths.actives Path for Actives.
+-- @param {table} resourcePaths.backdrops Path for Backdrops.
+-- @param {table} resourcePaths.fonts Path for Fonts.
+-- @param {table} resourcePaths.music Path for Music.
+-- @param {table} resourcePaths.sounds Path for Sounds.
+-- @param {table} resourcePaths.tilemaps Path for Tilemaps.
+function Engine:setResourcePaths(resourcePaths)
+  for resType, path in pairs(resourcePaths) do
+    self._resPaths[resType] = path
+  end
+end
+
 -- Specifies which color(s) should become transparent when loading images.
 -- @param {table} rgbSets Table of {r,g,b} tables, indicating the color keys.
 function Engine:defineColorKeys(rgbSets)
@@ -251,7 +275,7 @@ function Engine:defineActives(data)
       
       -- Load and store animation images
       local animation = {
-        image = self:_loadImage("res_actives/"..item.name),
+        image = self:_loadImage(self._resPaths.actives .. item.name),
         quads = {},
         offsetX = item.ox or 0,
         offsetY = item.oy or 0,
@@ -288,7 +312,7 @@ end
 -- @param {table} data A table of backdrop object definitions (see docs).
 function Engine:defineBackdrops(data)
   for _, item in ipairs(data) do
-    local image = self:_loadImage("res_backdrops/"..item.name)
+    local image = self:_loadImage(self._resPaths.backdrops .. item.name)
     if item.mosaic then image:setWrap("repeat", "repeat") end
     self._data.backdrops[item.name] = {
       image = image
@@ -307,7 +331,7 @@ end
 -- Loads an bitmap font image into a font data structure.
 -- @param {string} fontName The name of the font image (without extension).
 function Engine:_loadFont(fontName)
-  local path = "res_fonts/"
+  local path = self._resPaths.fonts
   local isEngineResource = false
   if (string.find(fontName, "system_")) then
     path = self._sysImgPath
@@ -357,7 +381,7 @@ end
 -- @param {table} data A table of sound resource definitions (see docs).
 function Engine:defineSounds(data)
   for _, item in ipairs(data) do
-    local path = "res_sounds/"..item.name
+    local path = self._resPaths.sounds .. item.name
     
     -- Figure out file extension
     for _, ext in ipairs({'wav', 'ogg'}) do
@@ -376,7 +400,7 @@ end
 -- @param {table} data A table of music resource definitions (see docs).
 function Engine:defineMusic(data)
   for _, item in ipairs(data) do
-    local path = "res_music/"..item.name
+    local path = self._resPaths.music .. item.name
     
     -- Figure out file extension
     for _, ext in ipairs({'ogg', 'it', 'xm', 'mod', 's3m'}) do
@@ -411,7 +435,7 @@ function Engine:defineTilemaps(data)
     -- Tilemap's base name (refers to the image file)
     if not string.find(item.name, '_') then
       local tilemap = {
-        image = self:_loadImage("res_tilemaps/"..item.name),
+        image = self:_loadImage(self._resPaths.tilemaps .. item.name),
         quads = {},
         tileWidth = item.tileWidth,
         tileHeight = item.tileHeight,
@@ -437,7 +461,8 @@ function Engine:defineTilemaps(data)
       local layoutName = self.util.string.split(item.name, '_')[2]
       
       -- Load and store tilemap layouts
-      local tilemapData = require("res_tilemaps."..item.name)
+      local path = string.gsub(self._resPaths.tilemaps, "/", ".")
+      local tilemapData = require(path .. item.name)
       self._data.tilemaps[tilemapName].layouts[layoutName] = {
         tiles = tilemapData.tiles
       }

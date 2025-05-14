@@ -1,0 +1,36 @@
+ToDo List
+[x] General input
+[x] Music
+[x] SFX
+[x] Destroying entities
+[x] Rearranging entity order
+[x] Mouse input
+[x] Change MathX name to mathEx or something
+[x] Fix window rescaling thingy
+[x] Fix tiled backdrop bug
+[x] Fix collision map generation
+[x] If room is smaller than client size, it should be placed in top-left corner
+[x] Fullscreen mode
+[x] Make sure all features are implemented
+[x] Reorganize/comment all code
+[x] Make it so behavior map can be omitted when loading a tilemap
+[x] Music loop points for OGG
+[x] Add functions for getting left/right/top/bottom/width/height of Active collider
+[x] Return tile data when performing collision check
+[x] Add @return statements to function comments
+[ ] If you run two collision events... will the second one override the debug painting?
+  - I think it's fine because collision states don't get reset until the next frame
+[ ] Fix hitbox rectangle drawing
+[x] Change resource paths to res/active, res/backdrop, etc. & store in vars
+[x] Add function: setResourcePaths(pathActives, pathBackdrops, etc.)
+[ ] Look more into forwarding Love events to the engine (to reduce boilerplate)
+[ ] Room background color is different from window background color
+[ ] Graphical tearing at 1x & 3x scale (non-integral camera position issue?)
+[ ] Add validation to functions
+[ ] Saving/loading data
+
+Decisions
+- none
+
+For when Love 12 comes out
+[ ] Implement <close> to auto run init() when Engine constructor finishes

@@ -15,6 +15,7 @@ function Level:new()
   o.player.slideTimer = 0
   o.player.direction = 1
   o.player.slideDirection = 1
+  o.player.spring = false
   
   o.bg = mint:addBackdrop('bg', 0, 0, 800, 224)
   
@@ -41,6 +42,7 @@ function Level:update()
   -- Sliding
   if
     self.player.isGrounded and
+    self.player.slideTimer == 0 and
     input:pressed("fire1") and
     input:held("down")
   then
@@ -71,14 +73,21 @@ function Level:update()
     self.player.slideTimer = 0
   end
   
+  -- Jump canceling
   if
     self.player.ySpeed < -1 and
-    input:released("fire1")
+    input:released("fire1") and
+    not self.player.sprung
   then
     self.player.ySpeed = -1
   end
   
   self.player.ySpeed = self.player.ySpeed + 0.1
+  
+  -- Turn sprung state off only if player is falling (so they can't cancel it)
+  if self.player.ySpeed >= 0 then
+    self.player.sprung = false
+  end
   
   -- Turn grounded state off as we're done processing movement
   self.player.isGrounded = false
@@ -126,6 +135,17 @@ function Level:update()
     self.player:setY(collisions[1].topEdgeY)
     self.player.isGrounded = true
     self.player.ySpeed = 0
+  end
+  
+  -- FLoors (springs)
+  collisions = mint:testMapCollision(self.player, 3)
+  if collisions and
+    self.player.ySpeed > 0 and
+    (previousY + self.player:getHeight()) <= collisions[1].bottomEdgeY
+  then
+    self.player:setY(collisions[1].topEdgeY)
+    self.player.ySpeed = -6
+    self.player.sprung = true
   end
   
   -- Invisible barriers
