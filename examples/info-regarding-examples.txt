@@ -17,5 +17,6 @@ MIT license, as well.
 The images, music, and sounds within these example projects, however, are
 copyrighted material and do not fall under the MIT license. They are provided
 solely for educational purposes and as a means to demonstrate how to use
-MintCrate in a more meaningful and understandable way. As such, please refrain
-from using them within your own projects.
+MintCrate in a more meaningful and understandable way. They can be freely
+redistributed with the library but they should not be present in your final
+projects.
