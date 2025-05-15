@@ -36,7 +36,7 @@ function love.load()
   mint:defineActives({
     -- Miamori
     {name = 'miamori'},
-    {name = 'miamori_collider', width = 15, height = 16, ox = -8, oy = -16},
+    {name = 'miamori_collider', width = 15, height = 20, ox = -8, oy = -20},
     {name = 'miamori_idle', ox = -11, oy = -25, ax = 16, ay = 15},
     {name = 'miamori_walk', ox = -11, oy = -25, ax = 16, ay = 15, frCount = 4, frDuration = 10},
     {name = 'miamori_slide', ox = -11, oy = -20, ax = 16, ay = 15},

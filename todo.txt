@@ -24,7 +24,7 @@ ToDo List
 [x] Change resource paths to res/active, res/backdrop, etc. & store in vars
 [x] Add function: setResourcePaths(pathActives, pathBackdrops, etc.)
 [x] Room background color is different from window background color
-[ ] Graphical tearing at 1x & 3x scale (non-integral camera position issue?)
+[x] Graphical tearing at 1x & 3x scale (non-integral camera position issue?)
 [ ] Add validation to functions
 [ ] Saving/loading data
 

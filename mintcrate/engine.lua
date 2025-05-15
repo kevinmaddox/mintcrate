@@ -90,6 +90,11 @@ function Engine:new(
     [2] = {pressed = false, held = false, released = false},
     [3] = {pressed = false, held = false, released = false}
   }
+  
+  -- Camera
+  self._camera = {x = 0, y = 0}
+  self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
+  self._cameraIsBound = false
 
   -- Debug functionality
   o._showFps = false
@@ -603,14 +608,16 @@ function Engine:changeRoom(room)
     self._instances[key] = {}
   end
   
-  -- Reset camera.
-  self._camera = {x = 0, y = 0}
-  
   -- Stop all audio.
   self:stopAllSounds()
   self:stopMusic()
   
-  -- Change to new room and default its size to the base application size.
+  -- Reset camera.
+  self._camera = {x = 0, y = 0}
+  self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
+  self._cameraIsBound = false
+  
+  -- Create new room.
   self._currentRoom = room:new()
   
   -- Throw warning message to console is room is smaller than game resolution.
@@ -724,15 +731,32 @@ end
 -- @param {number} x New X coordinate to place the camera at.
 -- @param {number} y New Y coordinate to place the camera at.
 function Engine:setCamera(x, y)
-  local boundX = x
-  boundX = math.max(boundX, 0);
-  boundX = math.min(boundX, self._currentRoom._roomWidth - self._baseWidth);
+  local x1
+  local y1
+  local x2
+  local y2
   
-  local boundY = y
-  boundY = math.max(boundY, 0);
-  boundY = math.min(boundY, self._currentRoom._roomHeight - self._baseHeight);
+  if not self._cameraIsBound then
+    x1 = 0
+    y1 = 0
+    x2 = self._currentRoom._roomWidth
+    y2 = self._currentRoom._roomHeight
+  else
+    x1 = self._bounds.x1
+    y1 = self._bounds.y1
+    x2 = self._bounds.x2
+    y2 = self._bounds.y2
+  end
   
-  -- Force camera to be 0 for axis if room size is smaller than window size
+  boundX = x
+  boundX = math.max(boundX, x1)
+  boundX = math.min(boundX, x2 - self._baseWidth)
+  
+  boundY = y
+  boundY = math.max(boundY, y1)
+  boundY = math.min(boundY, y2 - self._baseHeight)
+  
+  -- Force camera to fit room if room size is smaller than window size
   if self._currentRoom._roomWidth  <= self._baseWidth  then boundX = 0 end
   if self._currentRoom._roomHeight <= self._baseHeight then boundY = 0 end
   
@@ -740,13 +764,29 @@ function Engine:setCamera(x, y)
   self._camera.y = boundY
 end
 
+-- Binds the camera to a specified rectangular region.
+-- @param {number} x1 Region top-left X.
+-- @param {number} y1 Region top-left Y.
+-- @param {number} x2 Region bottom-right X.
+-- @param {number} y2 Region bottom-right Y.
+function Engine:bindCamera(x1, y1, x2, y2)
+  self._bounds = {x1 = x1, y1 = y1, x2 = x2, y2 = y2}
+  self._cameraIsBound = true
+end
+
+-- Unbinds the camera if previously bound.
+function Engine:unbindCamera()
+  self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
+  self._cameraIsBound = false
+end
+
 -- Centers the camera on a specific point.
 -- @param {number} x X coordinate to center the camera at.
 -- @param {number} y Y coordinate to center the camera at.
 function Engine:centerCamera(x, y)
   self:setCamera(
-    x - self.math.round(self._baseWidth / 2),
-    y - self.math.round(self._baseHeight / 2)
+    x - (self._baseWidth / 2),
+    y - (self._baseHeight / 2)
   )
 end
 
@@ -855,8 +895,8 @@ function Engine:sys_draw()
   love.graphics.scale(self._gfxScale, self._gfxScale)
   
   love.graphics.translate(
-    -self._camera.x + self._gfxOffsetX,
-    -self._camera.y + self._gfxOffsetY
+    math.floor(-self._camera.x + self._gfxOffsetX),
+    math.floor(-self._camera.y + self._gfxOffsetY)
   )
   
   -- Draw backdrops
@@ -881,7 +921,8 @@ function Engine:sys_draw()
           love.graphics.draw(
             tilemap.image,
             tilemap.quads[tileNumber],
-            (col-1) * tilemap.tileWidth, (row-1) * tilemap.tileHeight
+            (col-1) * tilemap.tileWidth,
+            (row-1) * tilemap.tileHeight
           )
         end
       end
@@ -1060,8 +1101,8 @@ function Engine:sys_draw()
       -- Draw X,Y position values & animation name
       if self._showActiveInfo then
         local pad = math.max(
-          string.len(tostring(self._currentRoom:getWidth())),
-          string.len(tostring(self._currentRoom:getHeight()))
+          string.len(tostring(self._currentRoom:getRoomWidth())),
+          string.len(tostring(self._currentRoom:getRoomHeight()))
         )
         
         local x = self.math.round(active:getX(), 2)
@@ -1291,6 +1332,10 @@ function Engine:sys_resize(w, h)
   else
     self._gfxScale = self._windowScale
   end
+  
+  -- Floor scale so it's integral. Non-integral scaling will result in graphical
+  -- artifacts on textures.
+  self._gfxScale = math.floor(self._gfxScale)
   
   -- Determine the offsets to center the game in the window.
   local ox = ((w / self._gfxScale) - self._baseWidth) / 2

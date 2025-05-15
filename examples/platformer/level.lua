@@ -20,24 +20,30 @@ function Level:new()
   o.bg = mint:addBackdrop('bg', 0, 64, 800, 224)
   
   mint:setMusic('snow-forest')
-  mint:playMusic()
+  -- mint:playMusic()
   
   return o
 end
 
 function Level:update()
+  
+  local collisions
+  local previousY
+  
   -- Player movement -----------------------------------------------------------
   
   -- Walking
   if input:held("right") then
-    self.player.xSpeed = 1.5
+    self.player.xSpeed = 1
     self.player.direction = 1
   elseif input:held("left") then
-    self.player.xSpeed = -1.5
+    self.player.xSpeed = -1
     self.player.direction = -1
   else
     self.player.xSpeed = 0
   end
+  
+  if mint:keyHeld("s") then self.player.xSpeed = 5 end
   
   -- Sliding
   if
@@ -52,7 +58,7 @@ function Level:update()
   
   if self.player.slideTimer > 0 then
     self.player.slideTimer = self.player.slideTimer - 1
-    self.player.xSpeed = self.player.slideDirection * 3
+    self.player.xSpeed = self.player.slideDirection * 2
   end
   
   if
@@ -69,7 +75,7 @@ function Level:update()
     input:pressed("fire1") and
     not input:held("down")
   then
-    self.player.ySpeed = -3
+    self.player.ySpeed = -2.75
     self.player.slideTimer = 0
   end
   
@@ -94,7 +100,7 @@ function Level:update()
   
   -- Update positions and handle collisions ------------------------------------
   
-  local collisions = false
+  collisions = false
   
   -- Update player's X position
   self.player:setX(self.player:getX() + self.player.xSpeed)
@@ -108,10 +114,11 @@ function Level:update()
       self.player:setX(collisions[1].rightEdgeX + (self.player:getWidth()/2)+1)
     end
     self.player.xSpeed = 0
+    self.player.slideTimer = 0
   end
   
   -- Update player's Y position
-  local previousY = self.player:getY()
+  previousY = self.player:getY()
   self.player:setY(self.player:getY() + self.player.ySpeed)
   
   -- Floors/ceilings (obstacles)
@@ -127,33 +134,37 @@ function Level:update()
   end
   
   -- Floors (pass-through platforms)
-  collisions = mint:testMapCollision(self.player, 2)
-  if collisions and
-    self.player.ySpeed > 0 and
-    (previousY + self.player:getHeight()) <= collisions[1].bottomEdgeY
-  then
-    self.player:setY(collisions[1].topEdgeY)
-    self.player.isGrounded = true
-    self.player.ySpeed = 0
+  collisions = mint:testMapCollision(self.player, 2) or {}
+  for _, collision in ipairs(collisions) do
+    if
+      self.player.ySpeed > 0 and
+      previousY <= collision.topEdgeY
+    then
+      self.player:setY(collision.topEdgeY)
+      self.player.isGrounded = true
+      self.player.ySpeed = 0
+    end
   end
   
   -- FLoors (springs)
-  collisions = mint:testMapCollision(self.player, 3)
-  if collisions and
-    self.player.ySpeed > 0 and
-    (previousY + self.player:getHeight()) <= collisions[1].bottomEdgeY
-  then
-    self.player:setY(collisions[1].topEdgeY)
-    self.player.ySpeed = -6
-    self.player.sprung = true
+  collisions = mint:testMapCollision(self.player, 3) or {}
+  for _, collision in ipairs(collisions) do
+    if
+      self.player.ySpeed > 0 and
+      previousY <= collision.topEdgeY
+    then
+      self.player:setY(collision.topEdgeY)
+      self.player.ySpeed = -6
+      self.player.sprung = true
+    end
   end
   
   -- Invisible barriers
-  if (self.player:getX()-self.player:getWidth()/2) < 0 then
-    self.player:setX(self.player:getWidth()/2 + 1)
+  if self.player:getLeftEdgeX() < 0 then
+    self.player:setX(self.player:getWidth()/2)
     self.player.xSpeed = 0
-  elseif (self.player:getX()+self.player:getWidth()/2) > self:getWidth() then
-    self.player:setX(self:getWidth() - self.player:getWidth())
+  elseif self.player:getRightEdgeX() > self:getRoomWidth() then
+    self.player:setX(self:getRoomWidth() - self.player:getWidth()/2)
     self.player.xSpeed = 0
   end
   
@@ -181,9 +192,7 @@ function Level:update()
   mint:centerCamera(self.player:getX(), self.player:getY())
   
   -- Update background trees position
-  self.bg:setX(
-    mint:getCameraX() / 2
-  )
+  self.bg:setX(mint:getCameraX() / 2)
 end
 
 return Level

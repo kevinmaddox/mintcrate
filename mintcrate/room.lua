@@ -34,13 +34,13 @@ end
 
 -- Returns the width of the room.
 -- @returns {number} Room's width.
-function Room:getWidth()
+function Room:getRoomWidth()
   return self._roomWidth
 end
 
 -- Returns the width of the room.
 -- @returns {number} Room's height.
-function Room:getHeight()
+function Room:getRoomHeight()
   return self._roomHeight
 end
 
