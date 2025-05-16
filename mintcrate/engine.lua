@@ -320,7 +320,8 @@ function Engine:defineBackdrops(data)
     local image = self:_loadImage(self._resPaths.backdrops .. item.name)
     if item.mosaic then image:setWrap("repeat", "repeat") end
     self._data.backdrops[item.name] = {
-      image = image
+      image = image,
+      mosaic = item.mosaic
     }
   end
 end
@@ -661,19 +662,31 @@ end
 -- @param {string} name The name of the Backdrop (from defineBackdrops).
 -- @param {number} x The starting X position of the backdrop.
 -- @param {number} y The ending X position of the backdrop.
--- @param {number} width The width of the backdrop.
--- @param {number} height The height of the backdrop.
+-- @param {table} options Optional Backdrop properties.
+-- @param {number} options.width The width of the backdrop.
+-- @param {number} options.height The height of the backdrop.
 -- @returns {Backdrop} A new instance of the Backdrop class.
-function Engine:addBackdrop(name, x, y, width, height)
+function Engine:addBackdrop(name, x, y, options)
+  local options = options or {}
   local image = self._data.backdrops[name].image
-  width = width or image:getWidth()
-  height = height or image:getHeight()
+  local width = options.width or image:getWidth()
+  local height = options.height or image:getHeight()
+  
+  local quad
+  local scaleX = 1
+  local scaleY = 1
+  if self._data.backdrops[name].mosaic then
+    quad = love.graphics.newQuad(0, 0, width, height, image:getDimensions())
+  else
+    local textureWidth, textureHeight = image:getDimensions()
+    scaleX = width / textureWidth
+    scaleY = height / textureHeight
+  end
   
   local backdrop = MintCrate.Backdrop:new(
     self._instances.backdrops,
     name, x, y,
-    width, height,
-    love.graphics.newQuad(0, 0, width, height, image:getDimensions())
+    width, height, quad, scaleX, scaleY
   )
   
   table.insert(self._instances.backdrops, backdrop)
@@ -686,16 +699,16 @@ end
 -- @param {number} x The starting X position of the Text object.
 -- @param {number} y The starting Y position of the Text object.
 -- @param {string} startingTextContent What text to show upon creation.
--- @param {number} maxCharsPerLine How many characters written before wrapping.
--- @param {number} lineSpacing How much space there is between lines, in pixels.
--- @param {boolean} wordWrap Whether entire words should wrap or break mid-word.
+-- @param {table} options Optional Text properties.
+-- @param {number} options.maxCharsPerLine Characters written before wrapping.
+-- @param {number} options.lineSpacing Space there is between lines, in pixels.
+-- @param {boolean} options.wordWrap Whether entire words should wrap or break.
 -- @returns {Text} A new instance of the Text class.
-function Engine:addText(name, x, y, startingTextContent,
-  maxCharsPerLine, lineSpacing, wordWrap
-)
-  maxCharsPerLine = maxCharsPerLine or 9999
-  lineSpacing = lineSpacing or 0
-  wordWrap = wordWrap or false
+function Engine:addText(name, x, y, startingTextContent, options)
+  local options = options or {}
+  local maxCharsPerLine = options.maxCharsPerLine or 9999
+  local lineSpacing = options.lineSpacing or 0
+  local wordWrap = options.wordWrap or false
   
   local text = MintCrate.Text:new(
     self._instances.text,
@@ -901,8 +914,16 @@ function Engine:sys_draw()
   
   -- Draw backdrops
   for _, backdrop in ipairs(self._instances.backdrops) do
-    love.graphics.draw(self._data.backdrops[backdrop._name].image,
-      backdrop._quad, backdrop._x, backdrop._y)
+    local image = self._data.backdrops[backdrop._name].image
+    local mosaic = self._data.backdrops[backdrop._name].mosaic
+    
+    if not mosaic then
+      love.graphics.draw(image, backdrop._x, backdrop._y, 0,
+        backdrop._scaleX, backdrop._scaleY)
+    else
+      love.graphics.draw(image, backdrop._quad, backdrop._x, backdrop._y, 0,
+        backdrop._scaleX, backdrop._scaleY)
+    end
   end
   
   -- Draw tilemap
@@ -1422,7 +1443,7 @@ end
 -- @param {Active} activeA The first Active to test.
 -- @param {Active} activeB The second Active to test.
 -- @returns {boolean} Whether a collission occurred.
-function Engine:testActiveCollision(activeA, activeB)
+function Engine:testCollision(activeA, activeB)
   return self:_testCollision(activeA:_getCollider(), activeB:_getCollider())
 end
 

@@ -17,7 +17,7 @@ function Level:new()
   o.player.slideDirection = 1
   o.player.spring = false
   
-  o.bg = mint:addBackdrop('bg', 0, 64, 800, 224)
+  o.bg = mint:addBackdrop('bg', 0, 64, {width = 800, height = 224})
   
   mint:setMusic('snow-forest')
   -- mint:playMusic()

@@ -61,11 +61,11 @@ function Text:setTextContent(textContent)
   local maxCharsPerLine = self._maxCharsPerLine
   
   -- Split words
-  local initialSplit = Util.string.split(textContent, " ")
+  local initialSplit = MintCrate.Util.string.split(textContent, " ")
   -- Split linebreaks into their own "words"
   local words = {}
   for _, fullWord in ipairs(initialSplit) do
-    local splitWords = Util.string.split(fullWord, "\n")
+    local splitWords = MintCrate.Util.string.split(fullWord, "\n")
     for i, word in ipairs(splitWords) do
       table.insert(words, word)
       if i < #splitWords then table.insert(words, "\n") end
@@ -118,7 +118,7 @@ end
 -- Returns the formatted lines to properly write the text with.
 -- @returns {table} Formatted lines of the text element.
 function Text:_getTextLines()
-  return self._getTextLines
+  return self._textLines
 end
 
 -- Returns the maximum number of characters allowed to be printed per line.

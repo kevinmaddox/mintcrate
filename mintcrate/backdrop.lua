@@ -17,8 +17,12 @@ local Backdrop = MintCrate.Entity:new()
 -- @param {number} width Width of the Backdrop, in pixels.
 -- @param {number} height Height of the Backdrop, in pixels.
 -- @param {Quad} quad Specifications for tiling Backdrops.
+-- @param {number} scaleX Used to scale non-mosaic Backdrops correctly.
+-- @param {number} scaleY Used to scale non-mosaic Backdrops correctly.
 -- @returns {Backdrop} A new instance of the Backdrop class.
-function Backdrop:new(instances, name, x, y, width, height, quad)
+function Backdrop:new(instances, name, x, y, width, height, quad,
+  scaleX, scaleY
+)
   local o = {}
   setmetatable(o, self)
   self.__index = self
@@ -30,6 +34,8 @@ function Backdrop:new(instances, name, x, y, width, height, quad)
   o._width = width
   o._height = height
   o._quad = quad
+  o._scaleX = scaleX
+  o._scaleY = scaleY
   
   return o
 end

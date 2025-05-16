@@ -25,9 +25,7 @@ ToDo List
 [x] Fix hitbox rectangle drawing
 [x] Add debug info display for camera
 [x] Add left/center/right alignment for Text elements (and to the draw text function)
-[ ] Functions for adding entities... make the extra things be optional params in tables
-[ ] If you run two collision events... will the second one override the debug painting?
-  - I think it's fine because collision states don't get reset until the next frame
+[x] Functions for adding entities... make the extra things be optional params in tables
 [ ] Add validation to functions
 [ ] Saving/loading data
 
