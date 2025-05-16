@@ -964,7 +964,7 @@ function Engine:sys_draw()
   -- Draw text
   for _, text in ipairs(self._instances.text) do
     self:_drawText(
-      text:getTextContent(),
+      text:_getTextLines(),
       self._data.fonts[text:_getName()],
       text:getX(), text:getY(),
       text:_getMaxCharsPerLine(),
@@ -990,16 +990,16 @@ function Engine:sys_draw()
           
           love.graphics.rectangle(
             "fill",
-            mask.x + 0.5, mask.y + 0.5,
-            mask.w - 1.0, mask.h - 1.0
+            math.floor(mask.x) + 0.5, math.floor(mask.y) + 0.5,
+            math.floor(mask.w) - 1.0, math.floor(mask.h) - 1.0
           )
           
           love.graphics.setColor(love.math.colorFromBytes(0, 0, 255))
           
           love.graphics.rectangle(
             "line",
-            mask.x + 0.5, mask.y + 0.5,
-            mask.w - 1.0, mask.h - 1.0
+            math.floor(mask.x) + 0.5, math.floor(mask.y) + 0.5,
+            math.floor(mask.w) - 1.0, math.floor(mask.h) - 1.0
           )
         end
         
@@ -1008,7 +1008,7 @@ function Engine:sys_draw()
         -- Draw collison mask behavior numbers
         if self._showTilemapBehaviorValues then
           self:_drawText(
-            tileType, self._data.fonts["system_counter"],
+            {tileType}, self._data.fonts["system_counter"],
             mask.x + 2, mask.y + 2,
             3, 0, false
           )
@@ -1044,16 +1044,16 @@ function Engine:sys_draw()
         if (collider.s == self._COLLIDER_SHAPES.RECTANGLE) then
           love.graphics.rectangle(
             "fill",
-            collider.x + 0.5, collider.y + 0.5,
-            collider.w - 1.0, collider.h - 1.0
+            math.floor(collider.x) + 0.5, math.floor(collider.y) + 0.5,
+            math.floor(collider.w) - 1.0, math.floor(collider.h) - 1.0
           )
           
           love.graphics.setColor(love.math.colorFromBytes(255, 0, 255))
           
           love.graphics.rectangle(
             "line",
-            collider.x + 0.5, collider.y + 0.5,
-            collider.w - 1.0, collider.h - 1.0
+            math.floor(collider.x) + 0.5, math.floor(collider.y) + 0.5,
+            math.floor(collider.w) - 1.0, math.floor(collider.h) - 1.0
           )
         else
           love.graphics.circle("fill", collider.x, collider.y, collider.r)
@@ -1118,25 +1118,63 @@ function Engine:sys_draw()
           self.util.string.padLeft(yParts[1], pad, " ") .. "." ..
           self.util.string.padRight(yParts[2], 2, "0")
         
-        local str =
-          "X:" .. x .. "\n" ..
-          "Y:" .. y .. "\n" ..
-          active:getAnimationName()
-        
         self:_drawText(
-          str, self._data.fonts["system_counter"],
-          active:getX() + 8, active:getY() + 8,
+          {
+            "X:" .. x,
+            "Y:" .. y,
+            active:getAnimationName()
+          }, self._data.fonts["system_counter"],
+          active:getX(), active:getY() + 8,
           self._baseWidth / self._data.fonts["system_counter"].charWidth,
-          0, false
+          0, false, "center"
         )
       end
     end
   end
   
+  -- Draw camera debug overlay
+  if self._showCameraInfo then
+    local pad = math.max(
+      string.len(tostring(self._currentRoom:getRoomWidth())),
+      string.len(tostring(self._currentRoom:getRoomHeight()))
+    )
+    
+    local strLines = {
+      "Camera",
+      "X:" .. self.util.string.padLeft(self._camera.x, pad, " "),
+      "Y:" .. self.util.string.padLeft(self._camera.y, pad, " ")
+    }
+    
+    if not self._cameraIsBound then
+      table.insert(strLines, "UNBOUND")
+    else
+      table.insert(strLines,
+        "BND1: (" ..
+        self.util.string.padLeft(self._cameraBounds.x1, pad, " ") ..
+        ", " ..
+        self.util.string.padLeft(self._cameraBounds.y1, pad, " ") ..
+        ")")
+      table.insert(strLines,
+        "BND2: (" ..
+        self.util.string.padLeft(self._cameraBounds.x2, pad, " ") ..
+        ", " ..
+        self.util.string.padLeft(self._cameraBounds.y2, pad, " ") ..
+        ")")
+    end
+    
+    self:_drawText(
+      strLines,
+      self._data.fonts["system_counter"],
+      self._camera.x + self._baseWidth, self._camera.y,
+      self._baseWidth / self._data.fonts["system_counter"].charWidth,
+      0, false, "right"
+    )
+  end
+  
   -- Draw FPS debug overlay
   if self._showFps then
     self:_drawText(
-      love.timer.getFPS(),
+      {love.timer.getFPS()},
       self._data.fonts["system_counter"],
       self._camera.x, self._camera.y,
       self._baseWidth / self._data.fonts["system_counter"].charWidth,
@@ -1147,11 +1185,18 @@ function Engine:sys_draw()
   -- Draw debug info for current room
   if self._showRoomInfo then
     self:_drawText(
-      "ACTS: "..#self._instances.actives..
-      "\nBAKS: "..#self._instances.backdrops..
-      "\nTXTS: "..#self._instances.text,
+      {
+        self._currentRoom:getRoomName(),
+        self._currentRoom:getRoomWidth() .. " x " ..
+          self._currentRoom:getRoomHeight(),
+        "ACTS: " .. #self._instances.actives,
+        "BAKS: " .. #self._instances.backdrops,
+        "TXTS: " .. #self._instances.text
+      },
       self._data.fonts["system_counter"],
-      self._camera.x, self._camera.y + 8,
+      self._camera.x,
+      self._camera.y + self._baseHeight -
+        (5 * self._data.fonts["system_counter"].charHeight),
       self._baseWidth / self._data.fonts["system_counter"].charWidth,
       0, false
     )
@@ -1170,22 +1215,39 @@ end
 -- @param {number} maxCharsPerLine How many characters written before wrapping.
 -- @param {number} lineSpacing How much space there is between lines.
 -- @param {boolean} wordWrap Whether entire words should wrap or break mid-word.
+-- @param {string} alignment How the text should be aligned.
 function Engine:_drawText(
-  textContent,
+  textLines,
   font,
   x, y,
-  maxCharsPerLine, lineSpacing, wordWrap
+  maxCharsPerLine, lineSpacing, wordWrap, alignment
 )
   maxCharsPerLine = maxCharsPerLine or 9999
   lineSpacing = lineSpacing or 0
   wordWrap = wordWrap or false
+  alignment = alignment or "left"
   
-  textContent = string.gsub(textContent, "\n", " \n ")
-  local words = self.util.string.split(textContent, " ")
+  -- Draw lines of text, character-by-character
+  for lineNum, line in ipairs(textLines) do
+    local xOffset = 0
+    
+    if alignment == "right" then
+      xOffset = string.len(line) * font.charWidth
+    elseif alignment == "center" then
+      xOffset = math.floor(string.len(line) * font.charWidth / 2)
+    end
+    
+    for charPosition, character in ipairs(self.util.string.split(line)) do
+      love.graphics.draw(
+        font.image,
+        font.quads[character],
+        x + (font.charWidth * (charPosition-1)) - xOffset,
+        y + (font.charHeight * (lineNum-1)) + (lineSpacing * (lineNum-1))
+      )
+    end
+  end
   
-  local line = 0
-  local position = 0
-  
+  --[[
   -- Copy each word to canvas, letter-by-letter.
   for i, word in ipairs(words) do
     -- Wrap words, but only if they're not longer than the max chars per line.
@@ -1251,6 +1313,8 @@ function Engine:_drawText(
       end
     end
   end
+  --]]
+  
 end
 
 -- -----------------------------------------------------------------------------
@@ -1703,6 +1767,16 @@ function Engine:showRoomInfo(enabled)
   end
 end
 
+-- Toggles an overlay that shows information regarding the camera.
+-- @param {boolean} enabled Whether the overlay should be shown or not.
+function Engine:showCameraInfo(enabled)
+  if type(enabled) == "nil" then
+    self._showCameraInfo = not self._showCameraInfo
+  else
+    self._showCameraInfo = enabled
+  end
+end
+
 -- Toggles an overlay that displays collision masks for tilemaps.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:showTilemapCollisionMasks(enabled)
@@ -1768,6 +1842,7 @@ end
 function Engine:showAllDebugOverlays(enabled)
   self:showFps(enabled)
   self:showRoomInfo(enabled)
+  self:showCameraInfo(enabled)
   self:showTilemapCollisionMasks(enabled)
   self:showTilemapBehaviorValues(enabled)
   self:showActiveCollisionMasks(enabled)

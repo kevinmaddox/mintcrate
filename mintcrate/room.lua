@@ -10,13 +10,17 @@ local Room = {}
 -- -----------------------------------------------------------------------------
 
 -- Creates an instance of the Room class.
+-- @param {string} roomName The room's name (identifier for debugging purposes).
 -- @param {number} roomWidth The width of the room, in pixels.
 -- @param {number} roomHeight The height of the room, in pixels.
 -- @returns {Room} A new instance of the Room class.
-function Room:new(roomWidth, roomHeight)
+function Room:new(roomName, roomWidth, roomHeight)
   local o = {}
   setmetatable(o, self)
   self.__index = self
+  
+  -- Set room name
+  self._roomName = roomName
   
   -- Set room dimensions
   self._roomWidth = roomWidth
@@ -31,6 +35,12 @@ end
 -- -----------------------------------------------------------------------------
 -- Methods for getting information about the room
 -- -----------------------------------------------------------------------------
+
+-- Returns the room's name.
+-- @returns {string} Room's name.
+function Room:getRoomName()
+  return self._roomName
+end
 
 -- Returns the width of the room.
 -- @returns {number} Room's width.

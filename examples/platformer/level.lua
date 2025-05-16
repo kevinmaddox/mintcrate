@@ -1,4 +1,4 @@
-Level = MintCrate.Room:new(640, 240)
+Level = MintCrate.Room:new("Level", 640, 240)
 
 function Level:new()
   local o = {}
@@ -109,9 +109,11 @@ function Level:update()
   collisions = mint:testMapCollision(self.player, 1)
   if collisions then
     if self.player.xSpeed > 0 then
-      self.player:setX(collisions[1].leftEdgeX - (self.player:getWidth()/2))
+      self.player:setX(collisions[1].leftEdgeX -
+        math.floor(self.player:getWidth()/2))
     else
-      self.player:setX(collisions[1].rightEdgeX + (self.player:getWidth()/2)+1)
+      self.player:setX(collisions[1].rightEdgeX +
+        math.floor(self.player:getWidth()/2)+1)
     end
     self.player.xSpeed = 0
     self.player.slideTimer = 0

@@ -18,13 +18,16 @@ ToDo List
 [x] Add functions for getting left/right/top/bottom/width/height of Active collider
 [x] Return tile data when performing collision check
 [x] Add @return statements to function comments
-[ ] If you run two collision events... will the second one override the debug painting?
-  - I think it's fine because collision states don't get reset until the next frame
-[ ] Fix hitbox rectangle drawing
 [x] Change resource paths to res/active, res/backdrop, etc. & store in vars
 [x] Add function: setResourcePaths(pathActives, pathBackdrops, etc.)
 [x] Room background color is different from window background color
 [x] Graphical tearing at 1x & 3x scale (non-integral camera position issue?)
+[x] Fix hitbox rectangle drawing
+[x] Add debug info display for camera
+[x] Add left/center/right alignment for Text elements (and to the draw text function)
+[ ] Functions for adding entities... make the extra things be optional params in tables
+[ ] If you run two collision events... will the second one override the debug painting?
+  - I think it's fine because collision states don't get reset until the next frame
 [ ] Add validation to functions
 [ ] Saving/loading data
 
