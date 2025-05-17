@@ -26,6 +26,7 @@ ToDo List
 [x] Add debug info display for camera
 [x] Add left/center/right alignment for Text elements (and to the draw text function)
 [x] Functions for adding entities... make the extra things be optional params in tables
+[ ] Change the name of "Text" objects to "Paragraph"
 [ ] Add validation to functions
 [ ] Saving/loading data
 
