@@ -16,7 +16,6 @@ require("mintcrate.loader")
 This will load the entire framework.
 
 ## Project Setup
-
 A project setup template is included in this repository via the `project-template` folder. You can simply copy this folder, rename it to your project's/game's name, and start developing within it (you'll still need to copy the `mintcrate` library folder into it.).
 
 Below is an overview of how a project is structured.
@@ -47,10 +46,12 @@ project-folder
 
 However, this directory setup can be redefined via the function `setResourcePaths`.
 
+## Examples
+Sample project scan be found in the `examples` directory. You can run these by simply calling `love {example-folder-name}` within the `examples` directory (assuming LÖVE has been added to your path).
+
 ## Rooms
 
 ## Entities
-
 Actives, Backdrops, Paragraphs
 
 ## Tilemaps
@@ -60,7 +61,6 @@ Actives, Backdrops, Paragraphs
 ## Input Handlers
 
 ## Utility Classes
-
 Util, MathX
 
 ## Debug Overlays
