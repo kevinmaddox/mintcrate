@@ -52,7 +52,37 @@ Sample project scan be found in the `examples` directory. You can run these by s
 ## Rooms
 
 ## Entities
-Actives, Backdrops, Paragraphs
+Entities are your general game objects. There are three types: Actives, Backdrops, and Paragraphs.
+
+- Actives: Things that move around and interact with one another. Players, enemies, bullets, collectables, etc.
+- Backdrops: Purely-visual background elements.
+- Paragraphs: Bitmap-font text with some formatting options.
+
+There are two steps in the order of how entities are drawn.
+
+1. Text is drawn on top of Actives, which are drawn on top of Backdrops.
+2. Pertaining to an entity of a particular type, the order of drawing is dependent on when the object was created. The most recently-created entity will be drawn on top of everything else. Entities can be rearranged via class methods (`bringForward`, `bringToFront`, `sendBackward`, `sendToBack`).
+
+Any entity can be destroyed by calling its `destroy` method. Note that you will still need to `nil` out the variable that the entity is assigned to so that it can be removed from memory.
+
+You can either do it by manually setting the variable to `nil`:
+
+```
+self.myActive:destroy()
+self.myActive = nil
+```
+
+Or, you can do so in one line by assigning the variable's value to the value returned by `destroy`, which will always be `nil`:
+
+```
+self.myActive = self.myActive:destroy()
+```
+
+### Actives
+
+### Backdrops
+
+### Paragraphs
 
 ## Tilemaps
 

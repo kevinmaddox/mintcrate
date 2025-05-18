@@ -38,6 +38,7 @@ end
 -- Removes the entity from the room and informs the engine to stop managing it.
 function Entity:destroy()
   table.remove(self._instances, self:_getInstanceIndex())
+  return nil
 end
 
 -- Returns the entity's name.
