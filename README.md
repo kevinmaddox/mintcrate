@@ -63,6 +63,8 @@ There are two steps in the order of how entities are drawn.
 1. Text is drawn on top of Actives, which are drawn on top of Backdrops.
 2. Pertaining to an entity of a particular type, the order of drawing is dependent on when the object was created. The most recently-created entity will be drawn on top of everything else. Entities can be rearranged via class methods (`bringForward`, `bringToFront`, `sendBackward`, `sendToBack`).
 
+Entities are defined via the `defineActives`, `defineBackdrops`, and `defineParagraphs` methods. They are then added to a Room via the `addActive`, `addBackdrop`, and `addParagraph` method, referenced by the name provided in the "define" methods.
+
 Any entity can be destroyed by calling its `destroy` method. Note that you will still need to `nil` out the variable that the entity is assigned to so that it can be removed from memory.
 
 You can either do it by manually setting the variable to `nil`:
@@ -78,7 +80,36 @@ Or, you can do so in one line by assigning the variable's value to the value ret
 self.myActive = self.myActive:destroy()
 ```
 
-### Actives
+## Actives
+
+Actives are the Entities with the greatest number of methods. Most of these deal with animation and sprite transformations.
+
+### Defining an Active
+
+Actives are defined via `love.load` in `main.lua`.
+
+```
+mint:defineActives({
+  -- Miamori
+  {name = 'miamori'},
+  {name = 'miamori_collider', width = 15, height = 20, ox = -8, oy = -20},
+  {name = 'miamori_idle', ox = -11, oy = -25, ax = 16, ay = 15},
+  {name = 'miamori_walk', ox = -11, oy = -25, ax = 16, ay = 15, frCount = 4, frDuration = 10},
+```
+
+- The first entry is purely for specifying the name of the Active. This is what's referenced when calling `addActive`.
+- The second entry is the definition of the Active's rectangular collision mask. The `_collider` suffix is special and indicates this. The `width` and `height` indicate the dimensions of the mask. `ox` and `oy` are the X and Y offset positions of the mask, or where it should be positioned relative to the Active's origin point.
+- The third and fourth entries are sprite animations. `miamori_idle` has one frame, whereas `miamori_walk` has four. `frCount` denotes the number of frames in the animation, and `frDuration` indicates how many game frames a single animation frame should last. A lower number means the animation will play faster.
+
+### Adding an Active
+
+Actives are added via `new` in a `Room`.
+
+```
+  o.player = mint:addActive('miamori', 64, 128)
+```
+
+The first parameter is the Active's previously-defined name. The second and third parameters are its starting X and Y position.
 
 ### Backdrops
 
@@ -94,3 +125,7 @@ self.myActive = self.myActive:destroy()
 Util, MathX
 
 ## Debug Overlays
+
+## Other Notes
+
+Any methods/variables/etc. prefixed with an underscore are intended for the engine and should be ignored when actually developing a game. Don't access an entity's X position by accessing its variable `._x`; use `getX` instead.
