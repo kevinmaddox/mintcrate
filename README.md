@@ -49,6 +49,8 @@ However, this directory setup can be redefined via the function `setResourcePath
 ## Examples
 Sample project scan be found in the `examples` directory. You can run these by simply calling `love {example-folder-name}` within the `examples` directory (assuming LÖVE has been added to your path).
 
+Looking at the examples is the easiest way to learn how MintCrate works and how a project is structured.
+
 ## Rooms
 
 ## Entities
@@ -86,15 +88,14 @@ Actives are the Entities with the greatest number of methods. Most of these deal
 
 ### Defining an Active
 
-Actives are defined via `love.load` in `main.lua`.
-
 ```
 mint:defineActives({
   -- Miamori
   {name = 'miamori'},
   {name = 'miamori_collider', width = 15, height = 20, ox = -8, oy = -20},
   {name = 'miamori_idle', ox = -11, oy = -25, ax = 16, ay = 15},
-  {name = 'miamori_walk', ox = -11, oy = -25, ax = 16, ay = 15, frCount = 4, frDuration = 10},
+  {name = 'miamori_walk', ox = -11, oy = -25, ax = 16, ay = 15, frCount = 4, frDuration = 10}
+})
 ```
 
 - The first entry is purely for specifying the name of the Active. This is what's referenced when calling `addActive`.
@@ -103,17 +104,45 @@ mint:defineActives({
 
 ### Adding an Active
 
-Actives are added via `new` in a `Room`.
-
 ```
-  o.player = mint:addActive('miamori', 64, 128)
+o.player = mint:addActive('miamori', 64, 128)
 ```
 
 The first parameter is the Active's previously-defined name. The second and third parameters are its starting X and Y position.
 
-### Backdrops
+## Backdrops
 
-### Paragraphs
+### Defining a Backdrop
+
+```
+mint:defineBackdrops({
+  {name = 'bg', mosaic = true}
+})
+```
+
+### Adding a Backdrop
+
+```
+o.bg = mint:addBackdrop('bg', 0, 64, {width = 800, height = 224})
+```
+
+## Paragraphs
+
+## Defining a Font
+
+Unlike Actives and Backdrops, Paragraphs are not directly defined. Rather, you define Fonts, which are then used to create Paragraph objects.
+
+```
+mint:defineFonts({
+  {name = 'pixel'}
+})
+```
+
+### Adding a Paragraph
+
+```
+o.txt = mint:addText('pixel', 128, 192, 'Lorem ipsum dolor sit amet', {maxCharsPerLine = 32, lineSpacing = 8, wordWrap = true});
+```
 
 ## Tilemaps
 
