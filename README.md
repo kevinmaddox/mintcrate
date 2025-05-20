@@ -151,10 +151,25 @@ o.txt = mint:addText('pixel', 128, 192, 'Lorem ipsum dolor sit amet', {maxCharsP
 ## Input Handlers
 
 ## Utility Classes
-Util, MathX
+
+MintCrate comes with a couple utility classes, Util and MathX. These exist for under-the-hood framework functionality, but can also be used when developing a game. You can access them via the instance of MintCrate that you create.
+
+```
+mint.util.string.split('my-cool-string', '-')
+mint.math.round(2.37)
+```
 
 ## Debug Overlays
 
+There are a number of debugging overlays that can be enabled/disabled on command. These overlays will:
+
+- Print information regarding the current Room and camera
+- Show collision masks
+- Indicate collisions between Actives/Actives and Actives/Tilemaps (if being tested for)
+- Print information regarding Actives, including their position, current animation, and origin/action points
+
+For convenience, the `showAllDebugOverlays` function will toggle all overlays.
+
 ## Other Notes
 
-Any methods/variables/etc. prefixed with an underscore are intended for the engine and should be ignored when actually developing a game. Don't access an entity's X position by accessing its variable `._x`; use `getX` instead.
+Any methods/variables/etc. prefixed with an underscore are intended for the framework and should be ignored when actually developing a game. Don't access an entity's X position by accessing its variable `._x`; use `getX` instead.
