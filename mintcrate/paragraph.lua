@@ -1,25 +1,25 @@
 -- -----------------------------------------------------------------------------
--- MintCrate - Text
+-- MintCrate - Paragraph
 -- An entity which is intended for displaying text via bitmap fonts.
 -- -----------------------------------------------------------------------------
 
-local Text = MintCrate.Entity:new()
+local Paragraph = MintCrate.Entity:new()
 
 -- -----------------------------------------------------------------------------
 -- Constructor
 -- -----------------------------------------------------------------------------
 
--- Creates an instance of the Text class.
+-- Creates an instance of the Paragraph class.
 -- @param {table} instances List of all Texts being managed by the engine.
--- @param {string} name Name of the Text, for definition & instantiation.
--- @param {number} x Text object's starting X position.
--- @param {number} y Text object's starting X position.
+-- @param {string} name Name of the Paragraph, for definition & instantiation.
+-- @param {number} x Paragraph's starting X position.
+-- @param {number} y Paragraph's starting X position.
 -- @param {number} maxCharsPerLine How many characters written before wrapping.
 -- @param {number} lineSpacing How much space there is between lines.
 -- @param {boolean} wordWrap Whether entire words should wrap or break mid-word.
 -- @param {string} alignment How the text should be aligned (left|center|right).
--- @returns {Text} A new instance of the Text class.
-function Text:new(instances, name, x, y, maxCharsPerLine, lineSpacing, wordWrap,
+-- @returns {Paragraph} A new instance of the Paragraph class.
+function Paragraph:new(instances, name, x, y, maxCharsPerLine, lineSpacing, wordWrap,
   alignment
 )
   local o = {}
@@ -44,13 +44,13 @@ end
 
 -- Returns the currently-displayed text.
 -- @returns {string} Current text.
-function Text:getTextContent()
+function Paragraph:getTextContent()
   return self._textContent
 end
 
 -- Sets the currently-displayed text.
 -- @param {string} textContent The new text to be displayed.
-function Text:setTextContent(textContent)
+function Paragraph:setTextContent(textContent)
   self._textContent = textContent
   
   textContent = string.gsub(textContent, "\r\n", "\n")
@@ -117,34 +117,34 @@ end
 
 -- Returns the formatted lines to properly write the text with.
 -- @returns {table} Formatted lines of the text element.
-function Text:_getTextLines()
+function Paragraph:_getTextLines()
   return self._textLines
 end
 
 -- Returns the maximum number of characters allowed to be printed per line.
 -- @returns {number} Max characters per line.
-function Text:_getMaxCharsPerLine()
+function Paragraph:_getMaxCharsPerLine()
   return self._maxCharsPerLine
 end
 
 -- Returns the amount of space between each line.
 -- @returns {number} Space between lines, in pixels.
-function Text:_getLineSpacing()
+function Paragraph:_getLineSpacing()
   return self._lineSpacing
 end
 
 -- Returns whether word wrapping is enabled.
 -- @returns {boolean} Word-wrapping mode.
-function Text:_getWordWrap()
+function Paragraph:_getWordWrap()
   return self._wordWrap
 end
 
 -- Returns the text's alignment.
 -- @returns {text} The text's alignment setting.
-function Text:_getAlignment()
+function Paragraph:_getAlignment()
   return self._alignment
 end
 
 -- -----------------------------------------------------------------------------
 
-return Text
+return Paragraph

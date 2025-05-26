@@ -126,7 +126,7 @@ function Engine:new(
   o._instances = {
     actives = {},
     backdrops = {},
-    text = {},
+    paragraphs = {},
     tiles = {}
   }
   
@@ -326,7 +326,7 @@ function Engine:defineBackdrops(data)
   end
 end
 
--- Defines the fonts that can be used to create text objects during gameplay.
+-- Defines the fonts that can be used to create Paragraph objects.
 -- @param {table} data A table of bitmap font definitions (see docs).
 function Engine:defineFonts(data)
   for _, item in ipairs(data) do
@@ -694,34 +694,34 @@ function Engine:addBackdrop(name, x, y, options)
   return backdrop
 end
 
--- Creates a Text object to be manipulated by the currently-active room.
+-- Creates a Paragraph to be manipulated by the currently-active room.
 -- @param {string} name The name of the Font (from defineFonts()).
--- @param {number} x The starting X position of the Text object.
--- @param {number} y The starting Y position of the Text object.
+-- @param {number} x The starting X position of the Paragraph.
+-- @param {number} y The starting Y position of the Paragraph.
 -- @param {string} startingTextContent What text to show upon creation.
--- @param {table} options Optional Text properties.
+-- @param {table} options Optional Paragraph properties.
 -- @param {number} options.maxCharsPerLine Characters written before wrapping.
 -- @param {number} options.lineSpacing Space there is between lines, in pixels.
 -- @param {boolean} options.wordWrap Whether entire words should wrap or break.
--- @returns {Text} A new instance of the Text class.
-function Engine:addText(name, x, y, startingTextContent, options)
+-- @returns {Paragraph} A new instance of the Paragraph class.
+function Engine:addParagraph(name, x, y, startingTextContent, options)
   local options = options or {}
   local maxCharsPerLine = options.maxCharsPerLine or 9999
   local lineSpacing = options.lineSpacing or 0
   local wordWrap = options.wordWrap or false
   
-  local text = MintCrate.Text:new(
-    self._instances.text,
+  local paragraph = MintCrate.Paragraph:new(
+    self._instances.paragraphs,
     name,
     x, y,
     maxCharsPerLine, lineSpacing, wordWrap
   )
   
-  text:setTextContent(startingTextContent)
+  paragraph:setTextContent(startingTextContent)
   
-  table.insert(self._instances.text, text)
+  table.insert(self._instances.paragraphs, paragraph)
   
-  return text
+  return paragraph
 end
 
 -- -----------------------------------------------------------------------------
@@ -983,14 +983,14 @@ function Engine:sys_draw()
   end
   
   -- Draw text
-  for _, text in ipairs(self._instances.text) do
+  for _, paragraph in ipairs(self._instances.paragraphs) do
     self:_drawText(
-      text:_getTextLines(),
-      self._data.fonts[text:_getName()],
-      text:getX(), text:getY(),
-      text:_getMaxCharsPerLine(),
-      text:_getLineSpacing(),
-      text:_getWordWrap()
+      paragraph:_getTextLines(),
+      self._data.fonts[paragraph:_getName()],
+      paragraph:getX(), paragraph:getY(),
+      paragraph:_getMaxCharsPerLine(),
+      paragraph:_getLineSpacing(),
+      paragraph:_getWordWrap()
     )
   end
   
@@ -1212,7 +1212,7 @@ function Engine:sys_draw()
           self._currentRoom:getRoomHeight(),
         "ACTS: " .. #self._instances.actives,
         "BAKS: " .. #self._instances.backdrops,
-        "TXTS: " .. #self._instances.text
+        "TXTS: " .. #self._instances.paragraphs
       },
       self._data.fonts["system_counter"],
       self._camera.x,
