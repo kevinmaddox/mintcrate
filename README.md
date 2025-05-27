@@ -100,7 +100,7 @@ mint:defineActives({
 
 - The first entry is purely for specifying the name of the Active. This is what's referenced when calling `addActive`.
 - The second entry is the definition of the Active's rectangular collision mask. The `_collider` suffix is special and indicates this. The `width` and `height` indicate the dimensions of the mask. `ox` and `oy` are the X and Y offset positions of the mask, or where it should be positioned relative to the Active's origin point.
-- The third and fourth entries are sprite animations. `miamori_idle` has one frame, whereas `miamori_walk` has four. `frCount` denotes the number of frames in the animation, and `frDuration` indicates how many game frames a single animation frame should last. A lower number means the animation will play faster.
+- The third and fourth entries are sprite animations. `miamori_idle` has one frame, whereas `miamori_walk` has four. `ox` and `oy` are the X and Y offset positions of the sprite, relative to the Active's origin point. `frCount` denotes the number of frames in the animation, and `frDuration` indicates how many game frames a single animation frame should last. A lower number means the animation will play faster.
 
 ### Adding an Active
 

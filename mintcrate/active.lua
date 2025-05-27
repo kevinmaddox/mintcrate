@@ -57,10 +57,6 @@ function Active:new(instances, name, x, y, colliderShape,
   o._animationName = initialAnimationName
   o._animationFrameNumber = 1
   o._animationFrameTimer = 0
-  o._animationOffsets = {
-    offsetX = 0, offsetY = 0,
-    actionX = 0, actionY = 0
-  }
   
   o._actionPointX = 0
   o._actionPointY = 0
@@ -210,10 +206,7 @@ function Active:_animate(animation)
       self._animationFrameNumber = 1
     end
     
-    self._animationOffsets = {
-      offsetX = animation.offsetX, offsetY = animation.offsetY,
-      actionX = animation.actionX, actionY = animation.actionY
-    }
+    self._currentAnimation = animation
   end
 end
 
@@ -276,22 +269,26 @@ end
 -- Returns the current X coordinate of the active's action point.
 -- @returns {number} Action point X.
 function Active:getActionPointX()
-  self:_updateActionPoint()
+  self:_updateActionPoints()
   return self._actionPointX
 end
 
 -- Returns the current Y coordinate of the active's action point.
 -- @returns {number} Action point Y.
 function Active:getActionPointY()
-  self:_updateActionPoint()
+  self:_updateActionPoints()
   return self._actionPointY
 end
 
 -- Updates the action point's position.
-function Active:_updateActionPoint()
+function Active:_updateActionPoints()
   -- Get un-transformed action points for current animation frame
-  local ax = self._animationOffsets.actionX + self._animationOffsets.offsetX
-  local ay = self._animationOffsets.actionY + self._animationOffsets.offsetY
+  local ax = 0
+  local ay = 0
+  if self._currentAnimation then
+    ax = self._currentAnimation.actionX + self._currentAnimation.offsetX
+    ay = self._currentAnimation.actionY + self._currentAnimation.offsetY
+  end
   
   -- Get flipped states
   local flippedX = 1

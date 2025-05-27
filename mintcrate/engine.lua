@@ -256,14 +256,22 @@ function Engine:defineActives(data)
     -- Active's collider data
     elseif string.find(item.name, 'collider') then
       local activeName = self.util.string.split(item.name, '_')[1]
+      local offsetX = 0
+      local offsetY = 0
+      if item.offset then
+        offsetX = item.offset[1]
+        offsetY = item.offset[2]
+      end
+      
       self._data.actives[activeName].collider = {
         width = item.width or 0,
         height = item.height or 0,
         radius = item.radius or 0,
-        offsetX = item.ox or 0,
-        offsetY = item.oy or 0,
+        offsetX = offsetX,
+        offsetY = offsetY,
         shape = self._COLLIDER_SHAPES.RECTANGLE
       }
+      
       if item.circle then
         self._data.actives[activeName].collider.shape =
           self._COLLIDER_SHAPES.CIRCLE
@@ -279,17 +287,24 @@ function Engine:defineActives(data)
       end
       
       -- Load and store animation images
+      local offsetX = 0
+      local offsetY = 0
+      if item.offset then
+        offsetX = item.offset[1]
+        offsetY = item.offset[2]
+      end
+      
       local animation = {
         image = self:_loadImage(self._resPaths.actives .. item.name),
         quads = {},
-        offsetX = item.ox or 0,
-        offsetY = item.oy or 0,
+        offsetX = offsetX,
+        offsetY = offsetY,
         transformX = item.tx or 0,
         transformY = item.ty or 0,
         actionX = item.ax or 0,
         actionY = item.ay or 0,
-        frameCount = item.frCount or 1,
-        frameDuration = item.frDuration or -1
+        frameCount = item.frameCount or 1,
+        frameDuration = item.frameDuration or -1
       }
       
       animation.frameWidth = animation.image:getWidth() / animation.frameCount

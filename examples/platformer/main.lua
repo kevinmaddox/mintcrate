@@ -35,12 +35,27 @@ function love.load()
   -- Actives
   mint:defineActives({
     -- Miamori
+    -- {name = 'miamori'},
+    -- {name = 'miamori_collider', width = 15, height = 20, ox = -8, oy = -20},
+    -- {name = 'miamori_idle', ox = -11, oy = -25, ax = 16, ay = 15},
+    -- {name = 'miamori_walk', ox = -11, oy = -25, ax = 16, ay = 15, frCount = 4, frDuration = 10},
+    -- {name = 'miamori_slide', ox = -11, oy = -20, ax = 16, ay = 15},
+    -- {name = 'miamori_jump', ox = -11, oy = -27, ax = 16, ay = 15}
+    
     {name = 'miamori'},
-    {name = 'miamori_collider', width = 15, height = 20, ox = -8, oy = -20},
-    {name = 'miamori_idle', ox = -11, oy = -25, ax = 16, ay = 15},
-    {name = 'miamori_walk', ox = -11, oy = -25, ax = 16, ay = 15, frCount = 4, frDuration = 10},
-    {name = 'miamori_slide', ox = -11, oy = -20, ax = 16, ay = 15},
-    {name = 'miamori_jump', ox = -11, oy = -27, ax = 16, ay = 15}
+    {name = 'miamori_collider', width = 15, height = 20, offset = {-8, -20}},
+    {name = 'miamori_idle',  offset = {-11, -25}, ax = 16, ay = 15},
+    {name = 'miamori_walk',  offset = {-11, -25}, ax = 16, ay = 15, frameCount = 4, frameDuration = 10},
+    {name = 'miamori_slide', offset = {-11, -20}, ax = 16, ay = 15},
+    {name = 'miamori_jump',  offset = {-11, -27}, ax = 16, ay = 15}
+    
+    -- {name = 'miamori'},
+    -- {name = 'miamori_collider', width = 15, height = 20, ox = -8, oy = -20},
+    -- {name = 'miamori_idle', offset={-11, -25}, actionPoint={16, 15}},
+    -- {name = 'miamori_walk', offset={-11, -25}, actionPoint={{16, 15}, {16, 16}, {16, 15}, {16, 16}}, frameCount = 4, frameDuration = 10},
+    -- {name = 'miamori_slide', offset={-11, -20}, actionPoint={16, 15}},
+    -- {name = 'miamori_jump', offset={-11, -27}, actionPoint={16, 15}}
+    
   })
   
   -- Backdrops
