@@ -58,6 +58,7 @@ function Active:new(instances, name, x, y, colliderShape,
   o._animationFrameNumber = 1
   o._animationFrameTimer = 0
   
+  -- The current global position of the current animation frame's action point.
   o._actionPointX = 0
   o._actionPointY = 0
   
@@ -286,8 +287,14 @@ function Active:_updateActionPoints()
   local ax = 0
   local ay = 0
   if self._currentAnimation then
-    ax = self._currentAnimation.actionX + self._currentAnimation.offsetX
-    ay = self._currentAnimation.actionY + self._currentAnimation.offsetY
+    -- ax = self._currentAnimation.actionX + self._currentAnimation.offsetX
+    -- ay = self._currentAnimation.actionY + self._currentAnimation.offsetY
+    
+    ax = self._currentAnimation.actionPoints[self._animationFrameNumber][1]
+    ay = self._currentAnimation.actionPoints[self._animationFrameNumber][2]
+    
+    ax = ax + self._currentAnimation.offsetX
+    ay = ay + self._currentAnimation.offsetY
   end
   
   -- Get flipped states

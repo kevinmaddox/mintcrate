@@ -294,6 +294,20 @@ function Engine:defineActives(data)
         offsetY = item.offset[2]
       end
       
+      local actionPoints = {}
+      if item.actionPoints and type(item.actionPoints[1]) == 'number' then
+        for i = 1, (item.frameCount or 1) do
+          table.insert(actionPoints,
+            {item.actionPoints[1], item.actionPoints[2]})
+        end
+      elseif item.actionPoints and type(item.actionPoints[1]) == 'table' then
+        actionPoints = item.actionPoints
+      else
+        for i = 1, (item.frameCount or 1) do
+          table.insert(actionPoints, {0, 0})
+        end
+      end
+      
       local animation = {
         image = self:_loadImage(self._resPaths.actives .. item.name),
         quads = {},
@@ -301,8 +315,7 @@ function Engine:defineActives(data)
         offsetY = offsetY,
         transformX = item.tx or 0,
         transformY = item.ty or 0,
-        actionX = item.ax or 0,
-        actionY = item.ay or 0,
+        actionPoints = actionPoints,
         frameCount = item.frameCount or 1,
         frameDuration = item.frameDuration or -1
       }

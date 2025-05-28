@@ -27,9 +27,11 @@ ToDo List
 [x] Add left/center/right alignment for Text elements (and to the draw text function)
 [x] Functions for adding entities... make the extra things be optional params in tables
 [x] Change the name of "Text" objects to "Paragraph"
-[ ] Make action points accept table values to have multiple points per a single animation
+[x] Make action points accept table values to have multiple points per a single animation
+[ ] Debug collision mask rectangle looks jumpy when moving
 [ ] Add validation to functions
 [ ] Saving/loading data
+  - Figure out a good format
 
 Decisions
 - none
