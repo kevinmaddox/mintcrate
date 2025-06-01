@@ -34,20 +34,12 @@ function love.load()
   
   -- Actives
   mint:defineActives({
-    -- Miamori
-    {name = 'miamori'},
-    {name = 'miamori_collider', width = 15, height = 20, offset = {-8, -20}},
-    {name = 'miamori_idle',  offset = {-11, -25}, actionPoints={16, 15}},
-    {name = 'miamori_walk',  offset = {-11, -25}, actionPoints={{16, 16}, {16, 15}, {16, 16}, {16, 15}}, frameCount = 4, frameDuration = 10},
-    {name = 'miamori_slide', offset = {-11, -20}, actionPoints={16, 10}},
-    {name = 'miamori_jump',  offset = {-11, -27}, actionPoints={16, 15}}
+  
   })
   
   -- Backdrops
   mint:defineBackdrops({
-    {name = 'bg', mosaic = true},
-    {name = 'tree'},
-    {name = 'tree2'}
+    {name = 'mountains'},
   })
   
   -- Fonts
@@ -55,16 +47,11 @@ function love.load()
     -- {name = 'pixel'}
   -- })
   
-  -- Tilemaps
-  mint:defineTilemaps({
-    {name = 'level', tileWidth = 16, tileHeight = 16},
-    {name = 'level_snow-forest'}
-  })
-  
   -- Music
-  mint:defineMusic({
-    {name = 'snow-forest'}
-  })
+  -- mint:defineMusic({
+    -- {name = 'select-your-whatever'},
+    -- {name = 'spirit-blue'}
+  -- })
   
   -- Sounds
   -- mint:defineSounds({
