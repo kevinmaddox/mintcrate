@@ -29,6 +29,9 @@ ToDo List
 [x] Change the name of "Text" objects to "Paragraph"
 [x] Make action points accept table values to have multiple points per a single animation
 [ ] Debug collision mask rectangle looks jumpy when moving
+[/] Room fade transitions
+[ ] Bug - Sounds not stopping when changing rooms (stopAllSounds not working?)
+[ ] Change Engine to Core (since MintCrate is a framework, not an engine)
 [ ] Add validation to functions
 [ ] Saving/loading data
   - Figure out a good format
