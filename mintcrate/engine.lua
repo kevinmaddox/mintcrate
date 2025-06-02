@@ -115,6 +115,7 @@ function Engine:new(
 
   -- Room/gamestate management
   o._startingRoom = startingRoom
+  o._isChangingRooms = false
   
   -- Game data
   o._data = {
@@ -635,45 +636,71 @@ end
 -- Changes the currently-active scene/level of the game (game state).
 -- @param {Room} room The room to load.
 function Engine:changeRoom(room)
-  -- Begin fade out for current room (if configured).
-  if self._currentRoom and self._currentRoom._fadeConf.fadeOut.enabled then
-    self:_triggerRoomFade('fadeOut')
+  -- Only change room if we're not currently transitioning to another one.
+  if not self._isChangingRooms then
+    -- Indicate we're now changing rooms.
+    self._isChangingRooms = true
     
-    -- Change room after fade and pause are all done.
-    local totalDuration =
-      self._currentRoom._fadeConf.fadeOut.fadeFrames +
-      self._currentRoom._fadeConf.fadeOut.pauseFrames
-    
-    self:delayFunction(function()
+    -- Handle fade-out before changing room (if configured).
+    if self._currentRoom and self._currentRoom._fadeConf.fadeOut.enabled then
+      -- Calculate how long until we need to wait until we change the room.
+      -- This value changes if we're in the midst of a fade-in.
+      local totalDuration = self._currentRoom._fadeConf.fadeOut.fadeFrames
+      totalDuration = totalDuration * (self._currentRoom._fadeLevel / 100)
+      totalDuration = math.max(totalDuration, 0)
+      
+      -- Include the number of frames to pause on.
+      totalDuration =
+        totalDuration + self._currentRoom._fadeConf.fadeOut.pauseFrames
+      
+      -- Trigger the fade-out effect.
+      self:_triggerRoomFade('fadeOut')
+      
+      -- Set delayed function to change the room
+      self:delayFunction(function()
+        self:_changeRoom(room)
+      end, totalDuration)
+    -- Otherwise, simply change room.
+    else
       self:_changeRoom(room)
-    end, totalDuration)
-  else
-    self:_changeRoom(room)
+    end
   end
 end
 
 function Engine:_triggerRoomFade(fadeType)
+  -- Cancel any current fades
+  if self._currentRoom._isFading then
+    self:clearFunction(self._currentRoom._fadeEffectFunc)
+    self:clearFunction(self._currentRoom._fadeDoneFunc)
+  end
+  
+  -- Indicate we're currently fading out.
   self._currentRoom._isFading = true
   self._currentRoom._currentFade = fadeType
   
+  -- Get the configuration for this fade.
+  local fadeConf = self._currentRoom._fadeConf[fadeType]
+  
   -- Handle fade in/out.
-  local fadeValue = 100 / self._currentRoom._fadeConf[fadeType].fadeFrames
-  if fadeType == "fadeIn" then
-    fadeValue = fadeValue * -1
+  local fadeEffectFunc = function()
+    self._currentRoom._fadeLevel =
+      self._currentRoom._fadeLevel + fadeConf.fadeValue
   end
   
-  local fadeFunc = function()
-    self._currentRoom._fadeConf[fadeType].fadeLevel =
-      self._currentRoom._fadeConf[fadeType].fadeLevel + fadeValue
-  end
-  
-  self:repeatFunction(fadeFunc, 1)
+  self:repeatFunction(fadeEffectFunc, 1)
+  self._currentRoom._fadeEffectFunc = fadeEffectFunc
   
   -- Clear repeated function when fade is done.
-  self:delayFunction(function()
-    self:clearFunction(fadeFunc)
+  local fadeDoneFunc = function()
+    self:clearFunction(fadeEffectFunc)
     self._currentRoom._isFading = false
-  end, self._currentRoom._fadeConf[fadeType].fadeFrames)
+    if fadeType == "fadeIn" then
+      self._currentRoom._fadeLevel = 100
+    end
+  end
+  
+  self:delayFunction(fadeDoneFunc, fadeConf.fadeFrames + fadeConf.pauseFrames)
+  self._currentRoom._fadeDoneFunc = fadeDoneFunc
 end
 
 -- Internal function which actually performs the room change.
@@ -694,7 +721,9 @@ function Engine:_changeRoom(room)
   self._cameraIsBound = false
   
   -- Clear out delayed functions.
-  self._queuedFunctions = {}
+  for _, item in ipairs(self._queuedFunctions) do
+    item.cancelled = true
+  end
   
   -- Create new room.
   self._currentRoom = room:new()
@@ -711,6 +740,9 @@ function Engine:_changeRoom(room)
   if self._currentRoom._roomHeight < self._baseHeight then
     print("WARNING: Room height is smaller than game resolution")
   end
+  
+  -- Indicate we're done changing rooms.
+  self._isChangingRooms = false
 end
 
 -- -----------------------------------------------------------------------------
@@ -1004,7 +1036,6 @@ function Engine:sys_update()
       end
     end
   end
-  print(self.util.table.toString(self._queuedFunctions))
   
   -- Run room update code
   if self._currentRoom then
@@ -1285,6 +1316,26 @@ function Engine:sys_draw()
     end
   end
   
+  -- Draw fade in/out screen overlay.
+  if self._currentRoom._isFading then
+    local fadeConf = self._currentRoom._fadeConf[self._currentRoom._currentFade]
+    
+    love.graphics.setColor(
+      fadeConf.fadeColor.r,
+      fadeConf.fadeColor.g,
+      fadeConf.fadeColor.b,
+      1 - (self._currentRoom._fadeLevel / 100)
+    )
+    
+    love.graphics.rectangle(
+      "fill",
+      0, 0,
+      self._baseWidth, self._baseHeight
+    )
+  end
+  
+  love.graphics.setColor(1, 1, 1, 1)
+  
   -- Draw camera debug overlay
   if self._showCameraInfo then
     local pad = math.max(
@@ -1354,26 +1405,6 @@ function Engine:sys_draw()
       0, false
     )
   end
-  
-  -- Draw fade in/out screen overlay.
-  if self._currentRoom._isFading then
-    local fadeConf = self._currentRoom._fadeConf[self._currentRoom._currentFade]
-    
-    love.graphics.setColor(
-      fadeConf.fadeColor.r,
-      fadeConf.fadeColor.g,
-      fadeConf.fadeColor.b,
-      fadeConf.fadeLevel / 100
-    )
-    
-    love.graphics.rectangle(
-      "fill",
-      0, 0,
-      self._baseWidth, self._baseHeight
-    )
-  end
-  
-  love.graphics.setColor(1, 1, 1, 1)
   
   love.graphics.pop()
   

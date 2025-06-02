@@ -3,7 +3,7 @@
 -- An entity which is intended for displaying text via bitmap fonts.
 -- -----------------------------------------------------------------------------
 
-local Paragraph = MintCrate.Entity:new()
+local Paragraph = {}
 
 -- -----------------------------------------------------------------------------
 -- Constructor
@@ -22,7 +22,8 @@ local Paragraph = MintCrate.Entity:new()
 function Paragraph:new(instances, name, x, y, maxCharsPerLine, lineSpacing, wordWrap,
   alignment
 )
-  local o = {}
+  local o = MintCrate.Entity:new()
+  setmetatable(self, {__index = MintCrate.Entity})
   setmetatable(o, self)
   self.__index = self
   

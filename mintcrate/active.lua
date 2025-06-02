@@ -3,7 +3,7 @@
 -- An animated entity that supports collisions and action points.
 -- -----------------------------------------------------------------------------
 
-local Active = MintCrate.Entity:new()
+local Active = {}
 
 -- -----------------------------------------------------------------------------
 -- Constructor
@@ -26,7 +26,8 @@ function Active:new(instances, name, x, y, colliderShape,
   colliderOffsetX, colliderOffsetY, colliderWidth, colliderHeight,
   colliderRadius, initialAnimationName
 )
-  local o = {}
+  local o = MintCrate.Entity:new()
+  setmetatable(self, {__index = MintCrate.Entity})
   setmetatable(o, self)
   self.__index = self
   

@@ -1,7 +1,8 @@
-Level = MintCrate.Room:new("Level", 640, 240)
+Level = {}
 
 function Level:new()
-  local o = {}
+  local o = MintCrate.Room:new("Level", 640, 240)
+  setmetatable(self, {__index = MintCrate.Room})
   setmetatable(o, self)
   self.__index = self
   

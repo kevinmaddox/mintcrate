@@ -31,11 +31,12 @@ function Room:new(roomName, roomWidth, roomHeight)
   
   -- Fade in/out settings
   self._isFading = false
+  self._fadeLevel = 0
+  self._currentFade = "fadeIn"
   self._fadeConf = {
     fadeIn = {enabled = false},
     fadeOut = {enabled = false}
   }
-  self._currentFade = "fadeIn"
   
   return o
 end
@@ -74,7 +75,8 @@ function Room:persistSoundsOnLeave(enabled)
   -- TODO: This
 end
 
-function Room:configureFadeIn(fadeDuration, color)
+function Room:configureFadeIn(fadeDuration, pauseDuration, color)
+  local pauseDuration = pauseDuration or 0
   local color = color or {r=0, g=0, b=0}
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
   
@@ -82,9 +84,11 @@ function Room:configureFadeIn(fadeDuration, color)
     enabled = true,
     fadeFrames = fadeDuration,
     pauseFrames = pauseDuration,
-    fadeLevel = 100,
+    fadeValue = 100 / fadeDuration,
     fadeColor = {r=r, g=g, b=b}
   }
+  
+  self._fadeLevel = 0 - (self._fadeConf.fadeIn.fadeValue * pauseDuration)
 end
 
 function Room:configureFadeOut(fadeDuration, pauseDuration, color)
@@ -96,7 +100,7 @@ function Room:configureFadeOut(fadeDuration, pauseDuration, color)
     enabled = true,
     fadeFrames = fadeDuration,
     pauseFrames = pauseDuration,
-    fadeLevel = 0,
+    fadeValue = -100 / fadeDuration,
     fadeColor = {r=r, g=g, b=b}
   }
 end

@@ -3,7 +3,7 @@
 -- A static entity intended for background visuals.
 -- -----------------------------------------------------------------------------
 
-local Backdrop = MintCrate.Entity:new()
+local Backdrop = {}
 
 -- -----------------------------------------------------------------------------
 -- Constructor
@@ -23,7 +23,8 @@ local Backdrop = MintCrate.Entity:new()
 function Backdrop:new(instances, name, x, y, width, height, quad,
   scaleX, scaleY
 )
-  local o = {}
+  local o = MintCrate.Entity:new()
+  setmetatable(self, {__index = MintCrate.Entity})
   setmetatable(o, self)
   self.__index = self
   
