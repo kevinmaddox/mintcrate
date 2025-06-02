@@ -22,10 +22,22 @@ function Level:new()
   mint:setMusic('snow-forest')
   -- mint:playMusic()
   
+  o.myFunc = function()
+    o.player.ySpeed = -3
+  end
+  
   return o
 end
 
 function Level:update()
+  
+  if input:pressed('fire2') then
+    mint:delayFunction(self.myFunc, 60)
+  end
+  
+  if input:pressed('fire1') then
+    mint:clearFunction(self.myFunc)
+  end
   
   local collisions
   local previousY

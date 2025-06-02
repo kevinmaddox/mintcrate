@@ -29,6 +29,14 @@ function Room:new(roomName, roomWidth, roomHeight)
   -- Background color (clear color)
   self._backgroundColor = {r = 0, g = 0, b = 0}
   
+  -- Fade in/out settings
+  self._isFading = false
+  self._fadeConf = {
+    fadeIn = {enabled = false},
+    fadeOut = {enabled = false}
+  }
+  self._currentFade = "fadeIn"
+  
   return o
 end
 
@@ -52,6 +60,45 @@ end
 -- @returns {number} Room's height.
 function Room:getRoomHeight()
   return self._roomHeight
+end
+
+-- -----------------------------------------------------------------------------
+-- Methods for configuring the room's fade in/out settings
+-- -----------------------------------------------------------------------------
+
+function Room:persistMusicOnLeave(enabled)
+  -- TODO: This
+end
+
+function Room:persistSoundsOnLeave(enabled)
+  -- TODO: This
+end
+
+function Room:configureFadeIn(fadeDuration, color)
+  local color = color or {r=0, g=0, b=0}
+  local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
+  
+  self._fadeConf.fadeIn = {
+    enabled = true,
+    fadeFrames = fadeDuration,
+    pauseFrames = pauseDuration,
+    fadeLevel = 100,
+    fadeColor = {r=r, g=g, b=b}
+  }
+end
+
+function Room:configureFadeOut(fadeDuration, pauseDuration, color)
+  local pauseDuration = pauseDuration or 0
+  local color = color or {r=0, g=0, b=0}
+  local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
+  
+  self._fadeConf.fadeOut = {
+    enabled = true,
+    fadeFrames = fadeDuration,
+    pauseFrames = pauseDuration,
+    fadeLevel = 0,
+    fadeColor = {r=r, g=g, b=b}
+  }
 end
 
 -- -----------------------------------------------------------------------------

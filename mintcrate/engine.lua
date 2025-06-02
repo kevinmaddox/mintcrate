@@ -73,6 +73,9 @@ function Engine:new(
   o._systemImages = {}
   o._systemFonts = {}
   
+  -- Functions that get called after a delay
+  self._queuedFunctions = {}
+  
   -- Stores input handlers for managing player input
   o._inputHandlers = {}
   o._keystates = {}
@@ -632,6 +635,50 @@ end
 -- Changes the currently-active scene/level of the game (game state).
 -- @param {Room} room The room to load.
 function Engine:changeRoom(room)
+  -- Begin fade out for current room (if configured).
+  if self._currentRoom and self._currentRoom._fadeConf.fadeOut.enabled then
+    self:_triggerRoomFade('fadeOut')
+    
+    -- Change room after fade and pause are all done.
+    local totalDuration =
+      self._currentRoom._fadeConf.fadeOut.fadeFrames +
+      self._currentRoom._fadeConf.fadeOut.pauseFrames
+    
+    self:delayFunction(function()
+      self:_changeRoom(room)
+    end, totalDuration)
+  else
+    self:_changeRoom(room)
+  end
+end
+
+function Engine:_triggerRoomFade(fadeType)
+  self._currentRoom._isFading = true
+  self._currentRoom._currentFade = fadeType
+  
+  -- Handle fade in/out.
+  local fadeValue = 100 / self._currentRoom._fadeConf[fadeType].fadeFrames
+  if fadeType == "fadeIn" then
+    fadeValue = fadeValue * -1
+  end
+  
+  local fadeFunc = function()
+    self._currentRoom._fadeConf[fadeType].fadeLevel =
+      self._currentRoom._fadeConf[fadeType].fadeLevel + fadeValue
+  end
+  
+  self:repeatFunction(fadeFunc, 1)
+  
+  -- Clear repeated function when fade is done.
+  self:delayFunction(function()
+    self:clearFunction(fadeFunc)
+    self._currentRoom._isFading = false
+  end, self._currentRoom._fadeConf[fadeType].fadeFrames)
+end
+
+-- Internal function which actually performs the room change.
+-- @param {Room} room The room to load.
+function Engine:_changeRoom(room)
   -- Wipe all current entity instances.
   for key, _ in pairs(self._instances) do
     self._instances[key] = {}
@@ -646,8 +693,16 @@ function Engine:changeRoom(room)
   self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
   self._cameraIsBound = false
   
+  -- Clear out delayed functions.
+  self._queuedFunctions = {}
+  
   -- Create new room.
   self._currentRoom = room:new()
+  
+  -- Trigger fade in for fresh room (if configured).
+  if self._currentRoom._fadeConf.fadeIn.enabled then
+    self:_triggerRoomFade('fadeIn')
+  end
   
   -- Throw warning message to console is room is smaller than game resolution.
   if self._currentRoom._roomWidth < self._baseWidth then
@@ -655,6 +710,38 @@ function Engine:changeRoom(room)
   end
   if self._currentRoom._roomHeight < self._baseHeight then
     print("WARNING: Room height is smaller than game resolution")
+  end
+end
+
+-- -----------------------------------------------------------------------------
+-- Methods for queued functions
+-- -----------------------------------------------------------------------------
+
+-- Fires off a function after n frames.
+-- @param {function} callback The function to queue.
+-- @param {number} numFrames How many frames should pass before firing.
+function Engine:delayFunction(callback, numFrames)
+  table.insert(self._queuedFunctions,
+    {callback = callback, remainingFrames = numFrames})
+end
+
+-- Repeats a function every n frames.
+-- @param {function} callback The function to queue.
+-- @param {number} numFrames How many frames should pass before firing.
+-- @param {boolean} fireImmediately Whether the function should initially fire.
+function Engine:repeatFunction(callback, numFrames, fireImmediately)
+  if fireImmediately then callback() end
+  table.insert(self._queuedFunctions,
+    {callback = callback, remainingFrames = numFrames, repeatValue = numFrames})
+end
+
+-- Clears a queued function.
+-- @param {function} callback The queued function to cancel/clear.
+function Engine:clearFunction(callback)
+  for _, item in ipairs(self._queuedFunctions) do
+    if item.callback == callback then
+      item.cancelled = true
+    end
   end
 end
 
@@ -901,6 +988,23 @@ function Engine:sys_update()
   ) then
     self._currentMusic.source:seek(self._currentMusic.loopStart, 'seconds')
   end
+  
+  -- Handle delayed functions
+  for i = #self._queuedFunctions, 1, -1 do
+    local item = self._queuedFunctions[i]
+    item.remainingFrames = item.remainingFrames - 1
+    if item.cancelled then
+      table.remove(self._queuedFunctions, i)
+    elseif item.remainingFrames <= 0 then
+      item.callback()
+      if item.repeatValue then
+        item.remainingFrames = item.repeatValue
+      else
+        table.remove(self._queuedFunctions, i)
+      end
+    end
+  end
+  print(self.util.table.toString(self._queuedFunctions))
   
   -- Run room update code
   if self._currentRoom then
@@ -1250,6 +1354,26 @@ function Engine:sys_draw()
       0, false
     )
   end
+  
+  -- Draw fade in/out screen overlay.
+  if self._currentRoom._isFading then
+    local fadeConf = self._currentRoom._fadeConf[self._currentRoom._currentFade]
+    
+    love.graphics.setColor(
+      fadeConf.fadeColor.r,
+      fadeConf.fadeColor.g,
+      fadeConf.fadeColor.b,
+      fadeConf.fadeLevel / 100
+    )
+    
+    love.graphics.rectangle(
+      "fill",
+      0, 0,
+      self._baseWidth, self._baseHeight
+    )
+  end
+  
+  love.graphics.setColor(1, 1, 1, 1)
   
   love.graphics.pop()
   
