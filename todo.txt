@@ -30,6 +30,8 @@ ToDo List
 [x] Make action points accept table values to have multiple points per a single animation
 [x] Room fade transitions
 [x] Option to fade out when quitting
+[ ] Accept array of mouse buttons or keyboard inputs or gamepad inputs for input checks
+[ ] Engine setting to turn BGM/SFX on/off (and adjust volume, perhaps?)
 [ ] Option to fade audio when fading out a room?
 [ ] Debug collision mask rectangle looks jumpy when moving
 [ ] Bug - Sounds not stopping when changing rooms (stopAllSounds not working?)

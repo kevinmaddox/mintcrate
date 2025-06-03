@@ -3,6 +3,7 @@ require("mintcrate.loader")
 
 require("rooms.splash")
 require("rooms.title")
+require("rooms.game")
 
 require("objects.button")
 
@@ -11,8 +12,9 @@ require("objects.button")
 function love.load()
   mint = MintCrate:new(
     240, 160,
-    -- Splash,
-    Title,
+    Splash,
+    -- Title,
+    -- Game,
     {
       windowScale = 2,
       windowTitle = "MintCrate Example - Azure Flight",
@@ -47,7 +49,35 @@ function love.load()
     {name = 'button-128'},
     {name = 'button-128_collider', width = 128, height = 24},
     {name = 'button-128_active-up'},
-    {name = 'button-128_active-down'}
+    {name = 'button-128_active-down'},
+    
+    -- Danger!! icons
+    {name = 'danger-down'},
+    {name = 'danger-down_default'},
+    {name = 'danger-up'},
+    {name = 'danger-up_default'},
+    
+    -- Harpy
+    {name = 'harpy'},
+    -- {name = 'harpy_collider'},
+    {name = 'harpy_default'},
+    {name = 'harpy_fall'},
+    {name = 'harpy_flap', frameCount = 6, frameDuration = 2, offset = {-1, 0}},
+    {name = 'harpy_hit01'},
+    {name = 'harpy_hit02'},
+    {name = 'harpy_hit03'},
+    {name = 'harpy_hit04'},
+    {name = 'harpy_hit05'},
+    
+    -- Platform posts
+    {name = 'post-top'},
+    {name = 'post-top_default'},
+    {name = 'post-pole'},
+    {name = 'post-pole_default'},
+    
+    -- Rocks
+    {name = 'rock'},
+    {name = 'rock_default'}
   })
   
   -- Backdrops
@@ -55,7 +85,9 @@ function love.load()
     {name = 'harpy'},
     {name = 'menu-bg', mosaic = true},
     {name = 'logo'},
-    {name = 'logo-shadow'}
+    {name = 'logo-shadow'},
+    {name = 'mountains'},
+    {name = 'ready'}
   })
   
   -- Fonts
@@ -65,10 +97,10 @@ function love.load()
   })
   
   -- Music
-  -- mint:defineMusic({
-    -- {name = 'select-your-whatever'},
-    -- {name = 'spirit-blue'}
-  -- })
+  mint:defineMusic({
+    -- {name = 'select-your-whatever-ex'},
+    {name = 'tangent'}
+  })
   
   -- Sounds
   mint:defineSounds({
@@ -78,7 +110,9 @@ function love.load()
   
   -- Global vars
   globals = {
-    enteringFromSplashScreen = true
+    enteringFromSplashScreen = true,
+    musicOn = true,
+    sfxOn = true
   }
   
   -- Loading complete

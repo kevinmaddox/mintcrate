@@ -6,7 +6,6 @@ function Title:new()
   setmetatable(o, self)
   self.__index = self
   
-  self:setBackgroundColor(255, 255, 255)
   if globals.enteringFromSplashScreen then
     self:configureFadeIn(15, 0, {r=255,g=255,b=255})
   else
@@ -24,17 +23,17 @@ function Title:new()
   o.logo = mint:addBackdrop('logo', 0, 0)
   o.logo:setX(o.logoShadow:getX())
   
-  o.logoFloatTicks = 0.2
+  o.sineWaveTicks = 0.2
   
   o.btnStart = Button:new(56, 72, 128, 'PLAY', false, function()
     globals.enteringFromSplashScreen = false
-    mint:changeRoom(Title)
+    mint:changeRoom(Game)
   end)
   o.btnBgm = Button:new(56, 96, 64, 'BGM', true, function(enabled)
-    -- TODO
+    globals.bgmOn = enabled
   end)
   o.btnSfx = Button:new(120, 96, 64, 'SFX', true, function(enabled)
-    -- TODO
+    globals.sfxOn = enabled
   end)
   o.btnQuit = Button:new(56, 120, 128, 'QUIT', false, function()
     mint:quit(true)
@@ -53,9 +52,9 @@ function Title:update()
   -- Float logo text
   -- I wrote this math a long time ago and barely remember why it is the way
   -- it is, lol. However, it works.
-  self.logoFloatTicks = self.logoFloatTicks + 0.01
+  self.sineWaveTicks = self.sineWaveTicks + 0.01
   local logoPosition =
-    math.floor((2.5 * math.sin(self.logoFloatTicks * 0.9 * math.pi / 0.5)) + 8)
+    math.floor((2.5 * math.sin(self.sineWaveTicks * 0.9 * math.pi / 0.5)) + 8)
   self.logo:setY(logoPosition)
   
   -- Update buttons
