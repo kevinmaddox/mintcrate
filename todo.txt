@@ -28,8 +28,10 @@ ToDo List
 [x] Functions for adding entities... make the extra things be optional params in tables
 [x] Change the name of "Text" objects to "Paragraph"
 [x] Make action points accept table values to have multiple points per a single animation
-[ ] Debug collision mask rectangle looks jumpy when moving
 [x] Room fade transitions
+[x] Option to fade out when quitting
+[ ] Option to fade audio when fading out a room?
+[ ] Debug collision mask rectangle looks jumpy when moving
 [ ] Bug - Sounds not stopping when changing rooms (stopAllSounds not working?)
 [ ] Add validation to functions
 [ ] Saving/loading data

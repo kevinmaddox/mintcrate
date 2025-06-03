@@ -174,8 +174,14 @@ function Engine:ready()
 end
 
 -- Terminates the application.
-function Engine:quit()
-  love.event.quit()
+-- @param {boolean} fadeBeforeQuitting Trigger's the Room's fadeout first.
+function Engine:quit(fadeBeforeQuitting)
+  -- Trigger the fade-out effect, then change room when it's done.
+  if fadeBeforeQuitting then
+    self:_triggerRoomFade('fadeOut', love.event.quit)
+  else
+    love.event.quit()
+  end
 end
 
 -- -----------------------------------------------------------------------------
@@ -643,23 +649,10 @@ function Engine:changeRoom(room)
     
     -- Handle fade-out before changing room (if configured).
     if self._currentRoom and self._currentRoom._fadeConf.fadeOut.enabled then
-      -- Calculate how long until we need to wait until we change the room.
-      -- This value changes if we're in the midst of a fade-in.
-      local totalDuration = self._currentRoom._fadeConf.fadeOut.fadeFrames
-      totalDuration = totalDuration * (self._currentRoom._fadeLevel / 100)
-      totalDuration = math.max(totalDuration, 0)
-      
-      -- Include the number of frames to pause on.
-      totalDuration =
-        totalDuration + self._currentRoom._fadeConf.fadeOut.pauseFrames
-      
-      -- Trigger the fade-out effect.
-      self:_triggerRoomFade('fadeOut')
-      
-      -- Set delayed function to change the room
-      self:delayFunction(function()
+      -- Trigger the fade-out effect, then change room when it's done.
+      self:_triggerRoomFade('fadeOut', function()
         self:_changeRoom(room)
-      end, totalDuration)
+      end)
     -- Otherwise, simply change room.
     else
       self:_changeRoom(room)
@@ -667,15 +660,25 @@ function Engine:changeRoom(room)
   end
 end
 
-function Engine:_triggerRoomFade(fadeType)
+-- Triggers a fade-in/out effect for the Room, then fires a specified function.
+-- @param {string} fadeType The type of fade ("fadeIn", "fadeOut").
+-- @param {function} finishedCallback The function to fire after fading is done.
+function Engine:_triggerRoomFade(fadeType, finishedCallback)
+  -- Calculate how long until we need to wait until we execute the callback.
+  -- This value changes if we're in the midst of a fade-in.
+  local totalDuration = self._currentRoom._fadeConf.fadeOut.fadeFrames
+  totalDuration = totalDuration * (self._currentRoom._fadeLevel / 100)
+  totalDuration = math.max(totalDuration, 0)
+  
+  -- Include the number of frames to pause on.
+  totalDuration =
+    totalDuration + self._currentRoom._fadeConf.fadeOut.pauseFrames
+  
   -- Cancel any current fades
-  if self._currentRoom._isFading then
-    self:clearFunction(self._currentRoom._fadeEffectFunc)
-    self:clearFunction(self._currentRoom._fadeDoneFunc)
-  end
+  self:clearFunction(self._currentRoom._fadeEffectFunc)
+  self:clearFunction(self._currentRoom._fadeDoneFunc)
   
   -- Indicate we're currently fading out.
-  self._currentRoom._isFading = true
   self._currentRoom._currentFade = fadeType
   
   -- Get the configuration for this fade.
@@ -693,7 +696,6 @@ function Engine:_triggerRoomFade(fadeType)
   -- Clear repeated function when fade is done.
   local fadeDoneFunc = function()
     self:clearFunction(fadeEffectFunc)
-    self._currentRoom._isFading = false
     if fadeType == "fadeIn" then
       self._currentRoom._fadeLevel = 100
     end
@@ -701,6 +703,11 @@ function Engine:_triggerRoomFade(fadeType)
   
   self:delayFunction(fadeDoneFunc, fadeConf.fadeFrames + fadeConf.pauseFrames)
   self._currentRoom._fadeDoneFunc = fadeDoneFunc
+  
+  -- Set delayed function to execute the callback
+  if finishedCallback then
+    self:delayFunction(finishedCallback, totalDuration)
+  end
 end
 
 -- Internal function which actually performs the room change.
@@ -1019,6 +1026,7 @@ function Engine:sys_update()
   -- Reset collision states
   for _, active in ipairs(self._instances.actives) do
     active:_getCollider().collision = false
+    active:_getCollider().mouseOver = false
   end
   
   if self._currentRoom:_getTilemapLayoutName() then
@@ -1338,7 +1346,7 @@ function Engine:sys_draw()
   end
   
   -- Draw fade in/out screen overlay.
-  if self._currentRoom._isFading then
+  if self._currentRoom._fadeLevel < 100 then
     local fadeConf = self._currentRoom._fadeConf[self._currentRoom._currentFade]
     
     love.graphics.setColor(
@@ -1776,6 +1784,10 @@ function Engine:mouseOverActive(active)
   collider.mouseOver = over
   
   return over
+end
+
+function Engine:clickedOnActive(mouseButton, active)
+  return (self:mousePressed(mouseButton) and self:mouseOverActive(active))
 end
 
 -- -----------------------------------------------------------------------------

@@ -26,10 +26,19 @@ function Title:new()
   
   o.logoFloatTicks = 0.2
   
-  o.btnStart = Button:new(56, 72, 128, 'PLAY')
-  o.btnStart = Button:new(56, 96, 64, 'BGM')
-  o.btnStart = Button:new(120, 96, 64, 'SFX')
-  o.btnStart = Button:new(56, 120, 128, 'QUIT')
+  o.btnStart = Button:new(56, 72, 128, 'PLAY', false, function()
+    globals.enteringFromSplashScreen = false
+    mint:changeRoom(Title)
+  end)
+  o.btnBgm = Button:new(56, 96, 64, 'BGM', true, function(enabled)
+    -- TODO
+  end)
+  o.btnSfx = Button:new(120, 96, 64, 'SFX', true, function(enabled)
+    -- TODO
+  end)
+  o.btnQuit = Button:new(56, 120, 128, 'QUIT', false, function()
+    mint:quit(true)
+  end)
   
   return o
 end
@@ -48,6 +57,12 @@ function Title:update()
   local logoPosition =
     math.floor((2.5 * math.sin(self.logoFloatTicks * 0.9 * math.pi / 0.5)) + 8)
   self.logo:setY(logoPosition)
+  
+  -- Update buttons
+  self.btnStart:update()
+  self.btnBgm:update()
+  self.btnSfx:update()
+  self.btnQuit:update()
 end
 
 return Title

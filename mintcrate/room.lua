@@ -30,7 +30,6 @@ function Room:new(roomName, roomWidth, roomHeight)
   self._backgroundColor = {r = 0, g = 0, b = 0}
   
   -- Fade in/out settings
-  self._isFading = false
   self._fadeLevel = 0
   self._currentFade = "fadeIn"
   self._fadeConf = {

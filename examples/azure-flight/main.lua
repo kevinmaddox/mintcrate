@@ -11,8 +11,8 @@ require("objects.button")
 function love.load()
   mint = MintCrate:new(
     240, 160,
-    Splash,
-    -- Title,
+    -- Splash,
+    Title,
     {
       windowScale = 2,
       windowTitle = "MintCrate Example - Azure Flight",
@@ -37,6 +37,7 @@ function love.load()
   mint:defineActives({
     -- 64px Button
     {name = 'button-64'},
+    {name = 'button-64_collider', width = 64, height = 24},
     {name = 'button-64_active-up'},
     {name = 'button-64_active-down'},
     {name = 'button-64_inactive-up'},
@@ -44,6 +45,7 @@ function love.load()
     
     -- 128px Button
     {name = 'button-128'},
+    {name = 'button-128_collider', width = 128, height = 24},
     {name = 'button-128_active-up'},
     {name = 'button-128_active-down'}
   })
@@ -69,10 +71,10 @@ function love.load()
   -- })
   
   -- Sounds
-  -- mint:defineSounds({
-    -- {name = 'dkick'},
-    -- {name = 'strongest'}
-  -- })
+  mint:defineSounds({
+    {name = 'button-down'},
+    {name = 'button-up'}
+  })
   
   -- Global vars
   globals = {
@@ -90,6 +92,7 @@ function love.update()
   if mint:keyPressed("d") then mint:showAllDebugOverlays() end
   for i=1, 4 do if mint:keyPressed(i) then mint:setWindowScale(i) end end
   if mint:keyPressed('f') then mint:setFullscreen(not mint:getFullscreen()) end
+  if mint:keyPressed('escape') then mint:quit() end
   
   mint:sys_update()
 end

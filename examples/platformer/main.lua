@@ -83,6 +83,7 @@ function love.update()
   if mint:keyPressed("d") then mint:showAllDebugOverlays() end
   for i=1, 4 do if mint:keyPressed(i) then mint:setWindowScale(i) end end
   if mint:keyPressed('f') then mint:setFullscreen(not mint:getFullscreen()) end
+  if mint:keyPressed('escape') then mint:quit() end
   
   mint:sys_update()
 end
