@@ -1,16 +1,21 @@
 package.path = package.path .. "../?.lua"
 require("mintcrate.loader")
-require("level")
+
+require("rooms.splash")
+require("rooms.title")
+
+require("objects.button")
 
 -- Initialization --------------------------------------------------------------
 
 function love.load()
   mint = MintCrate:new(
-    320, 240,
-    Level,
+    240, 160,
+    Splash,
+    -- Title,
     {
       windowScale = 2,
-      windowTitle = "MintCrate - Platformer Example",
+      windowTitle = "MintCrate Example - Azure Flight",
       pathPrefix = "../../"
       -- icon = "icon.png"
     }
@@ -19,33 +24,43 @@ function love.load()
   mint:init()
   
   mint:defineColorKeys({
-    {r =  255, g = 0, b = 255},
+    {r =  134, g = 171, b = 125},
+    {r =   88, g = 138, b = 103},
   })
   
   -- Inputs
   input = mint:addInputHandler()
   input:setJoystickNumber(1)
-  input:mapKeyboardInput('up',    'up')
-  input:mapKeyboardInput('down',  'down')
-  input:mapKeyboardInput('left',  'left')
-  input:mapKeyboardInput('right', 'right')
   input:mapKeyboardInput('fire1', 'x')
-  input:mapKeyboardInput('fire2', 'z')
   
   -- Actives
   mint:defineActives({
-  
+    -- 64px Button
+    {name = 'button-64'},
+    {name = 'button-64_active-up'},
+    {name = 'button-64_active-down'},
+    {name = 'button-64_inactive-up'},
+    {name = 'button-64_inactive-down'},
+    
+    -- 128px Button
+    {name = 'button-128'},
+    {name = 'button-128_active-up'},
+    {name = 'button-128_active-down'}
   })
   
   -- Backdrops
   mint:defineBackdrops({
-    {name = 'mountains'},
+    {name = 'harpy'},
+    {name = 'menu-bg', mosaic = true},
+    {name = 'logo'},
+    {name = 'logo-shadow'}
   })
   
   -- Fonts
-  -- mint:defineFonts({
-    -- {name = 'pixel'}
-  -- })
+  mint:defineFonts({
+    {name = 'ui-main'},
+    {name = 'ui-main-inactive'}
+  })
   
   -- Music
   -- mint:defineMusic({
@@ -58,6 +73,11 @@ function love.load()
     -- {name = 'dkick'},
     -- {name = 'strongest'}
   -- })
+  
+  -- Global vars
+  globals = {
+    enteringFromSplashScreen = true
+  }
   
   -- Loading complete
   mint:ready()

@@ -45,16 +45,30 @@ end
 -- Methods for retrieving data about the Backdrop
 -- -----------------------------------------------------------------------------
 
--- Returns the Backdrop width.
+-- Returns the full Backdrop width.
 -- @returns {number} Backdrop width.
 function Backdrop:getWidth()
   return self._width
 end
 
--- Returns the Backdrop height.
+-- Returns the full Backdrop height.
 -- @returns {number} Backdrop height.
 function Backdrop:getHeight()
   return self._height
+end
+
+-- Returns the width of only the backdrop texture.
+-- @returns {number} Backdrop texture width.
+function Backdrop:getTextureWidth()
+  local w, h = self._quad:getTextureDimensions()
+  return w
+end
+
+-- Returns the height of only the backdrop texture.
+-- @returns {number} Backdrop texture height.
+function Backdrop:getTextureHeight()
+  local w, h = self._quad:getTextureDimensions()
+  return h
 end
 
 -- -----------------------------------------------------------------------------

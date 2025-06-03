@@ -24,7 +24,7 @@ local Active = {}
 -- @returns {Active} A new instance of the Active class.
 function Active:new(instances, name, x, y, colliderShape,
   colliderOffsetX, colliderOffsetY, colliderWidth, colliderHeight,
-  colliderRadius, initialAnimationName
+  colliderRadius, initialAnimationName, initialAnimation
 )
   local o = MintCrate.Entity:new()
   setmetatable(self, {__index = MintCrate.Entity})
@@ -56,6 +56,7 @@ function Active:new(instances, name, x, y, colliderShape,
   o._colliderOffsetY = colliderOffsetY
   
   o._animationName = initialAnimationName
+  o._currentAnimation = initialAnimation
   o._animationFrameNumber = 1
   o._animationFrameTimer = 0
   
@@ -210,6 +211,22 @@ function Active:_animate(animation)
     
     self._currentAnimation = animation
   end
+end
+
+-- Returns the width of the current animation frame.
+-- @returns {number} Current frame width.
+function Active:getImageWidth()
+  local val = 0
+  if self._currentAnimation then val = self._currentAnimation.frameWidth end
+  return val
+end
+
+-- Returns the height of the current animation frame.
+-- @returns {number} Current frame height.
+function Active:getImageHeight()
+  local val = 0
+  if self._currentAnimation then val = self._currentAnimation.frameHeight end
+  return val
 end
 
 -- -----------------------------------------------------------------------------

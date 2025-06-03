@@ -19,8 +19,8 @@ local Paragraph = {}
 -- @param {boolean} wordWrap Whether entire words should wrap or break mid-word.
 -- @param {string} alignment How the text should be aligned (left|center|right).
 -- @returns {Paragraph} A new instance of the Paragraph class.
-function Paragraph:new(instances, name, x, y, maxCharsPerLine, lineSpacing, wordWrap,
-  alignment
+function Paragraph:new(instances, name, x, y, glyphWidth, glyphHeight,
+  maxCharsPerLine, lineSpacing, wordWrap, alignment
 )
   local o = MintCrate.Entity:new()
   setmetatable(self, {__index = MintCrate.Entity})
@@ -31,6 +31,8 @@ function Paragraph:new(instances, name, x, y, maxCharsPerLine, lineSpacing, word
   o._name = name
   o._x = x
   o._y = y
+  o._glyphWidth = glyphWidth
+  o._glyphHeight = glyphHeight
   o._maxCharsPerLine = maxCharsPerLine
   o._lineSpacing = lineSpacing
   o._wordWrap = wordWrap
@@ -114,6 +116,18 @@ function Paragraph:setTextContent(textContent)
   end
   
   self._textLines = strLines
+end
+
+-- Returns the width of a single glyph (character).
+-- @returns {number} The width of a glyph/character.
+function Paragraph:getGlyphWidth()
+  return self._glyphWidth
+end
+
+-- Returns the height of a single glyph (character).
+-- @returns {number} The height of a glyph/character.
+function Paragraph:getGlyphHeight()
+  return self._glyphHeight
 end
 
 -- Returns the formatted lines to properly write the text with.

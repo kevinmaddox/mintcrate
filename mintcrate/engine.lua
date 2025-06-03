@@ -286,8 +286,8 @@ function Engine:defineActives(data)
       local animationName = self.util.string.split(item.name, '_')[2]
       
       -- Specify default animation (the first one the user defines)
-      if not self._data.actives[activeName].initialAnimation then
-        self._data.actives[activeName].initialAnimation = animationName
+      if not self._data.actives[activeName].initialAnimationName then
+        self._data.actives[activeName].initialAnimationName = animationName
       end
       
       -- Load and store animation images
@@ -787,7 +787,15 @@ end
 -- @param {number} y The ending X position of the Active.
 -- @returns {Active} A new instance of the Active class.
 function Engine:addActive(name, x, y)
+  local x = x or 0
+  local y = y or 0
   local collider = self._data.actives[name].collider or {}
+  
+  local initialAnimationName = self._data.actives[name].initialAnimationName
+  local animation
+  if initialAnimationName then
+    animation = self._data.actives[name].animations[initialAnimationName]
+  end
   
   local active = MintCrate.Active:new(
     self._instances.actives,
@@ -797,7 +805,8 @@ function Engine:addActive(name, x, y)
     collider.offsetX or 0, collider.offsetY or 0,
     collider.width or 0, collider.height or 0,
     collider.radius or 0,
-    self._data.actives[name].initialAnimation
+    initialAnimationName,
+    animation
   )
   
   table.insert(self._instances.actives, active)
@@ -814,6 +823,8 @@ end
 -- @param {number} options.height The height of the backdrop.
 -- @returns {Backdrop} A new instance of the Backdrop class.
 function Engine:addBackdrop(name, x, y, options)
+  local x = x or 0
+  local y = y or 0
   local options = options or {}
   local image = self._data.backdrops[name].image
   local width = options.width or image:getWidth()
@@ -852,16 +863,25 @@ end
 -- @param {boolean} options.wordWrap Whether entire words should wrap or break.
 -- @returns {Paragraph} A new instance of the Paragraph class.
 function Engine:addParagraph(name, x, y, startingTextContent, options)
+  local x = x or 0
+  local y = y or 0
+  local startingTextContent = startingTextContent or ""
   local options = options or {}
   local maxCharsPerLine = options.maxCharsPerLine or 9999
   local lineSpacing = options.lineSpacing or 0
   local wordWrap = options.wordWrap or false
+  local alignment = options.alignment or "left"
+  
+  local font = self._data.fonts[name]
+  local glyphWidth = font.charWidth
+  local glyphHeight = font.charHeight
   
   local paragraph = MintCrate.Paragraph:new(
     self._instances.paragraphs,
     name,
     x, y,
-    maxCharsPerLine, lineSpacing, wordWrap
+    glyphWidth, glyphHeight,
+    maxCharsPerLine, lineSpacing, wordWrap, alignment
   )
   
   paragraph:setTextContent(startingTextContent)
@@ -1038,7 +1058,7 @@ function Engine:sys_update()
   end
   
   -- Run room update code
-  if self._currentRoom then
+  if self._currentRoom and self._currentRoom.update then
     self._currentRoom:update()
   end
   
@@ -1075,7 +1095,7 @@ function Engine:sys_draw()
     math.floor(-self._camera.y + self._gfxOffsetY)
   )
   
-  -- Draw backdrops
+  -- Draw Backdrops
   for _, backdrop in ipairs(self._instances.backdrops) do
     local image = self._data.backdrops[backdrop._name].image
     local mosaic = self._data.backdrops[backdrop._name].mosaic
@@ -1089,7 +1109,7 @@ function Engine:sys_draw()
     end
   end
   
-  -- Draw tilemap
+  -- Draw Tilemap
   if self._currentRoom:_getTilemapLayoutName() then
     local fullName = self._currentRoom:_getTilemapLayoutName()
     local tilemapName = self.util.string.split(fullName, '_')[1]
@@ -1113,7 +1133,7 @@ function Engine:sys_draw()
     end
   end
   
-  -- Draw actives
+  -- Draw Actives
   for _, active in ipairs(self._instances.actives) do
     local animation = self._data.actives[active:_getName()]
       .animations[active:getAnimationName()]
@@ -1145,7 +1165,7 @@ function Engine:sys_draw()
     ::DrawActiveDone::
   end
   
-  -- Draw text
+  -- Draw Paragraphs
   for _, paragraph in ipairs(self._instances.paragraphs) do
     self:_drawText(
       paragraph:_getTextLines(),
@@ -1153,7 +1173,8 @@ function Engine:sys_draw()
       paragraph:getX(), paragraph:getY(),
       paragraph:_getMaxCharsPerLine(),
       paragraph:_getLineSpacing(),
-      paragraph:_getWordWrap()
+      paragraph:_getWordWrap(),
+      paragraph:_getAlignment()
     )
   end
   
