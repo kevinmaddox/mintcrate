@@ -1939,7 +1939,14 @@ end
 
 -- Plays a sound resource.
 -- @param {string} soundName Name of the sound resource (from defineSounds()).
-function Engine:playSound(soundName)
+function Engine:playSound(soundName, options)
+  local options = options or {}
+  local volume = options.volume or 1
+  local pitch = options.pitch or 1
+  
+  self._data.sounds[soundName]:setVolume(volume)
+  self._data.sounds[soundName]:setPitch(pitch)
+  
   love.audio.stop(self._data.sounds[soundName])
   love.audio.play(self._data.sounds[soundName])
 end

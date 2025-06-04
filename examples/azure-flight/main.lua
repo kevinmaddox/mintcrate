@@ -6,15 +6,16 @@ require("rooms.title")
 require("rooms.game")
 
 require("objects.button")
+require("objects.physicsobject")
 
 -- Initialization --------------------------------------------------------------
 
 function love.load()
   mint = MintCrate:new(
     240, 160,
-    Splash,
+    -- Splash,
     -- Title,
-    -- Game,
+    Game,
     {
       windowScale = 2,
       windowTitle = "MintCrate Example - Azure Flight",
@@ -105,7 +106,8 @@ function love.load()
   -- Sounds
   mint:defineSounds({
     {name = 'button-down'},
-    {name = 'button-up'}
+    {name = 'button-up'},
+    {name = 'flap'}
   })
   
   -- Global vars
