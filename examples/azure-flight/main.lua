@@ -19,8 +19,8 @@ function love.load()
     {
       windowScale = 2,
       windowTitle = "MintCrate Example - Azure Flight",
-      pathPrefix = "../../"
-      -- icon = "icon.png"
+      pathPrefix = "../../",
+      windowIconPath = "icon.png"
     }
   )
   
