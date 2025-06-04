@@ -32,18 +32,21 @@ function Game:new()
   }
   o.platformPoles[3]:setX(mint:getScreenWidth() / 2 - o.platformPoles[3]:getImageWidth() / 2)
   
-  o.harpy = PhysicsObject:new('harpy', 0, 116, 5.5)
-  -- o.harpy = mint:addActive('harpy', 0, 116)
-  o.harpy:getActive():setX(mint:getScreenWidth() / 2 - o.harpy:getActive():getImageWidth() / 2)
+  o.harpy = PhysicsObject:new('harpy', 110, 116, 5.5)
   o.harpy.flapSoundDelay = 0
   o.harpy.lift = 5.5
   
   o.playerData = {
-    ySpeed = 0,
-    yAcceleration = 0,
     speedCoefficient = 1.5,
     maxYSpeed = 233
   }
+  
+  o.harpyX = PhysicsObject:new('harpy', 124, 116, 0.0917)
+  o.harpyX.lift = 0.1834
+  
+  local startpos = 140
+  o.harpy:getActive():setY(startpos)
+  o.harpyX:getActive():setY(startpos)
   
   o.state = 'ready'
   
@@ -57,7 +60,7 @@ function Game:update()
     self.instructions:setY(3 * math.sin(self.sineWaveTicks) + 68)
     
     -- Start actually playing the game when the user clicks
-    if mint:mousePressed(1) then
+    if mint:mousePressed(1) or mint:mousePressed(2) then
       self.state = 'playing'
       self.ready = self.ready:destroy()
       self.instructions = self.instructions:destroy()
@@ -69,24 +72,47 @@ function Game:update()
     -- Note: The code below is a bit weird. I wrote the formulas back in 2016
     -- for the original version of Azure Flight. For the sake of consistency
     -- between the ports, I'm choosing to keep it the same.
+    -- if mint:mouseHeld(1) then
     if mint:mouseHeld(1) and self.harpy.ySpeed < 0 then
       self.harpy:addYSpeed(self.harpy.lift * 2)
     elseif mint:mouseHeld(1) then
-      self.harpy:addYSpeed((self.playerData.speedCoefficient -
-        self.harpy.ySpeed / self.playerData.maxYSpeed) * self.harpy.lift)
+      local val = (self.playerData.speedCoefficient -
+        self.harpy.ySpeed / self.playerData.maxYSpeed) * self.harpy.lift
+      self.harpy:addYSpeed(val)
+      -- print(self.harpy.ySpeed / self.playerData.maxYSpeed, val)
     else
       self.harpy:addYSpeed(-self.harpy.gravity)
     end
     
     -- Update player position.
-    self.harpy:updatePhysics()
-    -- self.harpy:getActive():setY(self.harpy:getActive():getY() - self.harpy.ySpeed * (1/60))
+    -- self.harpy:updatePhysics()
+    self.harpy:getActive():setY(self.harpy:getActive():getY() - self.harpy.ySpeed * (1/60))
+    
+    
+    
+    -- TODO: This is the only value not correct
+    local val = (7 - self.harpyX.ySpeed) * 0.0184
+    print(self.harpyX:getActive():getY())
+    -- print(val, self.harpyX.ySpeed)
+    -- if mint:mouseHeld(1) then
+    if mint:mouseHeld(1) and self.harpy.ySpeed < 0 then
+      self.harpyX:addYSpeed(self.harpyX.lift)
+    elseif mint:mouseHeld(1) then
+      self.harpyX:addYSpeed(val)
+    else
+      self.harpyX:addYSpeed(-self.harpyX.gravity)
+    end
+    
+    self.harpyX:getActive():setY(self.harpyX:getActive():getY() - self.harpyX.ySpeed)
+    
+    
+    
     
     -- Handle harpy animations.
     if mint:mouseHeld(1) then
-      self.harpy:getActive():playAnimation('flap')
+      -- self.harpy:getActive():playAnimation('flap')
     else
-      self.harpy:getActive():playAnimation('fall')
+      -- self.harpy:getActive():playAnimation('fall')
     end
     
     -- Play flapping sound
