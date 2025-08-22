@@ -78,7 +78,11 @@ function love.load()
     
     -- Rocks
     {name = 'rock'},
-    {name = 'rock_default'}
+    {name = 'rock_default'},
+    
+    -- Water line
+    {name = 'water'},
+    {name = 'water_default'}
   })
   
   -- Backdrops

@@ -1,11 +1,10 @@
 PhysicsObject = {}
 
 function PhysicsObject:new(activeName, x, y, gravity)
-  local o = {}
+  local o = mint:addActive(activeName, x, y)
+  setmetatable(self, {__index = MintCrate.Active})
   setmetatable(o, self)
   self.__index = self
-  
-  o.active = mint:addActive(activeName, x, y)
   
   o.xSpeed = 0
   o.ySpeed = 0
@@ -28,16 +27,12 @@ function PhysicsObject:updatePhysics()
   -- Handle "falling" state
   if self.isFalling then
     self.ySpeed = self.ySpeed - self.gravity
-    self.active:setAngle(self.active:getAngle() + (self.xSpeed))
+    self:setAngle(self:getAngle() + (self.xSpeed))
   end
   
   -- Update X and Y positions
-  self.active:setX(self.active:getX() - self.xSpeed)
-  self.active:setY(self.active:getY() - self.ySpeed)
-end
-
-function PhysicsObject:getActive()
-  return self.active
+  self:setX(self:getX() - self.xSpeed)
+  self:setY(self:getY() - self.ySpeed)
 end
 
 return PhysicsObject

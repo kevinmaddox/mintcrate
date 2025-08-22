@@ -35,6 +35,8 @@ function Game:new()
   o.harpy.lift = o.harpy.gravity
   o.harpy.flapSoundDelay = 0
   
+  mint:addActive('water', 0, 156)
+  
   o.state = 'ready'
   
   return o
@@ -81,9 +83,9 @@ function Game:update()
     
     -- Handle harpy animations.
     if mint:mouseHeld(1) then
-      self.harpy:getActive():playAnimation('flap')
+      self.harpy:playAnimation('flap')
     else
-      self.harpy:getActive():playAnimation('fall')
+      self.harpy:playAnimation('fall')
     end
     
     -- Play flapping sound.
@@ -96,8 +98,19 @@ function Game:update()
     self.harpy.flapSoundDelay = self.harpy.flapSoundDelay - 1
     
     -- Handle starting platforms poles/logs.
-    for _, pole in ipairs(self.poles) do
+    for i = #self.poles, 1, -1 do
+      local pole = self.poles[i]
       pole:updatePhysics()
+      if pole:getY() > 156 then
+        -- WaterSplash:new(pole:getX(), pole:getY())
+        pole:destroy()
+        table.remove(self.poles, i)
+      end
+    end
+    
+    -- Create splashes and destroy objects if they fall into the water.
+    for _, pole in ipairs(self.poles) do
+      
     end
     
   elseif self.state == 'gameover' then
