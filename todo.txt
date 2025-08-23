@@ -1,4 +1,8 @@
-ToDo List
+================================================================================
+MintCrate To-do List
+================================================================================
+
+- MintCrate --------------------------------------------------------------------
 [x] General input
 [x] Music
 [x] SFX
@@ -44,3 +48,21 @@ Decisions
 
 For when Love 12 comes out
 [ ] Implement <close> to auto run init() when Engine constructor finishes
+
+- Example: Azure Flight --------------------------------------------------------
+[/] Starting poles
+  [ ] Alter origin to be center of logs (so splashes appear at correct points)
+[ ] Boulders
+[ ] Score
+[ ] Player-Boulder collision
+[ ] Add water droplets to splashes
+[ ] Water splashes
+  [x] Poles
+  [ ] Player (treading water)
+  [ ] Player (falling into water)
+  [ ] Boulders
+[ ] Sound Effects
+  [ ] Player treading water
+  [ ] Player-Boulder collision
+  [ ] Water splashes
+[ ] Game Over state/screen

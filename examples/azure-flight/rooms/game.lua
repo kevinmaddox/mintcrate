@@ -31,6 +31,8 @@ function Game:new()
     PhysicsObject:new('post-top',  106,   132, (4.0 / 60))
   }
   
+  o.splashes = {}
+  
   o.harpy = PhysicsObject:new('harpy', 110, 116, (5.5 / 60))
   o.harpy.lift = o.harpy.gravity
   o.harpy.flapSoundDelay = 0
@@ -67,9 +69,10 @@ function Game:update()
   elseif self.state == 'playing' then
     -- Player movement (harpy flight)
     -- Note: The code below is a bit weird. I cobbled together the formulas back
-    -- in 2016 for the original version of Azure Flight. For the sake of
-    -- consistency between the ports, I'm choosing to keep it the same, albeit
-    -- adjusted for MintCrate's fixed timestep.
+    -- in 2016 for the original version of Azure Flight. I didn't totally know
+    -- what I was doing back then. For the sake of consistency between the
+    -- ports, I'm choosing to keep it the same, albeit adjusted for MintCrate's
+    -- fixed timestep.
     if mint:mouseHeld(1) and self.harpy.ySpeed < 0 then
       self.harpy:addYSpeed(self.harpy.lift * 2)
     elseif mint:mouseHeld(1) then
@@ -101,16 +104,24 @@ function Game:update()
     for i = #self.poles, 1, -1 do
       local pole = self.poles[i]
       pole:updatePhysics()
+      -- Remove pole if it falls into the water.
       if pole:getY() > 156 then
-        -- WaterSplash:new(pole:getX(), pole:getY())
+        local splash = WaterSplash:new(pole:getX(), pole:getY())
+        table.insert(self.splashes, splash)
         pole:destroy()
         table.remove(self.poles, i)
       end
     end
     
-    -- Create splashes and destroy objects if they fall into the water.
-    for _, pole in ipairs(self.poles) do
-      
+    -- Handle splashes
+    for i = #self.splashes, 1, -1 do
+      local splash = self.splashes[i]
+      splash:update()
+      -- Remove splash if it's no longer visible.
+      if (splash:getScaleY() <= 0 or splash:getOpacity() <= 0) then
+        splash:destroy()
+        table.remove(self.splashes, i)
+      end
     end
     
   elseif self.state == 'gameover' then

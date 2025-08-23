@@ -7,6 +7,7 @@ require("rooms.game")
 
 require("objects.button")
 require("objects.physicsobject")
+require("objects.watersplash")
 
 -- Initialization --------------------------------------------------------------
 
@@ -82,7 +83,11 @@ function love.load()
     
     -- Water line
     {name = 'water'},
-    {name = 'water_default'}
+    {name = 'water_default'},
+    
+    -- Splash
+    {name = 'splash'},
+    {name = 'splash_default', offset = {-13, -30}}
   })
   
   -- Backdrops
