@@ -58,7 +58,7 @@ For when Love 12 comes out
 [ ] Add water droplets to splashes
 [ ] Water splashes
   [x] Poles
-  [ ] Player (treading water)
+  [x] Player (treading water)
   [ ] Player (falling into water)
   [ ] Boulders
 [ ] Sound Effects

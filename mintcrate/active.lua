@@ -83,6 +83,12 @@ function Active:setAngle(degrees)
   self._angle = degrees
 end
 
+-- Rotates the active by a specified number of degrees.
+-- @param {number} degrees The number of degrees to rotate by.
+function Active:rotate(degrees)
+  self._angle = self._angle + degrees
+end
+
 -- Makes the active look at a specific point.
 -- @param {number} x The X coordinate of the point to look at.
 -- @param {number} y The Y coordinate of the point to look at.

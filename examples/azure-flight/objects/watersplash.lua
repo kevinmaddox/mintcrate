@@ -1,6 +1,6 @@
 WaterSplash = {}
 
-function WaterSplash:new(x, y, scaleSpeed, scaleX, scaleY)
+function WaterSplash:new(x, y, scaleSpeed, scaleX)
   local o = mint:addActive('splash', x, y)
   setmetatable(self, {__index = MintCrate.Active})
   setmetatable(o, self)
@@ -8,7 +8,7 @@ function WaterSplash:new(x, y, scaleSpeed, scaleX, scaleY)
   
   o.scaleSpeed = scaleSpeed or 0.0667
   o:setScaleX(scaleX or 0.85)
-  o:setScaleY(scaleY or 0)
+  o:setScaleY(0)
   
   return o
 end

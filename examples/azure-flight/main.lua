@@ -61,33 +61,40 @@ function love.load()
     
     -- Harpy
     {name = 'harpy'},
-    -- {name = 'harpy_collider'},
-    {name = 'harpy_default'},
-    {name = 'harpy_fall'},
-    {name = 'harpy_flap', frameCount = 6, frameDuration = 2, offset = {-1, 0}},
-    {name = 'harpy_hit01'},
-    {name = 'harpy_hit02'},
-    {name = 'harpy_hit03'},
-    {name = 'harpy_hit04'},
-    {name = 'harpy_hit05'},
+    {name = 'harpy_collider', circle=true, radius=4},
+    {name = 'harpy_default', offset = {-10, -8}},
+    {name = 'harpy_fall', offset = {-10, -8}},
+    {name = 'harpy_flap', frameCount = 6, frameDuration = 2, offset = {-11, -9}},
+    {name = 'harpy_hit01', offset = {-10, -10}},
+    {name = 'harpy_hit02', offset = {-10, -10}},
+    {name = 'harpy_hit03', offset = {-10, -10}},
+    {name = 'harpy_hit04', offset = {-10, -10}},
+    {name = 'harpy_hit05', offset = {-10, -10}},
     
     -- Platform posts
     {name = 'post-top'},
-    {name = 'post-top_default'},
+    {name = 'post-top_default', offset={-14, -4}},
     {name = 'post-pole'},
-    {name = 'post-pole_default'},
+    {name = 'post-pole_default', offset={-3, -8}},
     
-    -- Rocks
-    {name = 'rock'},
-    {name = 'rock_default'},
+    -- Boulders
+    {name = 'boulder'},
+    {name = 'boulder_collider', circle=true, radius=12},
+    {name = 'boulder_default', offset={-12,-12}},
     
     -- Water line
     {name = 'water'},
     {name = 'water_default'},
     
-    -- Splash
+    -- Water splash
     {name = 'splash'},
-    {name = 'splash_default', offset = {-13, -30}}
+    {name = 'splash_default', offset = {-13, -30}},
+    
+    -- Water droplets
+    {name='droplet'},
+    {name='droplet_01', offset={-1,-2}},
+    {name='droplet_02', offset={-1,-2}},
+    {name='droplet_03', offset={-1,-2}}
   })
   
   -- Backdrops

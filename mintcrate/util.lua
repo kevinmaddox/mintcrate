@@ -31,6 +31,15 @@ function Util.number.toBoolean(n)
   return n > 0 and true or false
 end
 
+-- Returns 1 if positive, -1 if negative, and 0 if 0.
+-- @param {number} n A numeric value.
+-- @returns {number} A representation of the state of the number's sign.
+function Util.number.sign(n)
+  local sign = 0
+  if (x > 0) then sign = 1 elseif (x < 0) then sign = -1 end
+  return sign
+end
+
 -- -----------------------------------------------------------------------------
 -- Table-related methods
 -- -----------------------------------------------------------------------------

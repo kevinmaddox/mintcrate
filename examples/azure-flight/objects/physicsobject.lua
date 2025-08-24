@@ -19,8 +19,16 @@ function PhysicsObject:addYSpeed(val)
   self.ySpeed = self.ySpeed + val
 end
 
+function PhysicsObject:setYSpeed(val)
+  self.ySpeed = val
+end
+
 function PhysicsObject:setXSpeed(val)
   self.xSpeed = val
+end
+
+function PhysicsObject:getXSpeed()
+  return self.xSpeed
 end
 
 function PhysicsObject:updatePhysics()
@@ -31,7 +39,7 @@ function PhysicsObject:updatePhysics()
   end
   
   -- Update X and Y positions
-  self:setX(self:getX() - self.xSpeed)
+  self:setX(self:getX() + self.xSpeed)
   self:setY(self:getY() - self.ySpeed)
 end
 
