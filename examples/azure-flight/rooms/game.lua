@@ -2,13 +2,16 @@ Game = {}
 
 --[[
   Note: The formulas and values in this code can be a bit weird. I cobbled
-  them together abck in 2016 for the original version of Azure Flight. I didn't
+  them together back in 2016 for the original version of Azure Flight. I didn't
   totally know what I was doing back then. For the sake of consistency between
   the versions, I'm choosing to keep it the same, albeit adjusted for
-  MintCrate's fixed timestep. The original version of Azure Flight had a
-  variable timestep, which I now feel is an overhyped paradigm and is neither
-  suitable for all types of games nor does it really matter anymore for simple
-  2D games with how powerful computers have become.
+  MintCrate's fixed timestep, hence why there are some weirdly-specific decimal
+  values and a lot of numbers divided by 60.
+  
+  The original version of Azure Flight had a variable timestep, which I now feel
+  is an overhyped paradigm and is neither suitable for all types of games nor
+  does it really matter anymore for simple 2D games with how powerful computers
+  have become. Like with anything, it comes with its own set of caveats, too.
 --]]
 
 function Game:new()
@@ -114,6 +117,7 @@ function Game:update()
       boulder.currentRow = 1
       table.insert(self.boulders, boulder)
       self:repositionBoulder(boulder)
+      boulder:sendToBack()
     end
     self.boulderSpawnTimer = self.boulderSpawnTimer - 1
     
@@ -147,10 +151,27 @@ function Game:update()
     
     -- Process player-boulder collision
     for _, boulder in ipairs(self.boulders) do
-      if (mint:testCollision(self.harpy, boulder)) then
+      if (
+        not boulder.isFalling
+        and mint:testCollision(self.harpy, boulder)
+      ) then
+        -- Mark objects as being hit
         boulder.isFalling = true
         self.harpy.wasHit = true
         
+        -- Bounce objects due to impact
+        local bounceSpeed = math.abs(boulder:getXSpeed())
+        local bounceDir = -1
+        if (self.harpy:getX() > boulder:getX()) then bounceDir = 1 end
+        
+        self.harpy:setXSpeed(bounceSpeed * bounceDir / 1.5)
+        boulder:setXSpeed(bounceSpeed * bounceDir / 1.5 * -1)
+        
+        self.harpy:setYSpeed(self.harpy:getYSpeed() * -0.5)
+        if (self.harpy:getYSpeed() < 0) then
+          self.harpy:setYSpeed(love.math.random(0, 19) / 60)
+        end
+        boulder:setYSpeed(bounceSpeed)
       end
     end
     
@@ -187,7 +208,7 @@ function Game:update()
     
     self.harpy.treadDelay = self.harpy.treadDelay - (1/60)
     
-    -- Bring water line to the front of the view
+    -- Rearrange draw orders
     self.waterLine:bringToFront()
     
     -- Show Game Over screen if the player goes too low

@@ -31,6 +31,10 @@ function PhysicsObject:getXSpeed()
   return self.xSpeed
 end
 
+function PhysicsObject:getYSpeed()
+  return self.ySpeed
+end
+
 function PhysicsObject:updatePhysics()
   -- Handle "falling" state
   if self.isFalling then

@@ -36,7 +36,7 @@ end
 -- @returns {number} A representation of the state of the number's sign.
 function Util.number.sign(n)
   local sign = 0
-  if (x > 0) then sign = 1 elseif (x < 0) then sign = -1 end
+  if (n > 0) then sign = 1 elseif (n < 0) then sign = -1 end
   return sign
 end
 
