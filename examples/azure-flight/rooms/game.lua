@@ -23,7 +23,7 @@ function Game:new()
   mint:addBackdrop('mountains')
   
   mint:setMusic('tangent')
-  mint:playMusic()
+  -- mint:playMusic()
   
   o.dangerIconDown = mint:addActive('danger-down', 4, 133)
   o.dangerIconUp = mint:addActive('danger-up', 201, 3)
@@ -49,6 +49,7 @@ function Game:new()
   o.harpy.lift = o.harpy.gravity
   o.harpy.flapSoundDelay = 0
   o.harpy.treadDelay = 0
+  o.harpy.wasHit = false
   
   o.TOTAL_BOULDERS = 5
   o.TOTAL_BOULDER_ROWS = 6
@@ -74,6 +75,7 @@ function Game:update()
     (mint:mouseHeld(1) or mint:mouseHeld(2) or mint:keyHeld('x'))
   
   -- State: Ready to play ------------------------------------------------------
+  
   if self.state == 'ready' then
     -- Floating effect for instructions text
     self.sineWaveTicks = self.sineWaveTicks + 0.1
@@ -97,14 +99,16 @@ function Game:update()
     end
   
   -- State: Playing the game ---------------------------------------------------
+  
   elseif self.state == 'playing' then
+    if (self.harpy.wasHit) then inputReceived = false end
+    
     -- Spawn boulders
     if (
       #self.boulders < self.TOTAL_BOULDERS and
       self.boulderSpawnTimer <= 0
     ) then
       self.boulderSpawnTimer = 240
-      -- self.boulderSpawnTimer = 1
       local boulder = PhysicsObject:new('boulder', -64, -64, (5.5 / 60))
       boulder.currentSpeed = (80 / 60)
       boulder.currentRow = 1
@@ -141,7 +145,39 @@ function Game:update()
     end
     self.harpy.flapSoundDelay = self.harpy.flapSoundDelay - 1
     
-    -- Create water splashes when player treads into it.
+    -- Process player-boulder collision
+    for _, boulder in ipairs(self.boulders) do
+      if (mint:testCollision(self.harpy, boulder)) then
+        boulder.isFalling = true
+        self.harpy.wasHit = true
+        
+      end
+    end
+    
+    -- Kill player if they go too high
+    if (self.harpy:getY() < 0) then
+      self.harpy.wasHit = true
+      self.harpy:setY(0)
+      self.harpy:setYSpeed(0)
+    end
+    
+  -- Reposition boulders if they've left the screen
+  for i, boulder in ipairs(self.boulders) do
+    if (
+      (
+        boulder:getXSpeed() > 0 and
+        boulder:getX() > (mint:getScreenWidth() + boulder:getRadius())
+      ) or
+      (
+        boulder:getXSpeed() < 0 and
+        boulder:getX() < (0 - boulder:getRadius())
+      )
+    ) then
+      self:repositionBoulder(boulder)
+    end
+  end
+    
+    -- Create water splashes when player treads into it
     if (self.harpy:getY() >= 154 and self.harpy.treadDelay <= 0) then
       self.harpy.treadDelay = 0.2
       local splash = WaterSplash:new(self.harpy:getX(), 157, 0.05, 0.25)
@@ -151,71 +187,94 @@ function Game:update()
     
     self.harpy.treadDelay = self.harpy.treadDelay - (1/60)
     
-    -- Handle boulders.
-    for i, boulder in ipairs(self.boulders) do
-      -- Update boulder's physics simulation
-      boulder:updatePhysics()
-      
-      -- Reposition boulder if it's left the screen
-      if (
-        (
-          boulder:getXSpeed() > 0 and
-          boulder:getX() > (mint:getScreenWidth() + boulder:getRadius())
-        ) or
-        (
-          boulder:getXSpeed() < 0 and
-          boulder:getX() < (0 - boulder:getRadius())
-        )
-      ) then
-        self:repositionBoulder(boulder)
-      end
-      
-      -- Rotate boulder
-      boulder:rotate(boulder:getXSpeed() / (30 / 60))
-    end
-    
-    -- Handle starting platforms poles/logs.
-    for i = #self.poles, 1, -1 do
-      local pole = self.poles[i]
-      pole:updatePhysics()
-      -- Remove pole if it falls into the water.
-      if pole:getY() > 156 then
-        local splash = WaterSplash:new(pole:getX(), pole:getY())
-        table.insert(self.splashes, splash)
-        self:createDroplets(pole:getX(), pole:getY())
-        pole:destroy()
-        table.remove(self.poles, i)
-      end
-    end
-    
-    -- Handle water splashes
-    for i = #self.splashes, 1, -1 do
-      local splash = self.splashes[i]
-      splash:update()
-      -- Remove splash if it's no longer visible.
-      if (splash:getScaleY() <= 0 or splash:getOpacity() <= 0) then
-        splash:destroy()
-        table.remove(self.splashes, i)
-      end
-    end
-    
-    -- Handle water droplets
-    for i = #self.droplets, 1, -1 do
-      local droplet = self.droplets[i]
-      droplet:updatePhysics()
-      -- Remove droplet if it's no longer visible.
-      if (droplet:getY() > 160) then
-        droplet:destroy()
-        table.remove(self.droplets, i)
-      end
-    end
-    
     -- Bring water line to the front of the view
     self.waterLine:bringToFront()
-  
-  -- State: Game over screen ---------------------------------------------------
-  elseif self.state == 'gameover' then
     
+    -- Show Game Over screen if the player goes too low
+    if (self.harpy:getY() > mint:getScreenHeight()) then
+      self.state = 'gameover'
+    end
+    
+  -- State: Game over screen ---------------------------------------------------
+  
+  elseif self.state == 'gameover' then
+    if (self.harpy) then
+      self.harpy = self.harpy:destroy()
+      
+      mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 35,
+        'SCORE 0', {alignment='center'})
+      mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 53,
+        'BEST 19', {alignment='center'})
+      
+      self.btnRetry = Button:new(56, 72, 128, 'RETRY', false, function()
+        mint:changeRoom(Game)
+      end)
+      
+      self.btnMenu = Button:new(56, 96, 128, 'MENU', false, function()
+        mint:changeRoom(Title)
+      end)
+    end
+    
+    self.btnRetry:update()
+    self.btnMenu:update()
+  end
+  
+  -- Process for all states ----------------------------------------------------
+  
+  -- Handle boulders.
+  for i = #self.boulders, 1, -1 do
+    local boulder = self.boulders[i]
+    
+    -- Update boulder's physics simulation
+    boulder:updatePhysics()
+    
+    -- Rotate boulder
+    boulder:rotate(boulder:getXSpeed() / (30 / 60))
+    
+    -- Remove boulder if it falls into the water
+    if boulder:getY() > mint:getScreenHeight() + boulder:getRadius() then
+      local splash = WaterSplash:new(boulder:getX(), 157)
+      table.insert(self.splashes, splash)
+      self:createDroplets(boulder:getX(), 157)
+      boulder:destroy()
+      table.remove(self.boulders, i)
+    end
+  end
+  
+  -- Handle starting platforms poles/logs.
+  for i = #self.poles, 1, -1 do
+    local pole = self.poles[i]
+    pole:updatePhysics()
+    -- Remove pole if it falls into the water.
+    if pole:getY() > 156 then
+      local splash = WaterSplash:new(pole:getX(), 157)
+      table.insert(self.splashes, splash)
+      self:createDroplets(pole:getX(), 157)
+      pole:destroy()
+      table.remove(self.poles, i)
+    end
+  end
+  
+  -- Handle water splashes
+  for i = #self.splashes, 1, -1 do
+    local splash = self.splashes[i]
+    splash:update()
+    -- Remove splash if it's no longer visible.
+    if (splash:getScaleY() <= 0 or splash:getOpacity() <= 0) then
+      splash:destroy()
+      table.remove(self.splashes, i)
+    end
+  end
+  
+  -- Handle water droplets
+  for i = #self.droplets, 1, -1 do
+    local droplet = self.droplets[i]
+    droplet:updatePhysics()
+    -- Remove droplet if it's no longer visible.
+    if (droplet:getY() > 160) then
+      droplet:destroy()
+      table.remove(self.droplets, i)
+    end
   end
 end
 
