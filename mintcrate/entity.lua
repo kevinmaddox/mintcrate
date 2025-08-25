@@ -110,5 +110,31 @@ function Entity:sendToBack()
 end
 
 -- -----------------------------------------------------------------------------
+-- Methods for managing visibility
+-- -----------------------------------------------------------------------------
+
+-- Shows the entity if hidden.
+function Entity:show()
+  self._isVisible = true
+end
+
+-- Hides the entity if visible.
+function Entity:hide()
+  self._isVisible = false
+end
+
+-- Sets the visibility of the entity.
+-- @param {boolean} Whether to show or hide the entity.
+function Entity:setVisibility(isVisible)
+  self._isVisible = isVisible
+end
+
+-- Returns whether the entity is visible or not.
+-- @returns {boolean} Whether the entity is visible or not.
+function Entity:isVisible()
+  return self._isVisible
+end
+
+-- -----------------------------------------------------------------------------
 
 return Entity

@@ -117,7 +117,9 @@ function love.load()
   -- Fonts
   mint:defineFonts({
     {name = 'ui-main'},
-    {name = 'ui-main-inactive'}
+    {name = 'ui-main-inactive'},
+    {name = 'ui-gold-numbers'},
+    {name = 'title-high-score'}
   })
   
   -- Music

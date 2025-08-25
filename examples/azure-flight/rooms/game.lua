@@ -94,6 +94,11 @@ function Game:update()
       self.dangerIconDown = self.dangerIconDown:destroy()
       self.dangerIconUp = self.dangerIconUp:destroy()
       
+      -- Initialize score-tracking objects
+      self.score = 0
+      self.scoreDisplay = mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 12, '0', {alignment='center'})
+      self.scoreDisplayHigh = mint:addParagraph('ui-gold-numbers', mint:getScreenWidth() / 2, 12, '', {alignment='center'})
+      
       -- Drop starting platform into river
       for _, pole in ipairs(self.poles) do
         pole.isFalling = true
@@ -116,6 +121,7 @@ function Game:update()
       local boulder = PhysicsObject:new('boulder', -64, -64, (5.5 / 60))
       boulder.currentSpeed = (80 / 60)
       boulder.currentRow = 1
+      boulder.hasGivenScore = false
       table.insert(self.boulders, boulder)
       self:repositionBoulder(boulder)
       boulder:sendToBack()
@@ -251,6 +257,28 @@ function Game:update()
     
     self.harpy.treadDelay = self.harpy.treadDelay - (1 / 60)
     
+    -- Handle scoring
+    for i, boulder in ipairs(self.boulders) do
+      if (not boulder.hasGivenScore and not self.harpy.wasHit) then
+        if (
+          (
+            boulder:getXSpeed() > 0
+            and boulder:getX() >= (self.harpy:getX() + boulder:getRadius())
+          )
+          or
+          (
+            boulder:getXSpeed() < 0
+            and boulder:getX() <= (self.harpy:getX() - boulder:getRadius())
+          )
+        ) then
+          self.score = self.score + 1
+          boulder.hasGivenScore = true
+        end
+      end
+    end
+    self.scoreDisplay:setTextContent(self.score)
+    self.scoreDisplayHigh:setTextContent(self.score)
+    
     -- Rearrange draw orders
     self.waterLine:bringToFront()
     
@@ -262,6 +290,9 @@ function Game:update()
       table.insert(self.splashes, splash)
       self:createDroplets(self.harpy:getX(), 157)
       
+      self.scoreDisplay:destroy()
+      self.scoreDisplayHigh:destroy()
+      
       self.state = 'gameover'
     end
     
@@ -272,7 +303,7 @@ function Game:update()
       self.harpy = self.harpy:destroy()
       
       mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 35,
-        'SCORE 0', {alignment='center'})
+        'SCORE '..self.score, {alignment='center'})
       mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 53,
         'BEST 19', {alignment='center'})
       
@@ -454,6 +485,9 @@ function Game:repositionBoulder(boulder)
   if (boulder.currentSpeed < self.BOULDER_MAX_SPEED) then
     boulder.currentSpeed = boulder.currentSpeed + (1 / 60)
   end
+  
+  -- Reset boulder's scoring flag
+  boulder.hasGivenScore = false
   
   -- Update row-occupancy states
   for i = 1, #self.boulderRowOccupancy do
