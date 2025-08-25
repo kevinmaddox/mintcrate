@@ -107,6 +107,12 @@ function love.load()
     {name='overlay'},
     {name='overlay_white'},
     {name='overlay_black'},
+    
+    -- Shadow
+    {name='shadow-top'},
+    {name='shadow-top_default', offset={-10,-2}},
+    {name='shadow-bottom'},
+    {name='shadow-bottom_default', offset={-10,0}},
   })
   
   -- Backdrops

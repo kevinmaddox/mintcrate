@@ -9,7 +9,7 @@ function Title:new()
   if globals.enteringFromSplashScreen then
     self:configureFadeIn(15, 0, {r=255,g=255,b=255})
   else
-    self:configureFadeIn(15, 0, {r=0,g=0,b=0})
+    self:configureFadeIn(15, 15, {r=0,g=0,b=0})
   end
   self:configureFadeOut(15, 30, {r=0,g=0,b=0})
   
@@ -28,16 +28,16 @@ function Title:new()
   o.btnStart = Button:new(56, 72, 128, 'PLAY', false, function()
     globals.enteringFromSplashScreen = false
     mint:changeRoom(Game)
-  end, true)
+  end, true, 'up')
   o.btnBgm = Button:new(56, 96, 64, 'BGM', true, function(enabled)
     globals.bgmOn = enabled
-  end)
+  end, false, 'left')
   o.btnSfx = Button:new(120, 96, 64, 'SFX', true, function(enabled)
     globals.sfxOn = enabled
-  end)
+  end, false, 'right')
   o.btnQuit = Button:new(56, 120, 128, 'QUIT', false, function()
     mint:quit(true)
-  end, true)
+  end, true, 'down')
   
   return o
 end

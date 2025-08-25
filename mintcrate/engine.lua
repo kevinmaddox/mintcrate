@@ -76,6 +76,9 @@ function Engine:new(
   -- Functions that get called after a delay
   self._queuedFunctions = {}
   
+  -- Functions that get fired only once
+  self._fireOnceFunctions = {}
+  
   -- Stores input handlers for managing player input
   o._inputHandlers = {}
   o._keystates = {}
@@ -741,6 +744,8 @@ function Engine:_changeRoom(room)
     item.cancelled = true
   end
   
+  self._fireOnceFunctions = {}
+  
   -- Create new room.
   self._currentRoom = room:new()
   
@@ -790,6 +795,21 @@ function Engine:clearFunction(callback)
     if item.callback == callback then
       item.cancelled = true
     end
+  end
+end
+
+function Engine:fireOnce(callback, ...)
+  args = {...}
+  
+  local exists = false
+  
+  for _, f in ipairs(self._fireOnceFunctions) do
+    if (callback == f) then exists = true end
+  end
+  
+  if (not exists) then
+    table.insert(self._fireOnceFunctions, callback)
+    callback(unpack(args))
   end
 end
 

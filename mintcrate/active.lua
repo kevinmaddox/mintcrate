@@ -40,6 +40,9 @@ function Active:new(instances, drawOrder, name, x, y, colliderShape,
   o._y = y
   
   o._angle = 0
+  o._rotatedWidth = 0
+  o._rotatedHeight = 0
+  
   o._scaleX = 1
   o._scaleY = 1
   o._flippedHorizontally = false
@@ -236,6 +239,26 @@ function Active:getImageHeight()
   local val = 0
   if self._currentAnimation then val = self._currentAnimation.frameHeight end
   return val
+end
+
+function Active:getTransformedImageWidth()
+  local width  = self:getImageWidth()  * self._scaleX
+  local height = self:getImageHeight() * self._scaleY
+  local rotation = math.rad(math.abs(self._angle))
+  
+  local tWidth = (width  * math.cos(rotation)) + (height * math.sin(rotation))
+  
+  return MintCrate.MathX.round(tWidth)
+end
+
+function Active:getTransformedImageHeight()
+  local width  = self:getImageWidth()  * self._scaleX
+  local height = self:getImageHeight() * self._scaleY
+  local rotation = math.rad(math.abs(self._angle))
+  
+  local tHeight = (width  * math.cos(rotation)) + (height * math.sin(rotation))
+  
+  return MintCrate.MathX.round(tHeight)
 end
 
 -- -----------------------------------------------------------------------------

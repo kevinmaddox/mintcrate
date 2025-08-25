@@ -21,14 +21,17 @@ function Game:new()
   self.__index = self
   
   self:configureFadeIn(15, 0, {r=0,g=0,b=0})
-  self:configureFadeOut(15, 30, {r=0,g=0,b=0})
+  self:configureFadeOut(15, 15, {r=0,g=0,b=0})
   
   mint:addBackdrop('mountains')
   
   mint:setMusic('tangent')
   -- mint:playMusic()
   
-  o.dangerIconDown = mint:addActive('danger-down', 4, 133)
+  o.WATER_LINE_Y = 156
+  o.waterLine = mint:addActive('water', 0, 156)
+  
+  o.dangerIconDown = mint:addActive('danger-down', 201, 133)
   o.dangerIconUp = mint:addActive('danger-up', 201, 3)
   o.dangerIconDown:setOpacity(0.6)
   o.dangerIconUp:setOpacity(0.6)
@@ -39,6 +42,11 @@ function Game:new()
   o.instructions = mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 0, 'TAP & HOLD\nTO FLY', {alignment='center'})
   o.sineWaveTicks = 0
   
+  o.readyHighScoreDisplay =
+    mint:addParagraph('title-high-score', 2, 0, 'HIGH 0')
+  o.readyHighScoreDisplay:setY(mint:getScreenHeight() -
+    o.readyHighScoreDisplay:getGlyphHeight() - 2)
+  
   o.poles = {
     PhysicsObject:new('post-pole', 112, 148, (4.0 / 60)),
     PhysicsObject:new('post-pole', 128, 148, (4.0 / 60)),
@@ -48,6 +56,8 @@ function Game:new()
   o.splashes = {}
   o.droplets = {}
   o.stars = {}
+  o.shadows = {}
+  o.initialShadowsCreated = false
   
   o.harpy = PhysicsObject:new('harpy', 120, 124, (5.5 / 60))
   o.harpy.lift = o.harpy.gravity
@@ -68,8 +78,6 @@ function Game:new()
     o.boulderRowOccupancy[i] = false
   end
   
-  o.waterLine = mint:addActive('water', 0, 156)
-  
   o.state = 'ready'
   
   return o
@@ -82,6 +90,15 @@ function Game:update()
   -- State: Ready to play ------------------------------------------------------
   
   if self.state == 'ready' then
+    -- Create Harpy's and logs' shadows
+    if (not self.initialShadowsCreated) then
+      self:createShadow(self.harpy)
+      for _, pole in ipairs(self.poles) do
+        self:createShadow(pole)
+      end
+      self.initialShadowsCreated = true
+    end
+    
     -- Floating effect for instructions text
     self.sineWaveTicks = self.sineWaveTicks + 0.1
     self.instructions:setY(3 * math.sin(self.sineWaveTicks) + 68)
@@ -93,6 +110,7 @@ function Game:update()
       self.instructions = self.instructions:destroy()
       self.dangerIconDown = self.dangerIconDown:destroy()
       self.dangerIconUp = self.dangerIconUp:destroy()
+      self.readyHighScoreDisplay = self.readyHighScoreDisplay:destroy()
       
       -- Initialize score-tracking objects
       self.score = 0
@@ -126,6 +144,7 @@ function Game:update()
       table.insert(self.boulders, boulder)
       self:repositionBoulder(boulder)
       boulder:sendToBack()
+      self:createShadow(boulder)
     end
     self.boulderSpawnTimer = self.boulderSpawnTimer - 1
     
@@ -250,9 +269,8 @@ function Game:update()
       and not self.harpy.wasHit
     ) then
         self.harpy.treadDelay = 0.2
-        local splash = WaterSplash:new(self.harpy:getX(), 157, 0.05, 0.25)
-        table.insert(self.splashes, splash)
-        self:createDroplets(self.harpy:getX(), 157, 2, true)
+        self:createWaterSplash(self.harpy:getX(), 0.05, 0.25)
+        self:createDroplets(self.harpy:getX(), 2, true)
         mint:playSound('tread')
     end
     
@@ -282,14 +300,17 @@ function Game:update()
     
     -- Rearrange draw orders
     self.waterLine:bringToFront()
+    for _, shadow in ipairs(self.shadows) do
+      shadow:sendToBack()
+      shadow.bottom:bringToFront()
+    end
     
     -- Show Game Over screen if the player goes too low
     if (self.harpy:getY() > mint:getScreenHeight()) then
       mint:playSound('splash-big')
       
-      local splash = WaterSplash:new(self.harpy:getX(), 157)
-      table.insert(self.splashes, splash)
-      self:createDroplets(self.harpy:getX(), 157)
+      self:createWaterSplash(self.harpy:getX())
+      self:createDroplets(self.harpy:getX())
       
       self.scoreDisplay:destroy()
       self.scoreDisplayHigh:destroy()
@@ -317,11 +338,11 @@ function Game:update()
       
       self.btnRetry = Button:new(56, 72, 128, 'RETRY', false, function()
         mint:changeRoom(Game)
-      end, true)
+      end, true, 'up')
       
       self.btnMenu = Button:new(56, 96, 128, 'MENU', false, function()
         mint:changeRoom(Title)
-      end, true)
+      end, true, 'down')
     end
     
     -- Fade flash overlay
@@ -339,9 +360,8 @@ function Game:update()
     pole:updatePhysics()
     -- Remove pole if it falls into the water.
     if pole:getY() > 156 then
-      local splash = WaterSplash:new(pole:getX(), 157)
-      table.insert(self.splashes, splash)
-      self:createDroplets(pole:getX(), 157)
+      self:createWaterSplash(pole:getX())
+      self:createDroplets(pole:getX())
       pole:destroy()
       table.remove(self.poles, i)
       mint:playSound('splash')
@@ -361,9 +381,8 @@ function Game:update()
     -- Remove boulder if it falls into the water
     if boulder:getY() > mint:getScreenHeight() + boulder:getRadius() then
       mint:playSound('splash')
-      local splash = WaterSplash:new(boulder:getX(), 157)
-      table.insert(self.splashes, splash)
-      self:createDroplets(boulder:getX(), 157)
+      self:createWaterSplash(boulder:getX())
+      self:createDroplets(boulder:getX())
       boulder:destroy()
       table.remove(self.boulders, i)
     end
@@ -372,7 +391,14 @@ function Game:update()
   -- Handle water splashes
   for i = #self.splashes, 1, -1 do
     local splash = self.splashes[i]
-    splash:update()
+    
+    splash.scaleSpeed = splash.scaleSpeed - 0.002917
+    
+    splash:setScaleX(splash:getScaleX() + 0.0375)
+    splash:setScaleY(splash:getScaleY() + splash.scaleSpeed)
+    
+    splash:setOpacity(splash:getOpacity() - 0.01667)
+    
     -- Remove splash if it's no longer visible.
     if (splash:getScaleY() <= 0 or splash:getOpacity() <= 0) then
       splash:destroy()
@@ -404,9 +430,54 @@ function Game:update()
       table.remove(self.stars, i)
     end
   end
+  
+  -- Handle shadows
+  for i = #self.shadows, 1, -1 do
+    local shadow = self.shadows[i]
+    if (shadow.entity:exists()) then
+      shadow:setX(shadow.entity:getX())
+      shadow:setY(157 - 1)
+      
+      shadow.bottom:setX(shadow:getX())
+      shadow.bottom:setY(shadow:getY())
+      
+      -- Set opacity and scaling values
+      local entityBottomY =
+        shadow.entity:getY() + (shadow.entity:getImageHeight() / 2)
+      
+      local maxScale =
+        shadow.entity:getImageWidth() / shadow:getImageWidth()
+      local scale = (entityBottomY / 157) * maxScale
+      
+      shadow:setScaleX(scale)
+      shadow.bottom:setScaleX(scale)
+      
+      shadow:setScaleY(scale)
+      shadow.bottom:setScaleY(scale)
+      
+      local alpha = entityBottomY / 157
+      shadow:setOpacity(alpha)
+      shadow.bottom:setOpacity(alpha)
+    else
+      shadow.bottom:destroy()
+      shadow:destroy()
+      table.remove(self.shadows, i)
+    end
+  end
 end
 
-function Game:createDroplets(x, y, numDrops, weak)
+function Game:createWaterSplash(x, scaleSpeed, scaleX)
+  local splash = mint:addActive('splash', x, self.WATER_LINE_Y)
+  splash.scaleSpeed = scaleSpeed or 0.0667
+  splash:setScaleX(scaleX or 0.85)
+  splash:setScaleY(0)
+  
+  if (self.state == 'gameover') then splash:sendToBack() end
+  
+  table.insert(self.splashes, splash)
+end
+
+function Game:createDroplets(x, numDrops, weak)
   local numDrops = numDrops or 4
   local weak = weak or false
   
@@ -419,7 +490,7 @@ function Game:createDroplets(x, y, numDrops, weak)
       ySpeed = ySpeed * 0.75
     end
     
-    local droplet = PhysicsObject:new('droplet', x, y, (4.5 / 60))
+    local droplet = PhysicsObject:new('droplet', x, self.WATER_LINE_Y, (4.5 / 60))
     droplet.isFalling = true
     droplet:setOpacity(0.75)
     droplet:playAnimation('0'..love.math.random(1, 3))
@@ -427,6 +498,8 @@ function Game:createDroplets(x, y, numDrops, weak)
     local dir = mint.util.randomChoice(-1, 1)
     droplet:setXSpeed(xSpeed * dir)
     droplet:setYSpeed(ySpeed)
+    
+    if (self.state == 'gameover') then droplet:sendToBack() end
     
     table.insert(self.droplets, droplet)
   end
@@ -454,6 +527,13 @@ function Game:createStars(x, y)
     
     table.insert(self.stars, star)
   end
+end
+
+function Game:createShadow(targetEntity)
+  local shadow = mint:addActive('shadow-top', 0, 0)
+  shadow.bottom = mint:addActive('shadow-bottom', 0, 0)
+  shadow.entity = targetEntity
+  table.insert(self.shadows, shadow)
 end
 
 function Game:repositionBoulder(boulder)

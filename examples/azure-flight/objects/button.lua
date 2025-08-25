@@ -1,6 +1,8 @@
 Button = {}
 
-function Button:new(x, y, size, text, toggleable, clickedCallback, oneClickOnly)
+function Button:new(x, y, size, text, toggleable, clickedCallback, oneClickOnly,
+  keyboardKey
+)
   local o = {}
   setmetatable(o, self)
   self.__index = self
@@ -25,6 +27,8 @@ function Button:new(x, y, size, text, toggleable, clickedCallback, oneClickOnly)
   
   o.clickedCallback = clickedCallback
   
+  o.keyboardKey = keyboardKey or nil
+  
   return o
 end
 
@@ -32,7 +36,7 @@ function Button:update()
   if (self.oneClickOnly and self.wasClicked) then goto UpdateDone end
   
   -- Handle button clicking
-  if mint:mouseReleased(1) and mint:mouseOverActive(self.btn) then
+  if ((mint:mouseReleased(1) and mint:mouseOverActive(self.btn)) or (self.keyboardKey and mint:keyReleased(self.keyboardKey))) then
     if self.toggleable then self.enabled = not self.enabled end
     mint:playSound('button-up')
     self.clickedCallback(self.enabled)
@@ -40,7 +44,7 @@ function Button:update()
   end
   
   -- Handle visuals
-  if mint:mouseHeld(1) and mint:mouseOverActive(self.btn) then
+  if ((mint:mouseHeld(1) and mint:mouseOverActive(self.btn)) or (self.keyboardKey and mint:keyHeld(self.keyboardKey))) then
     if not self.isDown then
       mint:playSound('button-down')
       self.isDown = true

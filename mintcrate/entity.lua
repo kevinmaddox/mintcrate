@@ -16,6 +16,7 @@ function Entity:new()
   setmetatable(o, self)
   self.__index = self
   
+  o._wasDestroyed = false
   o._isVisible = true
   
   return o
@@ -41,7 +42,12 @@ end
 function Entity:destroy()
   table.remove(self._instances, self:_getInstanceIndex(self._instances))
   table.remove(self._drawOrder, self:_getInstanceIndex(self._drawOrder))
+  self._wasDestroyed = true
   return nil
+end
+
+function Entity:exists()
+  return not self._wasDestroyed
 end
 
 -- Returns the entity's name.
