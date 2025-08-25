@@ -16,6 +16,8 @@ function Entity:new()
   setmetatable(o, self)
   self.__index = self
   
+  o._isVisible = true
+  
   return o
 end
 

@@ -42,6 +42,7 @@ MintCrate To-do List
 [ ] Add validation to functions
 [ ] Saving/loading data
   - Figure out a good format
+[ ] Think really hard about function names (i.e. setTextContent should just be setText)
 
 Decisions
 - none

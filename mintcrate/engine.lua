@@ -1105,6 +1105,8 @@ function Engine:sys_draw()
   
   -- Draw Backdrops
   for _, backdrop in ipairs(self._instances.backdrops) do
+    if (not backdrop._isVisible) then goto DrawBackdropDone end
+    
     local image = self._data.backdrops[backdrop._name].image
     local mosaic = self._data.backdrops[backdrop._name].mosaic
     
@@ -1115,6 +1117,8 @@ function Engine:sys_draw()
       love.graphics.draw(image, backdrop._quad, backdrop._x, backdrop._y, 0,
         backdrop._scaleX, backdrop._scaleY)
     end
+    
+    ::DrawBackdropDone::
   end
   
   -- Draw Tilemap
@@ -1143,6 +1147,8 @@ function Engine:sys_draw()
   
   -- Draw Actives
   for _, active in ipairs(self._instances.actives) do
+    if (not active._isVisible) then goto DrawActiveDone end
+    
     local animation = self._data.actives[active:_getName()]
       .animations[active:getAnimationName()]
     if not animation then goto DrawActiveDone end
@@ -1175,6 +1181,8 @@ function Engine:sys_draw()
   
   -- Draw Paragraphs
   for _, paragraph in ipairs(self._instances.paragraphs) do
+    if (not paragraph._isVisible) then goto DrawParagraphDone end
+    
     self:_drawText(
       paragraph:_getTextLines(),
       self._data.fonts[paragraph:_getName()],
@@ -1184,6 +1192,8 @@ function Engine:sys_draw()
       paragraph:_getWordWrap(),
       paragraph:_getAlignment()
     )
+    
+    ::DrawParagraphDone::
   end
   
   -- Draw debug graphics for Tilemap
