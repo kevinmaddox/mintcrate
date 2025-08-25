@@ -37,6 +37,16 @@ function MathX.clamp(value, limitLower, limitUpper)
   return math.max(limitLower, math.min(limitUpper, value))
 end
 
+-- Returns the midpoint X,Y coordinates for a line (two points in space).
+-- @param {number} x1 X coordinate of the first point.
+-- @param {number} y1 Y coordinate of the first point.
+-- @param {number} x2 X coordinate of the second point.
+-- @param {number} y2 Y coordinate of the second point.
+-- @returns {number, number} X,Y coordinates of the midpoint.
+function MathX.midpoint(x1, y1, x2, y2)
+  return ((x1 + x2) / 2), ((y1 + y2) / 2)
+end
+
 -- Rounds a decimal value to the nearest whole value (up or down).
 -- @param {number} value The value to be rounded.
 -- @param {number} numDecimalPlaces The number of decimal places to round to.

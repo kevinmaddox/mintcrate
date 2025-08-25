@@ -94,7 +94,14 @@ function love.load()
     {name='droplet'},
     {name='droplet_01', offset={-1,-2}},
     {name='droplet_02', offset={-1,-2}},
-    {name='droplet_03', offset={-1,-2}}
+    {name='droplet_03', offset={-1,-2}},
+    
+    -- Stars
+    {name='star'},
+    {name='star_01', offset={-2,-2}},
+    {name='star_02', offset={-4,-4}},
+    {name='star_03', offset={-3,-3}},
+    {name='star_04', offset={-5,-2}}
   })
   
   -- Backdrops
@@ -123,7 +130,12 @@ function love.load()
   mint:defineSounds({
     {name = 'button-down'},
     {name = 'button-up'},
-    {name = 'flap'}
+    {name = 'flap'},
+    {name = 'impact'},
+    {name = 'impact-big'},
+    {name = 'splash'},
+    {name = 'splash-big'},
+    {name = 'tread'}
   })
   
   -- Global vars

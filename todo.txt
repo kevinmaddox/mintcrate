@@ -50,19 +50,25 @@ For when Love 12 comes out
 [ ] Implement <close> to auto run init() when Engine constructor finishes
 
 - Example: Azure Flight --------------------------------------------------------
-[/] Starting poles
-  [ ] Alter origin to be center of logs (so splashes appear at correct points)
-[ ] Boulders
+[x] Starting poles
+  [x] Alter origin to be center of logs (so splashes appear at correct points)
+[x] Boulders
 [ ] Score
-[ ] Player-Boulder collision
-[ ] Add water droplets to splashes
-[ ] Water splashes
+[x] Player-Boulder collision
+[x] Add water droplets to splashes
+[x] Stars effect
+[x] Water splashes
   [x] Poles
   [x] Player (treading water)
-  [ ] Player (falling into water)
-  [ ] Boulders
+  [x] Player (falling into water)
+  [x] Boulders
 [ ] Sound Effects
   [ ] Player treading water
   [ ] Player-Boulder collision
   [ ] Water splashes
-[ ] Game Over state/screen
+[/] Game Over state/screen
+  [/] Buttons and text (update score value)
+  [ ] White screen flash
+  [ ] Dimmed screen
+[ ] Shadows
+[ ] Buttons being unable to multi-click

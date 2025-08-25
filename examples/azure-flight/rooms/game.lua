@@ -47,12 +47,14 @@ function Game:new()
   
   o.splashes = {}
   o.droplets = {}
+  o.stars = {}
   
   o.harpy = PhysicsObject:new('harpy', 120, 124, (5.5 / 60))
   o.harpy.lift = o.harpy.gravity
   o.harpy.flapSoundDelay = 0
   o.harpy.treadDelay = 0
   o.harpy.wasHit = false
+  o.harpy.hitAngle = 0
   
   o.TOTAL_BOULDERS = 5
   o.TOTAL_BOULDER_ROWS = 6
@@ -136,8 +138,24 @@ function Game:update()
     -- Handle harpy animations.
     if inputReceived then
       self.harpy:playAnimation('flap')
-    else
+    elseif (not self.harpy.wasHit) then
       self.harpy:playAnimation('fall')
+    else
+      self.harpy.hitAngle = self.harpy.hitAngle + (-self.harpy:getXSpeed() / (15 / 60))
+      local angle = math.abs(self.harpy.hitAngle)
+      if     (angle >=   0.0 and angle <  22.5) then
+        self.harpy:playAnimation('hit01')
+      elseif (angle >=  22.5 and angle <  67.5) then
+        self.harpy:playAnimation('hit02')
+      elseif (angle >=  67.5 and angle < 112.5) then
+        self.harpy:playAnimation('hit03')
+      elseif (angle >= 112.5 and angle < 157.5) then
+        self.harpy:playAnimation('hit04')
+      elseif (angle >= 157.5 and angle < 180.0) then
+        self.harpy:playAnimation('hit05')
+      end
+      
+      self.harpy:flipHorizontally((self.harpy.hitAngle < 0))
     end
     
     -- Play flapping sound.
@@ -155,6 +173,13 @@ function Game:update()
         not boulder.isFalling
         and mint:testCollision(self.harpy, boulder)
       ) then
+        -- Play sound
+        if (not self.harpy.wasHit) then
+          mint:playSound('impact-big')
+        else
+          mint:playSound('impact')
+        end
+        
         -- Mark objects as being hit
         boulder.isFalling = true
         self.harpy.wasHit = true
@@ -172,14 +197,29 @@ function Game:update()
           self.harpy:setYSpeed(love.math.random(0, 19) / 60)
         end
         boulder:setYSpeed(bounceSpeed)
+        
+        -- Create stars effect
+        local starX, starY = mint.math.midpoint(
+          self.harpy:getX(), self.harpy:getY(),
+          boulder:getX(), boulder:getY()
+        )
+        self:createStars(starX, starY)
       end
     end
     
     -- Kill player if they go too high
     if (self.harpy:getY() < 0) then
+      mint:playSound('impact-big')
+      
       self.harpy.wasHit = true
       self.harpy:setY(0)
       self.harpy:setYSpeed(0)
+      
+      local dir = love.math.random(0, 1)
+      if dir == 0 then dir = -1 end
+      self.harpy:setXSpeed((4/60) * love.math.random(0, 5) * dir)
+      
+      self:createStars(self.harpy:getX(), 0)
     end
     
   -- Reposition boulders if they've left the screen
@@ -198,21 +238,32 @@ function Game:update()
     end
   end
     
-    -- Create water splashes when player treads into it
-    if (self.harpy:getY() >= 154 and self.harpy.treadDelay <= 0) then
-      self.harpy.treadDelay = 0.2
-      local splash = WaterSplash:new(self.harpy:getX(), 157, 0.05, 0.25)
-      table.insert(self.splashes, splash)
-      self:createDroplets(self.harpy:getX(), 157, 2, true)
+    -- Create water splashes when player treads water
+    if (
+      self.harpy:getY() >= 154
+      and self.harpy.treadDelay <= 0
+      and not self.harpy.wasHit
+    ) then
+        self.harpy.treadDelay = 0.2
+        local splash = WaterSplash:new(self.harpy:getX(), 157, 0.05, 0.25)
+        table.insert(self.splashes, splash)
+        self:createDroplets(self.harpy:getX(), 157, 2, true)
+        mint:playSound('tread')
     end
     
-    self.harpy.treadDelay = self.harpy.treadDelay - (1/60)
+    self.harpy.treadDelay = self.harpy.treadDelay - (1 / 60)
     
     -- Rearrange draw orders
     self.waterLine:bringToFront()
     
     -- Show Game Over screen if the player goes too low
     if (self.harpy:getY() > mint:getScreenHeight()) then
+      mint:playSound('splash-big')
+      
+      local splash = WaterSplash:new(self.harpy:getX(), 157)
+      table.insert(self.splashes, splash)
+      self:createDroplets(self.harpy:getX(), 157)
+      
       self.state = 'gameover'
     end
     
@@ -242,6 +293,21 @@ function Game:update()
   
   -- Process for all states ----------------------------------------------------
   
+  -- Handle starting platforms poles/logs.
+  for i = #self.poles, 1, -1 do
+    local pole = self.poles[i]
+    pole:updatePhysics()
+    -- Remove pole if it falls into the water.
+    if pole:getY() > 156 then
+      local splash = WaterSplash:new(pole:getX(), 157)
+      table.insert(self.splashes, splash)
+      self:createDroplets(pole:getX(), 157)
+      pole:destroy()
+      table.remove(self.poles, i)
+      mint:playSound('splash')
+    end
+  end
+  
   -- Handle boulders.
   for i = #self.boulders, 1, -1 do
     local boulder = self.boulders[i]
@@ -254,25 +320,12 @@ function Game:update()
     
     -- Remove boulder if it falls into the water
     if boulder:getY() > mint:getScreenHeight() + boulder:getRadius() then
+      mint:playSound('splash')
       local splash = WaterSplash:new(boulder:getX(), 157)
       table.insert(self.splashes, splash)
       self:createDroplets(boulder:getX(), 157)
       boulder:destroy()
       table.remove(self.boulders, i)
-    end
-  end
-  
-  -- Handle starting platforms poles/logs.
-  for i = #self.poles, 1, -1 do
-    local pole = self.poles[i]
-    pole:updatePhysics()
-    -- Remove pole if it falls into the water.
-    if pole:getY() > 156 then
-      local splash = WaterSplash:new(pole:getX(), 157)
-      table.insert(self.splashes, splash)
-      self:createDroplets(pole:getX(), 157)
-      pole:destroy()
-      table.remove(self.poles, i)
     end
   end
   
@@ -295,6 +348,20 @@ function Game:update()
     if (droplet:getY() > 160) then
       droplet:destroy()
       table.remove(self.droplets, i)
+    end
+  end
+  
+  -- Handle stars
+  for i = #self.stars, 1, -1 do
+    local star = self.stars[i]
+    star:updatePhysics()
+    -- Decrease star's lifespan and remove when it's dead.
+    if (star.lifespan > 0) then
+      star.lifespan = star.lifespan - (1 / 60)
+      star:setOpacity(star.lifespan / star.totalLifespan)
+    else
+      star:destroy()
+      table.remove(self.stars, i)
     end
   end
 end
@@ -323,6 +390,30 @@ function Game:createDroplets(x, y, numDrops, weak)
     droplet:setYSpeed(ySpeed)
     
     table.insert(self.droplets, droplet)
+  end
+end
+
+function Game:createStars(x, y)
+  for i = 1, 10 do
+    local star = PhysicsObject:new('star',
+      x - 5 + love.math.random(0, 10),
+      y - 5 + love.math.random(0, 10),
+      (5.5 / 60))
+    
+    star:playAnimation('0'..love.math.random(1, 4))
+    
+    local angle = love.math.random(0, 359)
+    local speed = (20 + love.math.random(0, 59)) / 60
+    
+    star:setXSpeed(speed * math.cos(math.rad(angle)))
+    star:setYSpeed(-speed * math.sin(math.rad(angle)))
+    
+    star:setAngle(angle)
+    
+    star.totalLifespan = 0.5
+    star.lifespan = star.totalLifespan
+    
+    table.insert(self.stars, star)
   end
 end
 
