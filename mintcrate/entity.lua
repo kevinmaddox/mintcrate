@@ -27,9 +27,9 @@ end
 
 -- Returns the entity's position in the list of all current instances.
 -- @returns {number} Entity's instance index.
-function Entity:_getInstanceIndex()
+function Entity:_getInstanceIndex(entityTable)
   local idx
-  for i, item in ipairs(self._instances) do
+  for i, item in ipairs(entityTable) do
     if (self == item) then
       idx = i
     end
@@ -39,7 +39,8 @@ end
 
 -- Removes the entity from the room and informs the engine to stop managing it.
 function Entity:destroy()
-  table.remove(self._instances, self:_getInstanceIndex())
+  table.remove(self._instances, self:_getInstanceIndex(self._instances))
+  table.remove(self._drawOrder, self:_getInstanceIndex(self._drawOrder))
   return nil
 end
 
@@ -90,25 +91,25 @@ end
 -- Brings the entity one position up in the draw order.
 function Entity:bringForward()
   MintCrate.Util.table.moveItemUp(
-    self._instances, self:_getInstanceIndex())
+    self._drawOrder, self:_getInstanceIndex(self._drawOrder))
 end
 
 -- Pushes the entity one position down in the draw order.
 function Entity:sendBackward()
   MintCrate.Util.table.moveItemDown(
-    self._instances, self:_getInstanceIndex())
+    self._drawOrder, self:_getInstanceIndex(self._drawOrder))
 end
 
 -- Brings the entity to the top of the draw order.
 function Entity:bringToFront()
   MintCrate.Util.table.moveItemToEnd(
-    self._instances, self:_getInstanceIndex())
+    self._drawOrder, self:_getInstanceIndex(self._drawOrder))
 end
 
 -- Pushes the entity to the bottom of the draw order.
 function Entity:sendToBack()
   MintCrate.Util.table.moveItemToStart(
-    self._instances, self:_getInstanceIndex())
+    self._drawOrder, self:_getInstanceIndex(self._drawOrder))
 end
 
 -- -----------------------------------------------------------------------------

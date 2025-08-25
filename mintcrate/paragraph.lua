@@ -19,15 +19,18 @@ local Paragraph = {}
 -- @param {boolean} wordWrap Whether entire words should wrap or break mid-word.
 -- @param {string} alignment How the text should be aligned (left|center|right).
 -- @returns {Paragraph} A new instance of the Paragraph class.
-function Paragraph:new(instances, name, x, y, glyphWidth, glyphHeight,
-  maxCharsPerLine, lineSpacing, wordWrap, alignment
+function Paragraph:new(instances, drawOrder, name, x, y,
+  glyphWidth, glyphHeight, maxCharsPerLine, lineSpacing, wordWrap, alignment
 )
   local o = MintCrate.Entity:new()
   setmetatable(self, {__index = MintCrate.Entity})
   setmetatable(o, self)
   self.__index = self
   
+  o._entityType = 'paragraph'
+  
   o._instances = instances
+  o._drawOrder = drawOrder
   o._name = name
   o._x = x
   o._y = y

@@ -134,6 +134,11 @@ function Engine:new(
     tiles = {}
   }
   
+  o._drawOrders = {
+    backdrops = {},
+    main = {}
+  }
+  
   -- TODO: Implement <close> var to autorun init() when Love 12 comes out
   
   return o
@@ -713,9 +718,13 @@ end
 -- Internal function which actually performs the room change.
 -- @param {Room} room The room to load.
 function Engine:_changeRoom(room)
-  -- Wipe all current entity instances.
+  -- Wipe all current entity instances, including draw order tables.
   for key, _ in pairs(self._instances) do
     self._instances[key] = {}
+  end
+  
+  for key, _ in pairs(self._drawOrders) do
+    self._drawOrders[key] = {}
   end
   
   -- Stop all audio.
@@ -806,6 +815,7 @@ function Engine:addActive(name, x, y)
   
   local active = MintCrate.Active:new(
     self._instances.actives,
+    self._drawOrders.main,
     name,
     x, y,
     collider.shape,
@@ -817,6 +827,7 @@ function Engine:addActive(name, x, y)
   )
   
   table.insert(self._instances.actives, active)
+  table.insert(self._drawOrders.main, active)
   
   return active
 end
@@ -850,11 +861,13 @@ function Engine:addBackdrop(name, x, y, options)
   
   local backdrop = MintCrate.Backdrop:new(
     self._instances.backdrops,
+    self._drawOrders.backdrops,
     name, x, y,
     width, height, quad, scaleX, scaleY
   )
   
   table.insert(self._instances.backdrops, backdrop)
+  table.insert(self._drawOrders.backdrops, backdrop)
   
   return backdrop
 end
@@ -885,6 +898,7 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   
   local paragraph = MintCrate.Paragraph:new(
     self._instances.paragraphs,
+    self._drawOrders.main,
     name,
     x, y,
     glyphWidth, glyphHeight,
@@ -894,6 +908,7 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   paragraph:setTextContent(startingTextContent)
   
   table.insert(self._instances.paragraphs, paragraph)
+  table.insert(self._drawOrders.main, paragraph)
   
   return paragraph
 end
@@ -1104,7 +1119,7 @@ function Engine:sys_draw()
   )
   
   -- Draw Backdrops
-  for _, backdrop in ipairs(self._instances.backdrops) do
+  for _, backdrop in ipairs(self._drawOrders.backdrops) do
     if (not backdrop._isVisible) then goto DrawBackdropDone end
     
     local image = self._data.backdrops[backdrop._name].image
@@ -1145,55 +1160,59 @@ function Engine:sys_draw()
     end
   end
   
-  -- Draw Actives
-  for _, active in ipairs(self._instances.actives) do
-    if (not active._isVisible) then goto DrawActiveDone end
+  -- Draw main entities
+  for _, entity in ipairs(self._drawOrders.main) do
+    -- Draw Actives
+    if (entity._entityType == 'active') then
+      local active = entity
+      if (not active._isVisible) then goto DrawActiveDone end
+      
+      local animation = self._data.actives[active:_getName()]
+        .animations[active:getAnimationName()]
+      if not animation then goto DrawActiveDone end
+      local animationFrameNumber = active:getAnimationFrameNumber()
+      
+      active:_animate(animation)
+      
+      if active:getOpacity() == 0 then
+        goto DrawActiveDone
+      end
+      
+      local flippedX = 1
+      if active:isFlippedHorizontally() then flippedX = -1 end
+      local flippedY = 1
+      if active:isFlippedVertically() then flippedY = -1 end
+      
+      love.graphics.setColor(1, 1, 1, active:getOpacity())
+      love.graphics.draw(
+        animation.image,
+        animation.quads[active:getAnimationFrameNumber()],
+        active:getX(), active:getY(),
+        math.rad(active:getAngle()),
+        (active:getScaleX() * flippedX), (active:getScaleY() * flippedY),
+        -animation.offsetX, -animation.offsetY
+      )
+      love.graphics.setColor(1, 1, 1, 1)
+      
+      ::DrawActiveDone::
     
-    local animation = self._data.actives[active:_getName()]
-      .animations[active:getAnimationName()]
-    if not animation then goto DrawActiveDone end
-    local animationFrameNumber = active:getAnimationFrameNumber()
-    
-    active:_animate(animation)
-    
-    if active:getOpacity() == 0 then
-      goto DrawActiveDone
+    -- Draw Paragraphs
+    elseif (entity._entityType == 'paragraph') then
+      local paragraph = entity
+      if (not paragraph._isVisible) then goto DrawParagraphDone end
+      
+      self:_drawText(
+        paragraph:_getTextLines(),
+        self._data.fonts[paragraph:_getName()],
+        paragraph:getX(), paragraph:getY(),
+        paragraph:_getMaxCharsPerLine(),
+        paragraph:_getLineSpacing(),
+        paragraph:_getWordWrap(),
+        paragraph:_getAlignment()
+      )
+      
+      ::DrawParagraphDone::
     end
-    
-    local flippedX = 1
-    if active:isFlippedHorizontally() then flippedX = -1 end
-    local flippedY = 1
-    if active:isFlippedVertically() then flippedY = -1 end
-    
-    love.graphics.setColor(1, 1, 1, active:getOpacity())
-    love.graphics.draw(
-      animation.image,
-      animation.quads[active:getAnimationFrameNumber()],
-      active:getX(), active:getY(),
-      math.rad(active:getAngle()),
-      (active:getScaleX() * flippedX), (active:getScaleY() * flippedY),
-      -animation.offsetX, -animation.offsetY
-    )
-    love.graphics.setColor(1, 1, 1, 1)
-    
-    ::DrawActiveDone::
-  end
-  
-  -- Draw Paragraphs
-  for _, paragraph in ipairs(self._instances.paragraphs) do
-    if (not paragraph._isVisible) then goto DrawParagraphDone end
-    
-    self:_drawText(
-      paragraph:_getTextLines(),
-      self._data.fonts[paragraph:_getName()],
-      paragraph:getX(), paragraph:getY(),
-      paragraph:_getMaxCharsPerLine(),
-      paragraph:_getLineSpacing(),
-      paragraph:_getWordWrap(),
-      paragraph:_getAlignment()
-    )
-    
-    ::DrawParagraphDone::
   end
   
   -- Draw debug graphics for Tilemap
@@ -1247,7 +1266,10 @@ function Engine:sys_draw()
     self._showActiveOriginPoints or
     self._showActiveActionPoints
   ) then
-    for _, active in ipairs(self._instances.actives) do
+    for _, entity in ipairs(self._drawOrders.main) do
+      if entity._entityType ~= 'active' then goto DrawActiveDebugGfxDone end
+      
+      local active = entity
       local animation = self._data.actives[active:_getName()]
         .animations[active:getAnimationName()]
       
@@ -1352,6 +1374,8 @@ function Engine:sys_draw()
           0, false, "center"
         )
       end
+      
+      ::DrawActiveDebugGfxDone::
     end
   end
   

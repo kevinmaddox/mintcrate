@@ -101,7 +101,12 @@ function love.load()
     {name='star_01', offset={-2,-2}},
     {name='star_02', offset={-4,-4}},
     {name='star_03', offset={-3,-3}},
-    {name='star_04', offset={-5,-2}}
+    {name='star_04', offset={-5,-2}},
+    
+    -- Screen flash/dim overlays
+    {name='overlay'},
+    {name='overlay_white'},
+    {name='overlay_black'},
   })
   
   -- Backdrops

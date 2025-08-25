@@ -20,7 +20,7 @@ local Backdrop = {}
 -- @param {number} scaleX Used to scale non-mosaic Backdrops correctly.
 -- @param {number} scaleY Used to scale non-mosaic Backdrops correctly.
 -- @returns {Backdrop} A new instance of the Backdrop class.
-function Backdrop:new(instances, name, x, y, width, height, quad,
+function Backdrop:new(instances, drawOrder, name, x, y, width, height, quad,
   scaleX, scaleY
 )
   local o = MintCrate.Entity:new()
@@ -28,7 +28,10 @@ function Backdrop:new(instances, name, x, y, width, height, quad,
   setmetatable(o, self)
   self.__index = self
   
+  o._entityType = 'backdrop'
+  
   o._instances = instances
+  o._drawOrder = drawOrder
   o._name = name
   o._x = x
   o._y = y

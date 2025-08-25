@@ -28,7 +28,7 @@ function Title:new()
   o.btnStart = Button:new(56, 72, 128, 'PLAY', false, function()
     globals.enteringFromSplashScreen = false
     mint:changeRoom(Game)
-  end)
+  end, true)
   o.btnBgm = Button:new(56, 96, 64, 'BGM', true, function(enabled)
     globals.bgmOn = enabled
   end)
@@ -37,7 +37,7 @@ function Title:new()
   end)
   o.btnQuit = Button:new(56, 120, 128, 'QUIT', false, function()
     mint:quit(true)
-  end)
+  end, true)
   
   return o
 end

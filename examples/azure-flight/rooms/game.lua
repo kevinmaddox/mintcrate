@@ -295,6 +295,13 @@ function Game:update()
       self.scoreDisplayHigh:destroy()
       
       self.state = 'gameover'
+      
+      self.overlayBlack = mint:addActive('overlay', 0, 0)
+      self.overlayBlack:setOpacity(0.5)
+      self.overlayBlack:playAnimation('black')
+      
+      self.overlayWhite = mint:addActive('overlay', 0, 0)
+      self.overlayWhite:playAnimation('white')
     end
     
   -- State: Game over screen ---------------------------------------------------
@@ -310,12 +317,15 @@ function Game:update()
       
       self.btnRetry = Button:new(56, 72, 128, 'RETRY', false, function()
         mint:changeRoom(Game)
-      end)
+      end, true)
       
       self.btnMenu = Button:new(56, 96, 128, 'MENU', false, function()
         mint:changeRoom(Title)
-      end)
+      end, true)
     end
+    
+    -- Fade flash overlay
+    self.overlayWhite:setOpacity(self.overlayWhite:getOpacity() - 0.05)
     
     self.btnRetry:update()
     self.btnMenu:update()

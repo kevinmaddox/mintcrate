@@ -22,7 +22,7 @@ local Active = {}
 -- @param {number} colliderRadius Radius of the collision mask (circle type).
 -- @param {string} initialAnimationName Active's starting animation.
 -- @returns {Active} A new instance of the Active class.
-function Active:new(instances, name, x, y, colliderShape,
+function Active:new(instances, drawOrder, name, x, y, colliderShape,
   colliderOffsetX, colliderOffsetY, colliderWidth, colliderHeight,
   colliderRadius, initialAnimationName, initialAnimation
 )
@@ -31,7 +31,10 @@ function Active:new(instances, name, x, y, colliderShape,
   setmetatable(o, self)
   self.__index = self
   
+  o._entityType = 'active'
+  
   o._instances = instances
+  o._drawOrder = drawOrder
   o._name = name
   o._x = x
   o._y = y
