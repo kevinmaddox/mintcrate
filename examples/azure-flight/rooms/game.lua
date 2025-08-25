@@ -97,7 +97,7 @@ function Game:update()
       -- Drop starting platform into river
       for _, pole in ipairs(self.poles) do
         pole.isFalling = true
-        local dir = mint.math.randomChoice(-1, 1)
+        local dir = mint.util.randomChoice(-1, 1)
         pole:setXSpeed((0.67 + (love.math.random(0, 20) * 0.01)) * dir)
       end
     end
@@ -214,7 +214,7 @@ function Game:update()
       self.harpy:setY(0)
       self.harpy:setYSpeed(0)
       
-      local dir = mint.math.randomChoice(-1, 1)
+      local dir = mint.util.randomChoice(-1, 1)
       self.harpy:setXSpeed((4/60) * love.math.random(0, 5) * dir)
       
       self:createStars(self.harpy:getX(), 0)
@@ -382,7 +382,7 @@ function Game:createDroplets(x, y, numDrops, weak)
     droplet:setOpacity(0.75)
     droplet:playAnimation('0'..love.math.random(1, 3))
     
-    local dir = mint.math.randomChoice(-1, 1)
+    local dir = mint.util.randomChoice(-1, 1)
     droplet:setXSpeed(xSpeed * dir)
     droplet:setYSpeed(ySpeed)
     
@@ -431,7 +431,7 @@ function Game:repositionBoulder(boulder)
   targetRow = targetRow - 1
   
   -- Pick a random side
-  local dir = mint.math.randomChoice(-1, 1)
+  local dir = mint.util.randomChoice(-1, 1)
   
   -- Warp boulder
   if (dir == 1) then

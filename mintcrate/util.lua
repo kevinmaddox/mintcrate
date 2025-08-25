@@ -6,6 +6,18 @@
 local Util = {}
 
 -- -----------------------------------------------------------------------------
+-- General methods
+-- -----------------------------------------------------------------------------
+
+-- Picks a random entry from a set of items.
+-- @param {*} ... Any number of items to pick a random entry from.
+-- @returns {*} A randomly-selected entry from the provided list of items.
+function Util.randomChoice(...)
+  local values = {...}
+  return values[love.math.random(1, #values)]
+end
+
+-- -----------------------------------------------------------------------------
 -- Boolean methods
 -- -----------------------------------------------------------------------------
 
@@ -29,15 +41,6 @@ Util.number = {}
 -- @returns {boolean} Boolean representation of a numeric value.
 function Util.number.toBoolean(n)
   return n > 0 and true or false
-end
-
--- Returns 1 if positive, -1 if negative, and 0 if 0.
--- @param {number} n A numeric value.
--- @returns {number} A representation of the state of the number's sign.
-function Util.number.sign(n)
-  local sign = 0
-  if (n > 0) then sign = 1 elseif (n < 0) then sign = -1 end
-  return sign
 end
 
 -- -----------------------------------------------------------------------------

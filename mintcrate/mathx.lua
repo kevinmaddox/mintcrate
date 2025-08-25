@@ -47,11 +47,6 @@ function MathX.midpoint(x1, y1, x2, y2)
   return ((x1 + x2) / 2), ((y1 + y2) / 2)
 end
 
-function MathX.randomChoice(...)
-  local values = {...}
-  return values[love.math.random(1, #values)]
-end
-
 -- Rounds a decimal value to the nearest whole value (up or down).
 -- @param {number} value The value to be rounded.
 -- @param {number} numDecimalPlaces The number of decimal places to round to.
@@ -61,9 +56,9 @@ function MathX.round(value, numDecimalPlaces)
   return math.floor(value * mult + 0.5) / mult
 end
 
--- Returns the positive (1) or negative (-1) sign of a value (returns 0 if 0).
--- @param {number} value The value to get the sign of.
--- @returns {number} Sign of value.
+-- Returns 1 if positive, -1 if negative, and 0 if 0.
+-- @param {number} n A numeric value.
+-- @returns {number} A representation of the state of the number's sign.
 function MathX.sign(value)
   local sign = 0
   if (n > 0) then sign = 1 elseif (n < 0) then sign = -1 end
