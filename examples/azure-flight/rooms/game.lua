@@ -26,7 +26,7 @@ function Game:new()
   mint:addBackdrop('mountains')
   
   mint:setMusic('tangent')
-  -- mint:playMusic()
+  mint:playMusic()
   
   o.WATER_LINE_Y = 156
   o.waterLine = mint:addActive('water', 0, 156)
@@ -43,7 +43,7 @@ function Game:new()
   o.sineWaveTicks = 0
   
   o.readyHighScoreDisplay =
-    mint:addParagraph('title-high-score', 2, 0, 'HIGH 0')
+    mint:addParagraph('title-high-score', 2, 0, 'HIGH '..globals.highScore)
   o.readyHighScoreDisplay:setY(mint:getScreenHeight() -
     o.readyHighScoreDisplay:getGlyphHeight() - 2)
   
@@ -264,7 +264,7 @@ function Game:update()
     
     -- Create water splashes when player treads water
     if (
-      self.harpy:getY() >= 154
+      (self.harpy:getY() + self.harpy:getImageHeight()/2) >= self.WATER_LINE_Y
       and self.harpy.treadDelay <= 0
       and not self.harpy.wasHit
     ) then
@@ -329,12 +329,17 @@ function Game:update()
   
   elseif self.state == 'gameover' then
     if (self.harpy) then
+      if (self.score > globals.highScore) then
+        globals.highScore = self.score
+        mint:saveData('hiscore', {highScore = globals.highScore})
+      end
+      
       self.harpy = self.harpy:destroy()
       
       mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 35,
         'SCORE '..self.score, {alignment='center'})
       mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 53,
-        'BEST 19', {alignment='center'})
+        'BEST '..globals.highScore, {alignment='center'})
       
       self.btnRetry = Button:new(56, 72, 128, 'RETRY', false, function()
         mint:changeRoom(Game)

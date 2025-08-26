@@ -54,7 +54,7 @@ For when Love 12 comes out
 [x] Starting poles
   [x] Alter origin to be center of logs (so splashes appear at correct points)
 [x] Boulders
-[ ] Score
+[x] Score
 [x] Player-Boulder collision
 [x] Add water droplets to splashes
 [x] Stars effect
@@ -63,13 +63,16 @@ For when Love 12 comes out
   [x] Player (treading water)
   [x] Player (falling into water)
   [x] Boulders
-[ ] Sound Effects
-  [ ] Player treading water
-  [ ] Player-Boulder collision
-  [ ] Water splashes
-[/] Game Over state/screen
-  [/] Buttons and text (update score value)
-  [ ] White screen flash
-  [ ] Dimmed screen
-[ ] Shadows
-[ ] Buttons being unable to multi-click
+[x] Sound Effects
+  [x] Player treading water
+  [x] Player-Boulder collision
+  [x] Water splashes
+[x] Game Over state/screen
+  [x] Buttons and text (update score value)
+  [x] White screen flash
+  [x] Dimmed screen
+[x] Shadows
+[x] Buttons being unable to multi-click
+[ ] Music not resetting upon game resetting
+[ ] BGM/SFX toggles working
+[ ] Title screen music

@@ -257,24 +257,12 @@ end
 
 Util.json = {}
 
---[[
-
-local myTbl = {
-  name = 'Jason',
-  cool = 283,
-  cooler = 932.1829,
-  neat = true,
-  warui = false,
-  subTbl = {fruit='apple',vegetable='carrot'},
-  arr = {'a','b','c','d',1,2,3,true,{'z','x',{iwentin='deeper'}}}
-}
-
---]]
-
 -- Serializes a table into a standard JSON string.
 -- @param {table} tbl The table to serialize.
+-- @param {boolean} prettyPrint Formats the output nicely with tabs and lines.
+-- @param {number} numSpaces How many spaces should be used for a tab.
 -- @returns {string} A JSON string representing the table.
-function Util.json.serialize(tbl, prettyPrint, numSpaces)
+function Util.json.encode(tbl, prettyPrint, numSpaces)
   
   function serializeValue(val, key, indent, tab, newline)
     local str = ''
@@ -289,9 +277,9 @@ function Util.json.serialize(tbl, prettyPrint, numSpaces)
       str = str .. val .. ','
     elseif (type(val) == 'string') then
       -- Escape characters
-      val = val:gsub('"', '\"')    -- Double quote
       val = val:gsub('\\', '\\\\') -- Backslash
       val = val:gsub('/', '\\/')    -- Forward slash
+      val = val:gsub('"', '\\"')    -- Double quote
       val = val:gsub('\b', '\\b')  -- Backspace
       val = val:gsub('\f', '\\f')  -- Form feed
       val = val:gsub('\n', '\\n')  -- Newline
@@ -354,20 +342,175 @@ function Util.json.serialize(tbl, prettyPrint, numSpaces)
   local newline = ''
   if (prettyPrint) then
     tab = string.rep(' ', numSpaces)
-    tab = '\t'
+    -- tab = '\t'
     newline = '\n'
   end
   
   return serializeTable(tbl, indent, tab, newline)
 end
 
--- Parses a standard JSON string into a table.
--- @param {string} json The JSON string to parse.
--- @returns {table} A table parsed from the JSON string.
-function Util.json.parse(json)
-  json = json:gsub('\n', '')
-  json = json:gsub('\t', '')
-  print(json)
+-- Deserializes a standard JSON string into a table.
+-- @param {string} json The JSON string to deserialize.
+-- @returns {string} A table parsed from the JSON string.
+function Util.json.decode(json)
+  function unescapeChar(str)
+    if     (str == '\\"')  then str = '"'       -- Double quote
+    elseif (str == '\\b')  then str = '\b'      -- Backspace
+    elseif (str == '\\f')  then str = '\f'      -- Form feed
+    elseif (str == '\\n')  then str = '\n'      -- Newline
+    elseif (str == '\\r')  then str = '\r'      -- Carriage return
+    elseif (str == '\\t')  then str = '\t'      -- Tab
+    elseif (str == '\\/')  then str = '/'       -- Forward slash
+    elseif (str == '\\\\') then str = '\\' end  -- Backslash
+    return str
+  end
+  
+  function parseValue(json, index)
+    local val = ''
+    local ignoreChar = false -- Used to ignore second part of escape chars
+    local isString = false   -- Used to handle quoted strings
+    
+    -- Check if value-to-be-parsed is a string (quotes must be accounted for)
+    if (json:sub(index, index) == '"') then
+      isString = true
+      index = index + 1
+    end
+    
+    -- Iterate until we parse the entire value
+    for i = index, #json do
+      local c = json:sub(i, i)
+      index = index + 1
+      
+      -- Current char is part of an escape character and was previously handled
+      if (ignoreChar) then
+        ignoreChar = false
+        goto continue
+      end
+      
+      -- Terminate parsing if we've hit a JSON-structure character
+      if (
+        (isString and c == '"')
+        or (not isString and (c == ' ' or c == ','))
+      ) then
+        break
+      -- Terminate parsing if we've hit the end of an array or object
+      elseif (not isString and (c == ']' or c == '}')) then
+        index = index - 1
+        break
+      -- Parse next 2 characters if an escape character was found
+      elseif (c == '\\') then
+        -- print('ESCAPE!', json:sub(i, i+4))
+        val = val .. unescapeChar(c..json:sub(i+1, i+1))
+        ignoreChar = true
+      -- Parse normal character
+      else
+        val = val .. c
+      end
+      
+      ::continue::
+    end
+    
+    -- If value is not a string, then convert it to the correct type
+    if (not isString) then
+      if     (val == 'true')  then val = true
+      elseif (val == 'false') then val = false
+      else                         val = tonumber(val) end
+    end
+    
+    return val, index
+  end
+  
+  function deserializeJson(json, index)
+    local state = ''         -- Used to branch parsing of keys vs values
+    local tableType = ''     -- Used to handle parsing objects (keyed) vs arrays
+    local index = index or 1 -- The current parsing position of the JSON string
+    local data = {}          -- Stores the parsed data
+    
+    -- Get rid of formatting-related line breaks and tabs
+    json = json:gsub('\n', '')
+    json = json:gsub('\t', '')
+    
+    -- Determine whether we're parsing an object or an array
+    local firstChar = json:sub(index, index)
+    if (firstChar == '{') then
+      tableType = 'object'
+      state = 'findKey'
+    elseif (firstChar == '[') then
+      tableType = 'array'
+      state = 'findValue'
+    else
+      -- TODO: Throw error
+    end
+    
+    
+    -- print('first:', firstChar)
+    
+    index = index + 1
+    
+    local currentKey = ''   -- Stores a parsed key (if collection is an object)
+    local currentValue = '' -- Stores a parsed value
+    
+    -- Iterate until we're done parsing current array/object
+    for i = index, #json do
+      -- Get character at this index
+      local c = json:sub(i, i)
+      
+      -- Ignore irrelevant characters
+      if (c == ' ' or c == ':' or c == ',' or i < index) then goto continue end
+
+      if (c == '}' or c == ']') then
+        -- print('exiting...')
+        -- print('char', c)
+        -- print('loopidx', i)
+        -- print('ouridx', index)
+        -- print(json:sub(i))
+        -- Exit out of current array/object
+        index = i + 1
+        break
+      end
+      
+      -- We're searching for a key...
+      if (state == 'findKey') then
+        if (c == '"') then
+          -- Parse key
+          currentKey, index = parseValue(json, i)
+          -- print('key:', currentKey)
+          
+          -- Indicate we'll look for a value next time
+          state = 'findValue'
+        end
+      -- We're searching for a value...
+      elseif (state == 'findValue') then
+        -- Parse value
+        if (c == '{' or c == '[') then
+          -- Recurse if we've found an array/object
+          currentValue, index = deserializeJson(json, i)
+        else
+          -- Parse value normally
+          currentValue, index = parseValue(json, i)
+        end
+        -- print('val:', currentValue)
+        
+        -- Store into data
+        if (tableType == 'object') then
+          data[currentKey] = currentValue
+          state = 'findKey'
+        elseif (tableType == 'array') then
+          table.insert(data, currentValue)
+        end
+        
+        -- Reset current key/value
+        currentKey = ''
+        currentValue = ''
+      end
+      
+      ::continue::
+    end
+    
+    return data, index
+  end
+  
+  return deserializeJson(json)
 end
 
 -- -----------------------------------------------------------------------------

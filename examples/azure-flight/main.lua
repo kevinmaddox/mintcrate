@@ -158,6 +158,10 @@ function love.load()
     sfxOn = true
   }
   
+  -- Load previously-saved high score
+  local loadedData = mint:loadData('hiscore')
+  globals.highScore = loadedData.highScore or 0
+  
   -- Loading complete
   mint:ready()
 end

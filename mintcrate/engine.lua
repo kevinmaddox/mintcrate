@@ -1020,12 +1020,22 @@ end
 -- Methods for storing and loading data
 -- -----------------------------------------------------------------------------
 
+-- Saves a table of game data to a JSON file to the user's app data folder.
+-- @param {string} filename Name of the JSON file (without file extension).
+-- @param {data} Table of data to encode and save as JSON data.
 function Engine:saveData(filename, data)
-  
+  local json = self.util.json.encode(data)
+  love.filesystem.write(filename..'.json', json)
 end
 
+-- Loads a table of game data from a JSON file from the user's app data folder.
+-- @param {string} filename Name of the JSON file (without file extension).
+-- @returns {table} Decoded JSON data, stored in a table.
 function Engine:loadData(filename)
-  
+  local json = love.filesystem.read(filename..'.json')
+  local data = {}
+  if (json ~= nil) then data = self.util.json.decode(json) end
+  return data
 end
 
 -- -----------------------------------------------------------------------------
