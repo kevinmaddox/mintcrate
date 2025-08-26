@@ -39,6 +39,7 @@ function Entity:_getInstanceIndex(entityTable)
 end
 
 -- Removes the entity from the room and informs the engine to stop managing it.
+-- @returns {nil} This can be used to dereference the instance via assignment.
 function Entity:destroy()
   table.remove(self._instances, self:_getInstanceIndex(self._instances))
   table.remove(self._drawOrder, self:_getInstanceIndex(self._drawOrder))
@@ -46,6 +47,8 @@ function Entity:destroy()
   return nil
 end
 
+-- Checks whether the entity has been previously destroyed.
+-- @returns {boolean} Whether the entity was previously removed from the engine.
 function Entity:exists()
   return not self._wasDestroyed
 end

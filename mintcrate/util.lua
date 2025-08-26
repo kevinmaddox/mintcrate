@@ -150,6 +150,21 @@ function Util.table.count(tbl)
   return c
 end
 
+-- Checks whether a table resembles an array (numeric+sequential keys).
+-- @param {table} tbl The table to check.
+function Util.table.matchesArrayPattern(tbl)
+  local i = 0
+  local isArray = true
+  for _,__ in pairs(tbl) do
+    i = i + 1
+    if tbl[i] == nil then
+      isArray = false
+      break
+    end
+  end
+  return isArray
+end
+
 -- -----------------------------------------------------------------------------
 -- String-related methods
 -- -----------------------------------------------------------------------------
@@ -234,6 +249,125 @@ function Util.string.padRight(str, length, padChar)
   str = tostring(str)
   while string.len(str) < length do str = str .. padChar end
   return str
+end
+
+-- -----------------------------------------------------------------------------
+-- JSON-related methods
+-- -----------------------------------------------------------------------------
+
+Util.json = {}
+
+--[[
+
+local myTbl = {
+  name = 'Jason',
+  cool = 283,
+  cooler = 932.1829,
+  neat = true,
+  warui = false,
+  subTbl = {fruit='apple',vegetable='carrot'},
+  arr = {'a','b','c','d',1,2,3,true,{'z','x',{iwentin='deeper'}}}
+}
+
+--]]
+
+-- Serializes a table into a standard JSON string.
+-- @param {table} tbl The table to serialize.
+-- @returns {string} A JSON string representing the table.
+function Util.json.serialize(tbl, prettyPrint, numSpaces)
+  
+  function serializeValue(val, key, indent, tab, newline)
+    local str = ''
+    
+    str = str .. newline .. str.rep(tab, indent)
+    
+    if (key) then str = str .. '"'..key..'":' end
+    
+    if (type(val) == 'boolean') then
+      str = str .. tostring(val) .. ','
+    elseif (type(val) == 'number') then
+      str = str .. val .. ','
+    elseif (type(val) == 'string') then
+      -- Escape characters
+      val = val:gsub('"', '\"')    -- Double quote
+      val = val:gsub('\\', '\\\\') -- Backslash
+      val = val:gsub('/', '\\/')    -- Forward slash
+      val = val:gsub('\b', '\\b')  -- Backspace
+      val = val:gsub('\f', '\\f')  -- Form feed
+      val = val:gsub('\n', '\\n')  -- Newline
+      val = val:gsub('\r', '\\r')  -- Carriage return
+      val = val:gsub('\t', '\\t')  -- Tab
+      
+      str = str .. '"'..val..'"' .. ','
+    elseif (type(val) == 'table') then
+      str = str .. serializeTable(val, indent, tab, newline) .. ','
+    else
+      -- TODO: Throw error
+    end
+    
+    return str
+  end
+  
+  function serializeTable(tbl, indent, tab, newline)
+    -- Prepare for serialization
+    local str = ''
+    
+    -- Determine whether table matches the pattern of a JS array or object
+    local isArray = Util.table.matchesArrayPattern(tbl)
+    
+    -- Begin array/object
+    if (isArray) then
+      str = str .. "["
+    else
+      str = str .. "{"
+    end
+    
+    indent = indent + 1
+    
+    -- Serialize value
+    if (Util.table.matchesArrayPattern(tbl)) then
+      for _, val in ipairs(tbl) do str = str .. serializeValue(val, nil, indent, tab, newline) end
+    else
+      for key, val in pairs(tbl) do str = str .. serializeValue(val, key, indent, tab, newline) end
+    end
+    
+    -- Remove last comma
+    str = str:sub(1, -2)
+    
+    indent = indent - 1
+    
+    -- End array/object
+    if (isArray) then
+      str = str .. newline .. str.rep(tab, indent) .. "]"
+    else
+      str = str .. newline .. str.rep(tab, indent) .. "}"
+    end
+    
+    return str
+  end
+  
+  local prettyPrint = prettyPrint or false
+  local numSpaces = numSpaces or 2
+  
+  local indent = 0
+  local tab = ''
+  local newline = ''
+  if (prettyPrint) then
+    tab = string.rep(' ', numSpaces)
+    tab = '\t'
+    newline = '\n'
+  end
+  
+  return serializeTable(tbl, indent, tab, newline)
+end
+
+-- Parses a standard JSON string into a table.
+-- @param {string} json The JSON string to parse.
+-- @returns {table} A table parsed from the JSON string.
+function Util.json.parse(json)
+  json = json:gsub('\n', '')
+  json = json:gsub('\t', '')
+  print(json)
 end
 
 -- -----------------------------------------------------------------------------

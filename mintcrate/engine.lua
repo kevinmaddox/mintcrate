@@ -798,6 +798,9 @@ function Engine:clearFunction(callback)
   end
 end
 
+-- Fires a function only once.
+-- @param {function} callback The function to fire only once.
+-- @param {*} ... Any number of arguments to pass to the callback.
 function Engine:fireOnce(callback, ...)
   args = {...}
   
@@ -805,6 +808,7 @@ function Engine:fireOnce(callback, ...)
   
   for _, f in ipairs(self._fireOnceFunctions) do
     if (callback == f) then exists = true end
+    break
   end
   
   if (not exists) then
@@ -1010,6 +1014,18 @@ function Engine:centerCamera(x, y)
     x - (self._baseWidth / 2),
     y - (self._baseHeight / 2)
   )
+end
+
+-- -----------------------------------------------------------------------------
+-- Methods for storing and loading data
+-- -----------------------------------------------------------------------------
+
+function Engine:saveData(filename, data)
+  
+end
+
+function Engine:loadData(filename)
+  
 end
 
 -- -----------------------------------------------------------------------------
