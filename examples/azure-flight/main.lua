@@ -136,8 +136,7 @@ function love.load()
   -- Music
   mint:defineMusic({
     -- {name = 'select-your-whatever-ex'},
-    {name = 'tangent'},
-    {name = 'snow-forest'}
+    {name = 'tangent'}
   })
   
   -- Sounds
