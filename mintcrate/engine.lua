@@ -477,6 +477,9 @@ function Engine:defineMusic(data)
     end
     
     self._data.music[item.name] = music
+    
+    -- Default the "currently-playing" track to the first track loaded
+    if (not self._currentMusic) then self._currentMusic = item.name end
   end
 end
 
@@ -731,8 +734,8 @@ function Engine:_changeRoom(room)
   end
   
   -- Stop all audio.
-  self:stopAllSounds()
-  self:stopMusic()
+  -- self:stopAllSounds()
+  -- self:stopMusic()
   
   -- Reset camera.
   self._camera = {x = 0, y = 0}
@@ -1099,15 +1102,40 @@ function Engine:sys_update()
   end
   
   -- Loop music
-  if (
-    self._currentMusic and
-    self._currentMusic.source:isPlaying() and
-    self._currentMusic.loop and
-    type(self._currentMusic.loopStart) ~= "nil" and
-    type(self._currentMusic.loopEnd) ~= "nil" and
-    self._currentMusic.source:tell("seconds") >= self._currentMusic.loopEnd
-  ) then
-    self._currentMusic.source:seek(self._currentMusic.loopStart, 'seconds')
+  -- Handle music
+  for _, track in pairs(self._data.music) do
+    -- Handle looping for non-tracker-module music formats
+    if (
+      track.source:isPlaying()
+      and track.loop
+      and type(track.loopStart) ~= "nil"
+      and type(track.loopEnd) ~= "nil"
+      and track.source:tell("seconds") >= track.loopEnd
+    ) then
+      track.source:seek(track.loopStart, "seconds")
+    end
+    
+    -- Handle fade-ins
+    if (track.fadeInLength and track.source:isPlaying()) then
+      local newVol =
+        math.min(1, track.source:getVolume() + (1 / track.fadeInLength))
+      track.source:setVolume(newVol)
+      if (track.source:getVolume() >= 1) then
+        print('fade in done:', _)
+        track.fadeInLength = nil 
+      end
+    -- Handle fade-outs
+    elseif (track.fadeOutLength and track.source:isPlaying()) then
+      local newVol =
+        math.max(0, track.source:getVolume() - (1 / track.fadeOutLength))
+      track.source:setVolume(newVol)
+      print(_, track.fadeOutLength, track.source:getVolume(), (1 / track.fadeOutLength), track.source:getVolume() - (1 / track.fadeOutLength), dec)
+      if (track.source:getVolume() <= 0.0001) then
+        print('fade out done:', _)
+        track.fadeOutLength = nil
+        love.audio.stop(track.source)
+      end
+    end
   end
   
   -- Handle delayed functions
@@ -2038,33 +2066,81 @@ function Engine:stopAllSounds()
   end
 end
 
--- Sets a music resource to be the active music track.
--- @param {string} musicName Name of the music resource (from defineMusic()).
-function Engine:setMusic(musicName)
-  self._currentMusic = self._data.music[musicName]
+-- Internal function for playing music.
+-- @param {string} trackName The name of the song to play (from defineMusic).
+-- @param {number} fadeLength How much to fade in the song, in frames.
+function Engine:_playMusic(trackName, fadeLength)
+  local track = self._data.music[trackName]
+  local fadeLength = fadeLength or 0
+  
+  love.audio.stop(track.source)
+  track.fadeInLength = nil
+  track.fadeOutLength = nil
+  
+  if (fadeLength == 0) then
+    track.source:setVolume(1)
+  else
+    track.source:setVolume(0)
+    track.fadeInLength = fadeLength
+  end
+  
+  love.audio.play(track.source)
+end
+
+-- Internal function for stopping music.
+-- @param {string} trackName The name of the song to play (from defineMusic).
+-- @param {number} fadeLength How much to fade out the song, in frames.
+function Engine:_stopMusic(trackName, fadeLength)
+  local track = self._data.music[trackName]
+  local fadeLength = fadeLength or 0
+  
+  track.fadeInLength = nil
+  track.fadeOutLength = nil
+  
+  if (fadeLength == 0) then
+    love.audio.stop(track.source)
+  else
+    track.fadeOutLength = fadeLength
+  end
 end
 
 -- Starts playback of the currently-set music track.
-function Engine:playMusic()
-  if (self._currentMusic) then
-    love.audio.stop(self._currentMusic.source)
-    love.audio.play(self._currentMusic.source)
+-- @param {string} trackName The name of the song to play (from defineMusic).
+-- @param {number} fadeLength How much to fade/xfade in the song, in frames.
+function Engine:playMusic(trackName, fadeLength)
+  local fadeLength = fadeLength or 0
+  
+  local oldTrack = self._data.music[self._currentMusic]
+  local newTrack = self._data.music[trackName]
+  
+  if (self._currentMusic ~= trackName) then
+    self:_playMusic(trackName, fadeLength)
+    self:_stopMusic(self._currentMusic, fadeLength)
+  elseif (oldTrack.fadeOutLength or not oldTrack.source:isPlaying()) then
+    self:_playMusic(trackName, fadeLength)
   end
+  
+  self._currentMusic = trackName
 end
 
 -- Pauses playback of the currently-set music track.
 function Engine:pauseMusic()
-  if (self._currentMusic) then love.audio.pause(self._currentMusic.source) end
+  local track = self._data.music[self._currentMusic]
+  love.audio.pause(track.source)
 end
 
 -- Resumes playback of the currently-set music track.
 function Engine:resumeMusic()
-  if (self._currentMusic) then love.audio.resume(self._currentMusic.source) end
+  local track = self._data.music[self._currentMusic]
+  if (not track.source:isPlaying()) then
+    love.audio.play(self._data.music[self._currentMusic].source)
+  end
 end
 
 -- Stops playback of the currently-set music track.
-function Engine:stopMusic()
-  if (self._currentMusic) then love.audio.stop(self._currentMusic.source) end
+-- @param {number} fadeLength How much to fade out the song, in frames.
+function Engine:stopMusic(fadeLength)
+  self:_stopMusic(self._currentMusic, fadeLength)
 end
 
 -- -----------------------------------------------------------------------------

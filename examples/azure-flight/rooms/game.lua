@@ -25,8 +25,8 @@ function Game:new()
   
   mint:addBackdrop('mountains')
   
-  mint:setMusic('tangent')
-  mint:playMusic()
+  -- mint:setMusic('tangent')
+  mint:playMusic('tangent')
   
   o.WATER_LINE_Y = 156
   o.waterLine = mint:addActive('water', 0, 156)
