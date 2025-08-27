@@ -120,6 +120,11 @@ function Engine:new(
   o._startingRoom = startingRoom
   o._isChangingRooms = false
   
+  -- Music/SFX global volume levels
+  o.masterBgmVolume = 1
+  o.masterSfxVolume = 1
+  o.masterBgmPitch = 1
+  
   -- Game data
   o._data = {
     actives = {},
@@ -443,8 +448,13 @@ function Engine:defineSounds(data)
       end
     end
     
+    local sound = {
+      source = love.audio.newSource(path, "static"),
+      volume = 1
+    }
+    
     -- Load sound
-    self._data.sounds[item.name] = love.audio.newSource(path, "static")
+    self._data.sounds[item.name] = sound
   end
 end
 
@@ -466,7 +476,8 @@ function Engine:defineMusic(data)
       source = love.audio.newSource(path, "stream"),
       loop = item.loop or false,
       loopStart = item.loopStart or nil,
-      loopEnd = item.loopEnd or nil
+      loopEnd = item.loopEnd or nil,
+      volume = 1
     }
     
     if (
@@ -1117,20 +1128,19 @@ function Engine:sys_update()
     
     -- Handle fade-ins
     if (track.fadeInLength and track.source:isPlaying()) then
-      local newVol =
-        math.min(1, track.source:getVolume() + (1 / track.fadeInLength))
-      track.source:setVolume(newVol)
-      if (track.source:getVolume() >= 1) then
+      track.volume = math.min(1, track.volume + (1 / track.fadeInLength))
+      track.source:setVolume(track.volume * self.masterBgmVolume)
+      print(track.volume)
+      if (track.volume >= 1) then
         print('fade in done:', _)
         track.fadeInLength = nil 
       end
     -- Handle fade-outs
     elseif (track.fadeOutLength and track.source:isPlaying()) then
-      local newVol =
-        math.max(0, track.source:getVolume() - (1 / track.fadeOutLength))
-      track.source:setVolume(newVol)
+      track.volume = math.max(0, track.volume - (1 / track.fadeOutLength))
+      track.source:setVolume(track.volume * self.masterBgmVolume)
       print(_, track.fadeOutLength, track.source:getVolume(), (1 / track.fadeOutLength), track.source:getVolume() - (1 / track.fadeOutLength), dec)
-      if (track.source:getVolume() <= 0.0001) then
+      if (track.volume <= 0.0001) then
         print('fade out done:', _)
         track.fadeOutLength = nil
         love.audio.stop(track.source)
@@ -2047,22 +2057,29 @@ end
 
 -- Plays a sound resource.
 -- @param {string} soundName Name of the sound resource (from defineSounds()).
+-- @param {table} options Optional sound properties.
+-- @param {number} options.volume Volume level, between 0 and 1.
+-- @param {number} options.pitch Pitch rate, between 0.1 and 30.
 function Engine:playSound(soundName, options)
   local options = options or {}
-  local volume = options.volume or 1
-  local pitch = options.pitch or 1
+  local volume = self.math.clamp((options.volume or 1), 0, 1)
+  local pitch = self.math.clamp((options.pitch or 1), 0.1, 30)
   
-  self._data.sounds[soundName]:setVolume(volume)
-  self._data.sounds[soundName]:setPitch(pitch)
+  local sound = self._data.sounds[soundName]
   
-  love.audio.stop(self._data.sounds[soundName])
-  love.audio.play(self._data.sounds[soundName])
+  sound.volume = volume
+  sound.source:setVolume(sound.volume * self.masterSfxVolume)
+  
+  sound.source:setPitch(pitch)
+  
+  love.audio.stop(sound.source)
+  love.audio.play(sound.source)
 end
 
 -- Stops any currently-playing sounds.
 function Engine:stopAllSounds()
-  for _, sound in ipairs(self._data.sounds) do
-    love.audio.stop(sound)
+  for _, sound in pairs(self._data.sounds) do
+    love.audio.stop(sound.source)
   end
 end
 
@@ -2078,9 +2095,11 @@ function Engine:_playMusic(trackName, fadeLength)
   track.fadeOutLength = nil
   
   if (fadeLength == 0) then
-    track.source:setVolume(1)
+    track.volume = 1
+    track.source:setVolume(track.volume * self.masterBgmVolume)
   else
-    track.source:setVolume(0)
+    track.volume = 0
+    track.source:setVolume(track.volume * self.masterBgmVolume)
     track.fadeInLength = fadeLength
   end
   
@@ -2101,6 +2120,51 @@ function Engine:_stopMusic(trackName, fadeLength)
     love.audio.stop(track.source)
   else
     track.fadeOutLength = fadeLength
+  end
+end
+
+-- Gets the current master/global music volume.
+-- @returns {number} The current master/global music volume.
+function Engine:getMasterMusicVolume()
+  return self.masterBgmVolume
+end
+
+-- Gets the current master/global sound effect volume.
+-- @returns {number} The current master/global sound effect volume.
+function Engine:getMasterSoundVolume()
+  return self.masterSfxVolume
+end
+
+-- Sets the current master/global music volume.
+-- @param {number} newVolume New volume level, between 0 and 1.
+function Engine:setMasterMusicVolume(newVolume)
+  self.masterBgmVolume = self.math.clamp(newVolume, 0, 1)
+  for _, track in pairs(self._data.music) do
+    track.source:setVolume(track.volume * self.masterBgmVolume)
+  end
+end
+
+-- Sets the current master/global sound effect volume.
+-- @param {number} newVolume New volume level, between 0 and 1.
+function Engine:setMasterSoundVolume(newVolume)
+  self.masterSfxVolume = self.math.clamp(newVolume, 0, 1)
+  for _, sound in pairs(self._data.sounds) do
+    sound.source:setVolume(sound.volume * self.masterSfxVolume)
+  end
+end
+
+-- Gets the current master/global music pitch rate.
+-- @returns {number} The current master/global music pitch rate.
+function Engine:getMasterMusicPitch()
+  return self.masterBgmPitch
+end
+
+-- Sets the current master/global music pitch rate.
+-- @param {number} newVolume New pitch rate, between 0.1 and 30.
+function Engine:setMasterMusicPitch(newPitch)
+  self.masterBgmPitch = self.math.clamp(newPitch, 0.1, 30)
+  for _, track in pairs(self._data.music) do
+    track.source:setPitch(self.masterBgmPitch)
   end
 end
 

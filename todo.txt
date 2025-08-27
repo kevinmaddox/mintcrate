@@ -34,14 +34,14 @@ MintCrate To-do List
 [x] Make action points accept table values to have multiple points per a single animation
 [x] Room fade transitions
 [x] Option to fade out when quitting
-[ ] Accept array of mouse buttons or keyboard inputs or gamepad inputs for input checks
-[ ] Engine setting to turn BGM/SFX on/off (and adjust volume, perhaps?)
-[ ] Option to fade audio when fading out a room?
+[x] Engine setting to turn BGM/SFX on/off (and adjust volume, perhaps?)
+[x] Bug - Sounds not stopping when changing rooms (stopAllSounds not working?)
 [ ] Debug collision mask rectangle looks jumpy when moving
-[ ] Bug - Sounds not stopping when changing rooms (stopAllSounds not working?)
-[ ] Add validation to functions
-[ ] Saving/loading data
-  - Figure out a good format
+[ ] Accept array of mouse buttons or keyboard inputs or gamepad inputs for input checks(?)
+[ ] Add validation and error-checking to functions
+[ ] Option to fade audio when fading out a room?
+[/] Saving/loading data
+  [ ] Finish final touches on JSON parser
 [ ] Think really hard about function names (i.e. setTextContent should just be setText)
 
 Decisions
@@ -73,6 +73,7 @@ For when Love 12 comes out
   [x] Dimmed screen
 [x] Shadows
 [x] Buttons being unable to multi-click
-[ ] Music not resetting upon game resetting
-[ ] BGM/SFX toggles working
+[x] Music not resetting upon game resetting
+[t] BGM/SFX toggles working
 [ ] Title screen music
+[ ] Optimization
