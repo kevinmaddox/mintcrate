@@ -1,7 +1,7 @@
 Button = {}
 
 function Button:new(x, y, size, text, toggleable, clickedCallback, oneClickOnly,
-  keyboardKey
+  keyboardKey, startEnabled
 )
   local o = {}
   setmetatable(o, self)
@@ -21,6 +21,7 @@ function Button:new(x, y, size, text, toggleable, clickedCallback, oneClickOnly,
   
   o.toggleable = toggleable
   o.enabled = true
+  if (startEnabled == false) then o.enabled = false end
   
   o.oneClickOnly = oneClickOnly or false
   o.wasClicked = false

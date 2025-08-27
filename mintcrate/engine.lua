@@ -188,10 +188,11 @@ end
 
 -- Terminates the application.
 -- @param {boolean} fadeBeforeQuitting Trigger's the Room's fadeout first.
-function Engine:quit(fadeBeforeQuitting)
+-- @param {boolean} fadeMusic Fades the music with the visual fade-out.
+function Engine:quit(fadeBeforeQuitting, fadeMusic)
   -- Trigger the fade-out effect, then change room when it's done.
   if fadeBeforeQuitting then
-    self:_triggerRoomFade('fadeOut', love.event.quit)
+    self:_triggerRoomFade('fadeOut', love.event.quit, fadeMusic)
   else
     love.event.quit()
   end
@@ -663,7 +664,15 @@ end
 
 -- Changes the currently-active scene/level of the game (game state).
 -- @param {Room} room The room to load.
-function Engine:changeRoom(room)
+-- @param {table} options Optional room-changing properties
+-- @param {boolean} options.fadeMusic Fades the music with the visual fade-out.
+-- @param {boolean} options.persistAudio Prevents the audio from stopping.
+function Engine:changeRoom(room, options)
+  local options = options or {}
+  local fadeMusic = options.fadeMusic or false
+  local persistAudio = options.persistAudio or false
+  if (fadeMusic and persistAudio) then fadeMusic = false end
+  
   -- Only change room if we're not currently transitioning to another one.
   if not self._isChangingRooms then
     -- Indicate we're now changing rooms.
@@ -673,11 +682,11 @@ function Engine:changeRoom(room)
     if self._currentRoom and self._currentRoom._fadeConf.fadeOut.enabled then
       -- Trigger the fade-out effect, then change room when it's done.
       self:_triggerRoomFade('fadeOut', function()
-        self:_changeRoom(room)
-      end)
+        self:_changeRoom(room, persistAudio)
+      end, fadeMusic)
     -- Otherwise, simply change room.
     else
-      self:_changeRoom(room)
+      self:_changeRoom(room, persistAudio)
     end
   end
 end
@@ -685,12 +694,17 @@ end
 -- Triggers a fade-in/out effect for the Room, then fires a specified function.
 -- @param {string} fadeType The type of fade ("fadeIn", "fadeOut").
 -- @param {function} finishedCallback The function to fire after fading is done.
-function Engine:_triggerRoomFade(fadeType, finishedCallback)
+-- @param {boolean} fadeMusic Fades the music with the visual fade-out.
+function Engine:_triggerRoomFade(fadeType, finishedCallback, fadeMusic)
   -- Calculate how long until we need to wait until we execute the callback.
   -- This value changes if we're in the midst of a fade-in.
   local totalDuration = self._currentRoom._fadeConf.fadeOut.fadeFrames
   totalDuration = totalDuration * (self._currentRoom._fadeLevel / 100)
   totalDuration = math.max(totalDuration, 0)
+  
+  -- Will be used to fade the music (if needed). We want it to fade before the
+  -- fade pauses.
+  local musicFadeDuration = totalDuration
   
   -- Include the number of frames to pause on.
   totalDuration =
@@ -726,6 +740,9 @@ function Engine:_triggerRoomFade(fadeType, finishedCallback)
   self:delayFunction(fadeDoneFunc, fadeConf.fadeFrames + fadeConf.pauseFrames)
   self._currentRoom._fadeDoneFunc = fadeDoneFunc
   
+  -- Fade music (if specified).
+  if (fadeMusic) then self:stopMusic(musicFadeDuration) end
+  
   -- Set delayed function to execute the callback
   if finishedCallback then
     self:delayFunction(finishedCallback, totalDuration)
@@ -734,7 +751,8 @@ end
 
 -- Internal function which actually performs the room change.
 -- @param {Room} room The room to load.
-function Engine:_changeRoom(room)
+-- @param {boolean} persistAudio Prevents the audio from stopping.
+function Engine:_changeRoom(room, persistAudio)
   -- Wipe all current entity instances, including draw order tables.
   for key, _ in pairs(self._instances) do
     self._instances[key] = {}
@@ -745,8 +763,10 @@ function Engine:_changeRoom(room)
   end
   
   -- Stop all audio.
-  -- self:stopAllSounds()
-  -- self:stopMusic()
+  if (not persistAudio) then
+    self:stopAllSounds()
+    self:stopMusic()
+  end
   
   -- Reset camera.
   self._camera = {x = 0, y = 0}

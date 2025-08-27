@@ -36,10 +36,10 @@ MintCrate To-do List
 [x] Option to fade out when quitting
 [x] Engine setting to turn BGM/SFX on/off (and adjust volume, perhaps?)
 [x] Bug - Sounds not stopping when changing rooms (stopAllSounds not working?)
+[x] Option to fade or persist audio when fading out a room
 [ ] Debug collision mask rectangle looks jumpy when moving
 [ ] Accept array of mouse buttons or keyboard inputs or gamepad inputs for input checks(?)
 [ ] Add validation and error-checking to functions
-[ ] Option to fade audio when fading out a room?
 [/] Saving/loading data
   [ ] Finish final touches on JSON parser
 [ ] Think really hard about function names (i.e. setTextContent should just be setText)

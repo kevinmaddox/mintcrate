@@ -143,7 +143,6 @@ function Game:update()
       boulder.hasGivenScore = false
       table.insert(self.boulders, boulder)
       self:repositionBoulder(boulder)
-      boulder:sendToBack()
       self:createShadow(boulder)
     end
     self.boulderSpawnTimer = self.boulderSpawnTimer - 1
@@ -297,8 +296,13 @@ function Game:update()
     end
     self.scoreDisplay:setTextContent(self.score)
     self.scoreDisplayHigh:setTextContent(self.score)
+    if (self.score > globals.highScore) then
+      self.scoreDisplay:hide()
+      self.scoreDisplayHigh:show()
+    end
     
     -- Rearrange draw orders
+    self.harpy:bringToFront()
     self.waterLine:bringToFront()
     for _, shadow in ipairs(self.shadows) do
       shadow:sendToBack()
@@ -342,11 +346,11 @@ function Game:update()
         'BEST '..globals.highScore, {alignment='center'})
       
       self.btnRetry = Button:new(56, 72, 128, 'RETRY', false, function()
-        mint:changeRoom(Game)
+        mint:changeRoom(Game, {persistAudio=true})
       end, true, 'up')
       
       self.btnMenu = Button:new(56, 96, 128, 'MENU', false, function()
-        mint:changeRoom(Title)
+        mint:changeRoom(Title, {fadeMusic=true})
       end, true, 'down')
     end
     

@@ -30,15 +30,17 @@ function Title:new()
     mint:changeRoom(Game)
   end, true, 'up')
   o.btnBgm = Button:new(56, 96, 64, 'BGM', true, function(enabled)
+    globals.bgmOn = enabled
     local vol = 1
     if (not enabled) then vol = 0 end
     mint:setMasterMusicVolume(vol)
-  end, false, 'left')
+  end, false, 'left', globals.bgmOn)
   o.btnSfx = Button:new(120, 96, 64, 'SFX', true, function(enabled)
+    globals.sfxOn = enabled
     local vol = 1
     if (not enabled) then vol = 0 end
     mint:setMasterSoundVolume(vol)
-  end, false, 'right')
+  end, false, 'right', globals.sfxOn)
   o.btnQuit = Button:new(56, 120, 128, 'QUIT', false, function()
     mint:quit(true)
   end, true, 'down')
