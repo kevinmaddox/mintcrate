@@ -47,7 +47,6 @@ function Active:new(instances, drawOrder, name, x, y, colliderShape,
   o._scaleY = 1
   o._flippedHorizontally = false
   o._flippedVertically = false
-  o._opacity = 1.0
   o._collider = {
     s = colliderShape,
     x = x + colliderOffsetX,
@@ -164,18 +163,6 @@ function Active:flipVertically(isFlipped)
   else
     self._flippedVertically = isFlipped
   end
-end
-
--- Returns the active's current opacity value.
--- @returns {number} Opacity value.
-function Active:getOpacity()
-  return self._opacity
-end
-
--- Sets the active's opacity value.
--- @param {number} opacity The new opacity value (0.0 - 1.0) (1.0 is opaque).
-function Active:setOpacity(opacity)
-  self._opacity = opacity
 end
 
 -- -----------------------------------------------------------------------------

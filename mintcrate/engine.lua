@@ -76,9 +76,6 @@ function Engine:new(
   -- Functions that get called after a delay
   self._queuedFunctions = {}
   
-  -- Functions that get fired only once
-  self._fireOnceFunctions = {}
-  
   -- Stores input handlers for managing player input
   o._inputHandlers = {}
   o._keystates = {}
@@ -773,12 +770,10 @@ function Engine:_changeRoom(room, persistAudio)
   self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
   self._cameraIsBound = false
   
-  -- Clear out delayed functions.
+  -- Clear out delayed/repeated functions.
   for _, item in ipairs(self._queuedFunctions) do
     item.cancelled = true
   end
-  
-  self._fireOnceFunctions = {}
   
   -- Create new room.
   self._currentRoom = room:new()
@@ -829,25 +824,6 @@ function Engine:clearFunction(callback)
     if item.callback == callback then
       item.cancelled = true
     end
-  end
-end
-
--- Fires a function only once.
--- @param {function} callback The function to fire only once.
--- @param {*} ... Any number of arguments to pass to the callback.
-function Engine:fireOnce(callback, ...)
-  args = {...}
-  
-  local exists = false
-  
-  for _, f in ipairs(self._fireOnceFunctions) do
-    if (callback == f) then exists = true end
-    break
-  end
-  
-  if (not exists) then
-    table.insert(self._fireOnceFunctions, callback)
-    callback(unpack(args))
   end
 end
 
@@ -1224,11 +1200,14 @@ function Engine:sys_draw()
   
   -- Draw Backdrops
   for _, backdrop in ipairs(self._drawOrders.backdrops) do
-    if (not backdrop._isVisible) then goto DrawBackdropDone end
+    if (not backdrop._isVisible or backdrop:getOpacity() == 0) then
+      goto DrawBackdropDone
+    end
     
     local image = self._data.backdrops[backdrop._name].image
     local mosaic = self._data.backdrops[backdrop._name].mosaic
     
+    love.graphics.setColor(1, 1, 1, backdrop:getOpacity())
     if not mosaic then
       love.graphics.draw(image, backdrop._x, backdrop._y, 0,
         backdrop._scaleX, backdrop._scaleY)
@@ -1236,6 +1215,7 @@ function Engine:sys_draw()
       love.graphics.draw(image, backdrop._quad, backdrop._x, backdrop._y, 0,
         backdrop._scaleX, backdrop._scaleY)
     end
+    love.graphics.setColor(1, 1, 1, 1)
     
     ::DrawBackdropDone::
   end
@@ -1278,7 +1258,7 @@ function Engine:sys_draw()
       
       active:_animate(animation)
       
-      if active:getOpacity() == 0 then
+      if (active:getOpacity() == 0) then
         goto DrawActiveDone
       end
       
@@ -1303,8 +1283,11 @@ function Engine:sys_draw()
     -- Draw Paragraphs
     elseif (entity._entityType == 'paragraph') then
       local paragraph = entity
-      if (not paragraph._isVisible) then goto DrawParagraphDone end
+      if (not paragraph._isVisible or paragraph:getOpacity() == 0) then
+        goto DrawParagraphDone
+      end
       
+      love.graphics.setColor(1, 1, 1, paragraph:getOpacity())
       self:_drawText(
         paragraph:_getTextLines(),
         self._data.fonts[paragraph:_getName()],
@@ -1314,6 +1297,7 @@ function Engine:sys_draw()
         paragraph:_getWordWrap(),
         paragraph:_getAlignment()
       )
+      love.graphics.setColor(1, 1, 1, 1)
       
       ::DrawParagraphDone::
     end

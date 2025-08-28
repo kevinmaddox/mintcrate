@@ -18,6 +18,7 @@ function Entity:new()
   
   o._wasDestroyed = false
   o._isVisible = true
+  o._opacity = 1.0
   
   return o
 end
@@ -145,6 +146,18 @@ end
 -- @returns {boolean} Whether the entity is visible or not.
 function Entity:isVisible()
   return self._isVisible
+end
+
+-- Returns the active's current opacity value.
+-- @returns {number} Opacity value.
+function Entity:getOpacity()
+  return self._opacity
+end
+
+-- Sets the active's opacity value.
+-- @param {number} opacity The new opacity value (0.0 - 1.0) (1.0 is opaque).
+function Entity:setOpacity(opacity)
+  self._opacity = opacity
 end
 
 -- -----------------------------------------------------------------------------

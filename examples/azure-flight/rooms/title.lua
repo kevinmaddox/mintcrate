@@ -13,6 +13,8 @@ function Title:new()
   end
   self:configureFadeOut(15, 30, {r=0,g=0,b=0})
   
+  mint:playMusic('select-your-whatever-2k15')
+  
   o.bg = mint:addBackdrop('menu-bg', 0, 0, {width=272, height=192})
   o.bg:setX(-o.bg:getTextureWidth())
   o.bg:setY(-o.bg:getTextureHeight())
@@ -27,7 +29,7 @@ function Title:new()
   
   o.btnStart = Button:new(56, 72, 128, 'PLAY', false, function()
     globals.enteringFromSplashScreen = false
-    mint:changeRoom(Game)
+    mint:changeRoom(Game, {fadeMusic=true})
   end, true, 'up')
   o.btnBgm = Button:new(56, 96, 64, 'BGM', true, function(enabled)
     globals.bgmOn = enabled

@@ -43,6 +43,7 @@ MintCrate To-do List
 [/] Saving/loading data
   [ ] Finish final touches on JSON parser
 [ ] Think really hard about function names (i.e. setTextContent should just be setText)
+[ ] Revamp system for queueing functions, delaying them, and firing them only once
 
 Decisions
 - none

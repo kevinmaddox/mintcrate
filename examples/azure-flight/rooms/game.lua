@@ -25,7 +25,6 @@ function Game:new()
   
   mint:addBackdrop('mountains')
   
-  -- mint:setMusic('tangent')
   mint:playMusic('tangent')
   
   o.WATER_LINE_Y = 156
@@ -144,6 +143,7 @@ function Game:update()
       table.insert(self.boulders, boulder)
       self:repositionBoulder(boulder)
       self:createShadow(boulder)
+      boulder:sendToBack()
     end
     self.boulderSpawnTimer = self.boulderSpawnTimer - 1
     
@@ -302,7 +302,8 @@ function Game:update()
     end
     
     -- Rearrange draw orders
-    self.harpy:bringToFront()
+    self.scoreDisplay:sendToBack()
+    self.scoreDisplayHigh:sendToBack()
     self.waterLine:bringToFront()
     for _, shadow in ipairs(self.shadows) do
       shadow:sendToBack()

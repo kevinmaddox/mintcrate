@@ -14,9 +14,9 @@ require("objects.watersplash")
 function love.load()
   mint = MintCrate:new(
     240, 160,
-    -- Splash,
+    Splash,
     -- Title,
-    Game,
+    -- Game,
     {
       windowScale = 2,
       windowTitle = "MintCrate Example - Azure Flight",
@@ -135,7 +135,7 @@ function love.load()
   
   -- Music
   mint:defineMusic({
-    -- {name = 'select-your-whatever-ex'},
+    {name = 'select-your-whatever-2k15', loop=true, loopStart=51.206, loopEnd=92.810},
     {name = 'tangent'}
   })
   
