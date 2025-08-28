@@ -133,6 +133,18 @@ function Active:setScaleY(scaleY)
   self._scaleY = scaleY
 end
 
+-- Scales the active horizontally by a specified amount.
+-- @param {number} scaleX The amount to scale horizontally by.
+function Active:scaleX(scaleX)
+  self._scaleX = self._scaleX + scaleX
+end
+
+-- Scales the active vertically by a specified amount.
+-- @param {number} scaleY The amount to scale vertically by.
+function Active:scaleY(scaleY)
+  self._scaleY = self._scaleY + scaleY
+end
+
 -- Returns whether the active is flipped horizontally.
 -- @returns {boolean} Horizontal-flip state.
 function Active:isFlippedHorizontally()
