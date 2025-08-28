@@ -1148,20 +1148,20 @@ function Engine:sys_update()
     
     -- Handle fade-ins
     if (track.fadeInLength and track.source:isPlaying()) then
+      -- Fade audio
       track.volume = math.min(1, track.volume + (1 / track.fadeInLength))
       track.source:setVolume(track.volume * self.masterBgmVolume)
-      print(track.volume)
+      -- Complete fade
       if (track.volume >= 1) then
-        print('fade in done:', _)
-        track.fadeInLength = nil 
+        track.fadeInLength = nil
       end
     -- Handle fade-outs
     elseif (track.fadeOutLength and track.source:isPlaying()) then
+      -- Fade audio
       track.volume = math.max(0, track.volume - (1 / track.fadeOutLength))
       track.source:setVolume(track.volume * self.masterBgmVolume)
-      print(_, track.fadeOutLength, track.source:getVolume(), (1 / track.fadeOutLength), track.source:getVolume() - (1 / track.fadeOutLength), dec)
+      -- Complete fade
       if (track.volume <= 0.0001) then
-        print('fade out done:', _)
         track.fadeOutLength = nil
         love.audio.stop(track.source)
       end
@@ -2110,14 +2110,17 @@ function Engine:_playMusic(trackName, fadeLength)
   local track = self._data.music[trackName]
   local fadeLength = fadeLength or 0
   
+  -- Stop current track and reset fade lengths
   love.audio.stop(track.source)
   track.fadeInLength = nil
   track.fadeOutLength = nil
   
   if (fadeLength == 0) then
+    -- No fade specified
     track.volume = 1
     track.source:setVolume(track.volume * self.masterBgmVolume)
   else
+    -- Fade specified
     track.volume = 0
     track.source:setVolume(track.volume * self.masterBgmVolume)
     track.fadeInLength = fadeLength
@@ -2133,6 +2136,7 @@ function Engine:_stopMusic(trackName, fadeLength)
   local track = self._data.music[trackName]
   local fadeLength = fadeLength or 0
   
+  -- Reset fade lengths
   track.fadeInLength = nil
   track.fadeOutLength = nil
   
@@ -2194,17 +2198,28 @@ end
 function Engine:playMusic(trackName, fadeLength)
   local fadeLength = fadeLength or 0
   
-  local oldTrack = self._data.music[self._currentMusic]
-  local newTrack = self._data.music[trackName]
-  
-  if (self._currentMusic ~= trackName) then
-    self:_playMusic(trackName, fadeLength)
-    self:_stopMusic(self._currentMusic, fadeLength)
-  elseif (oldTrack.fadeOutLength or not oldTrack.source:isPlaying()) then
-    self:_playMusic(trackName, fadeLength)
+  -- Use previously-played track if one wasn't specified.
+  if (not trackName and self._currentMusic) then
+    trackName = self._currentMusic
   end
   
-  self._currentMusic = trackName
+  -- Play track.
+  if (trackName) then
+    local oldTrack = self._data.music[self._currentMusic]
+    local newTrack = self._data.music[trackName]
+    
+    -- Play new track and stop old one if one's already playing.
+    if (self._currentMusic ~= trackName) then
+      self:_playMusic(trackName, fadeLength)
+      self:_stopMusic(self._currentMusic, fadeLength)
+    -- Otherwise, just play the new track.
+    elseif (oldTrack.fadeOutLength or not oldTrack.source:isPlaying()) then
+      self:_playMusic(trackName, fadeLength)
+    end
+    
+    -- Keep record of what track has been played.
+    self._currentMusic = trackName
+  end
 end
 
 -- Pauses playback of the currently-set music track.
