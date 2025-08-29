@@ -9,6 +9,9 @@ local Room = {}
 -- Constructor
 -- -----------------------------------------------------------------------------
 
+-- Set class's type.
+Room.type = "Room"
+
 -- Creates an instance of the Room class.
 -- @param {string} roomName The room's name (identifier for debugging purposes).
 -- @param {number} roomWidth The width of the room, in pixels.

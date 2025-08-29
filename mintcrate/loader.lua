@@ -7,6 +7,7 @@ local pkg = (...):match("(.-)[^%.]+$")
 
 MintCrate = {}
 MintCrate.Engine       = require(pkg .. "engine")
+MintCrate.Assert       = require(pkg .. "assert")
 MintCrate.Entity       = require(pkg .. "entity")
 MintCrate.Active       = require(pkg .. "active")
 MintCrate.Backdrop     = require(pkg .. "backdrop")
@@ -39,8 +40,9 @@ function MintCrate:new(
   engine._sysImgPath = pkg.."img.encoded."
   
   -- Store libs into engine instance so that user can access them easily.
-  engine.util = MintCrate.Util
-  engine.math = MintCrate.MathX
+  engine.assert = MintCrate.Assert
+  engine.util   = MintCrate.Util
+  engine.math   = MintCrate.MathX
   
   return engine
 end

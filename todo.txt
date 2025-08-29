@@ -37,13 +37,21 @@ MintCrate To-do List
 [x] Engine setting to turn BGM/SFX on/off (and adjust volume, perhaps?)
 [x] Bug - Sounds not stopping when changing rooms (stopAllSounds not working?)
 [x] Option to fade or persist audio when fading out a room
-[ ] Debug collision mask rectangle looks jumpy when moving
-[ ] Accept array of mouse buttons or keyboard inputs or gamepad inputs for input checks(?)
-[ ] Add validation and error-checking to functions
 [/] Saving/loading data
   [ ] Finish final touches on JSON parser
-[ ] Think really hard about function names (i.e. setTextContent should just be setText)
-[ ] Revamp system for queueing functions, delaying them, and firing them only once
+[ ] Add validation and error-checking to functions
+  [ ] Loader
+  [ ] Engine
+  [ ] Room
+  [ ] Inputhandler
+  [ ] Entity
+  [ ] Active
+  [ ] Backdrop
+  [ ] Paragraph
+  [ ] MathX
+  [ ] Util
+[ ] Think really hard about function/class names (i.e. setTextContent should just be setText)
+[ ] Debug collision mask rectangle looks jumpy when moving
 
 Decisions
 - none

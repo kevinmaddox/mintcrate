@@ -31,6 +31,14 @@ function Engine:new(
   
   options = options or {}
   
+  MintCrate.Assert('string', 'new', 'baseWidth', baseWidth)
+  MintCrate.Assert('number', 'new', 'baseHeight', baseHeight)
+  MintCrate.Assert('Room',   'new', 'startingRoom', startingRoom)
+  MintCrate.Assert('number', 'new', 'options.windowScale', options.windowScale, {optional=true})
+  MintCrate.Assert('string', 'new', 'options.windowTitle', options.windowTitle, {optional=true})
+  MintCrate.Assert('string', 'new', 'options.windowIconPath', options.windowIconPath, {optional=true})
+  MintCrate.Assert('string', 'new', 'options.pathPrefix', options.pathPrefix, {optional=true})
+  
   -- Initialize Love
   love.graphics.setLineStyle("rough")
   love.graphics.setDefaultFilter("nearest", "nearest")
@@ -1997,7 +2005,6 @@ end
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 -- @returns {boolean} Whether the key was pressed.
 function Engine:keyPressed(scancode)
-  scancode = tostring(scancode)
   return (self._keystates[scancode] and self._keystates[scancode].pressed)
 end
 
@@ -2005,7 +2012,6 @@ end
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 -- @returns {boolean} Whether the key was released.
 function Engine:keyReleased(scancode)
-  scancode = tostring(scancode)
   return (self._keystates[scancode] and self._keystates[scancode].released)
 end
 
@@ -2013,7 +2019,6 @@ end
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 -- @returns {boolean} Whether the key is being held.
 function Engine:keyHeld(scancode)
-  scancode = tostring(scancode)
   return (self._keystates[scancode] and self._keystates[scancode].held)
 end
 
