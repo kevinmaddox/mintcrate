@@ -9,6 +9,9 @@ local Paragraph = {}
 -- Constructor
 -- -----------------------------------------------------------------------------
 
+-- Set class's type.
+Paragraph.type = "Paragraph"
+
 -- Creates an instance of the Paragraph class.
 -- @param {table} instances List of all Texts being managed by the engine.
 -- @param {string} name Name of the Paragraph, for definition & instantiation.

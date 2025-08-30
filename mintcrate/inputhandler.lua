@@ -9,6 +9,9 @@ local InputHandler = {}
 -- Constructor
 -- -----------------------------------------------------------------------------
 
+-- Set class's type.
+InputHandler.type = "InputHandler"
+
 -- Creates an instance of the InputHandler class.
 -- @returns {InputHandler} A new instance of the InputHandler class.
 function InputHandler:new()

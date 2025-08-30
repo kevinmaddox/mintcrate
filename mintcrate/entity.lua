@@ -9,6 +9,9 @@ local Entity = {}
 -- Constructor
 -- -----------------------------------------------------------------------------
 
+-- Set class's type.
+Entity.type = "Entity"
+
 -- Creates an instance of the Entity class.
 -- @returns {Entity} A new instance of the Entity class.
 function Entity:new()

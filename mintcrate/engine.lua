@@ -31,13 +31,20 @@ function Engine:new(
   
   options = options or {}
   
-  MintCrate.Assert('string', 'new', 'baseWidth', baseWidth)
-  MintCrate.Assert('number', 'new', 'baseHeight', baseHeight)
-  MintCrate.Assert('Room',   'new', 'startingRoom', startingRoom)
-  MintCrate.Assert('number', 'new', 'options.windowScale', options.windowScale, {optional=true})
-  MintCrate.Assert('string', 'new', 'options.windowTitle', options.windowTitle, {optional=true})
-  MintCrate.Assert('string', 'new', 'options.windowIconPath', options.windowIconPath, {optional=true})
-  MintCrate.Assert('string', 'new', 'options.pathPrefix', options.pathPrefix, {optional=true})
+  local f = 'new'
+  MintCrate.Assert.type(f, 'baseWidth', baseWidth, 'number')
+  MintCrate.Assert.type(f, 'baseHeight', baseHeight, 'number')
+  MintCrate.Assert.type(f, 'startingRoom', startingRoom, 'Room')
+  MintCrate.Assert.type(f, 'options', options, 'table', true)
+  MintCrate.Assert.type(
+    f, 'options.windowScale', options.windowScale, 'number', true)
+  MintCrate.Assert.type(
+    f, 'options.windowTitle', options.windowTitle, 'string', true)
+  MintCrate.Assert.type(
+    f, 'options.windowIconPath', options.windowIconPath, 'string', true)
+  MintCrate.Assert.type(
+    f, 'options.pathPrefix', options.pathPrefix, 'string', true)
+  
   
   -- Initialize Love
   love.graphics.setLineStyle("rough")
@@ -195,6 +202,12 @@ end
 -- @param {boolean} fadeBeforeQuitting Trigger's the Room's fadeout first.
 -- @param {boolean} fadeMusic Fades the music with the visual fade-out.
 function Engine:quit(fadeBeforeQuitting, fadeMusic)
+  local f = 'quit'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'fadeBeforeQuitting', fadeBeforeQuitting,
+    'boolean', true)
+  MintCrate.Assert.type(f, 'fadeMusic', fadeMusic, 'boolean', true)
+  
   -- Trigger the fade-out effect, then change room when it's done.
   if fadeBeforeQuitting then
     self:_triggerRoomFade('fadeOut', love.event.quit, fadeMusic)
@@ -216,6 +229,23 @@ end
 -- @param {table} resourcePaths.sounds Path for Sounds.
 -- @param {table} resourcePaths.tilemaps Path for Tilemaps.
 function Engine:setResourcePaths(resourcePaths)
+  local f = 'setResourcePaths'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 
+    'resourcePaths', resourcePaths, 'table', true)
+  MintCrate.Assert.type(f,
+    'resourcePaths.actives', resourcePaths.actives, 'table', true)
+  MintCrate.Assert.type(f,
+    'resourcePaths.backdrops', resourcePaths.backdrops, 'table', true)
+  MintCrate.Assert.type(f,
+    'resourcePaths.fonts', resourcePaths.fonts, 'table', true)
+  MintCrate.Assert.type(f,
+    'resourcePaths.music', resourcePaths.music, 'table', true)
+  MintCrate.Assert.type(f,
+    'resourcePaths.sounds', resourcePaths.sounds, 'table', true)
+  MintCrate.Assert.type(f,
+    'resourcePaths.tilemaps', resourcePaths.tilemaps, 'table', true)
+  
   for resType, path in pairs(resourcePaths) do
     self._resPaths[resType] = path
   end
@@ -224,6 +254,10 @@ end
 -- Specifies which color(s) should become transparent when loading images.
 -- @param {table} rgbSets Table of {r,g,b} tables, indicating the color keys.
 function Engine:defineColorKeys(rgbSets)
+  local f = 'defineColorKeys'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'rgbSets', rgbSets, 'table')
+  
   self._colorKeyColors = rgbSets
 end
 
@@ -278,6 +312,10 @@ end
 -- Defines the active object entities that can be created during gameplay.
 -- @param {table} data A table of active object definitions (see docs).
 function Engine:defineActives(data)
+  local f = 'defineActives'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'data', data, 'table')
+  
   for _, item in ipairs(data) do
     -- Active's base name
     if not string.find(item.name, '_') then
@@ -373,6 +411,10 @@ end
 -- Defines the backdrop object entities that can be created during gameplay.
 -- @param {table} data A table of backdrop object definitions (see docs).
 function Engine:defineBackdrops(data)
+  local f = 'defineBackdrops'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'data', data, 'table')
+  
   for _, item in ipairs(data) do
     local image = self:_loadImage(self._resPaths.backdrops .. item.name)
     if item.mosaic then image:setWrap("repeat", "repeat") end
@@ -386,6 +428,10 @@ end
 -- Defines the fonts that can be used to create Paragraph objects.
 -- @param {table} data A table of bitmap font definitions (see docs).
 function Engine:defineFonts(data)
+  local f = 'defineFonts'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'data', data, 'table')
+  
   for _, item in ipairs(data) do
     self._data.fonts[item.name] = self:_loadFont(item.name)
   end
@@ -443,6 +489,10 @@ end
 -- Defines the sounds that can be played during gameplay.
 -- @param {table} data A table of sound resource definitions (see docs).
 function Engine:defineSounds(data)
+  local f = 'defineSounds'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'data', data, 'table')
+  
   for _, item in ipairs(data) do
     local path = self._resPaths.sounds .. item.name
     
@@ -467,6 +517,10 @@ end
 -- Defines the music that can be played during gameplay.
 -- @param {table} data A table of music resource definitions (see docs).
 function Engine:defineMusic(data)
+  local f = 'defineMusic'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'data', data, 'table')
+  
   for _, item in ipairs(data) do
     local path = self._resPaths.music .. item.name
     
@@ -503,6 +557,10 @@ end
 -- Defines the tilemaps that can be set during gameplay.
 -- @param {table} data A table of tilemap definitions (see docs).
 function Engine:defineTilemaps(data)
+  local f = 'defineTilemaps'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'data', data, 'table')
+  
   for _, item in ipairs(data) do
     -- Tilemap's base name (refers to the image file)
     if not string.find(item.name, '_') then
@@ -674,6 +732,16 @@ end
 -- @param {boolean} options.persistAudio Prevents the audio from stopping.
 function Engine:changeRoom(room, options)
   local options = options or {}
+  
+  local f = 'changeRoom'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'room', room, 'Room')
+  MintCrate.Assert.type(f, 'options', options, 'table', true)
+  MintCrate.Assert.type(
+    f, 'options.fadeMusic', options.fadeMusic, 'boolean', true)
+  MintCrate.Assert.type(
+    f, 'options.persistAudio', options.persistAudio, 'boolean', true)
+  
   local fadeMusic = options.fadeMusic or false
   local persistAudio = options.persistAudio or false
   if (fadeMusic and persistAudio) then fadeMusic = false end
@@ -716,8 +784,12 @@ function Engine:_triggerRoomFade(fadeType, finishedCallback, fadeMusic)
     totalDuration + self._currentRoom._fadeConf.fadeOut.pauseFrames
   
   -- Cancel any current fades
-  self:clearFunction(self._currentRoom._fadeEffectFunc)
-  self:clearFunction(self._currentRoom._fadeDoneFunc)
+  if (self._currentRoom._fadeEffectFunc) then
+    self:clearFunction(self._currentRoom._fadeEffectFunc)
+  end
+  if (self._currentRoom._fadeDoneFunc) then
+    self:clearFunction(self._currentRoom._fadeDoneFunc)
+  end
   
   -- Indicate we're currently fading out.
   self._currentRoom._currentFade = fadeType
@@ -811,6 +883,11 @@ end
 -- @param {function} callback The function to queue.
 -- @param {number} numFrames How many frames should pass before firing.
 function Engine:delayFunction(callback, numFrames)
+  local f = 'delayFunction'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'callback', callback, 'function')
+  MintCrate.Assert.type(f, 'numFrames', numFrames, 'number')
+  
   table.insert(self._queuedFunctions,
     {callback = callback, remainingFrames = numFrames})
 end
@@ -820,6 +897,12 @@ end
 -- @param {number} numFrames How many frames should pass before firing.
 -- @param {boolean} fireImmediately Whether the function should initially fire.
 function Engine:repeatFunction(callback, numFrames, fireImmediately)
+  local f = 'repeatFunction'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'callback', callback, 'function')
+  MintCrate.Assert.type(f, 'numFrames', numFrames, 'number')
+  MintCrate.Assert.type(f, 'fireImmediately', fireImmediately, 'boolean', true)
+  
   if fireImmediately then callback() end
   table.insert(self._queuedFunctions,
     {callback = callback, remainingFrames = numFrames, repeatValue = numFrames})
@@ -828,6 +911,10 @@ end
 -- Clears a queued function.
 -- @param {function} callback The queued function to cancel/clear.
 function Engine:clearFunction(callback)
+  local f = 'clearFunction'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'callback', callback, 'function')
+  
   for _, item in ipairs(self._queuedFunctions) do
     if item.callback == callback then
       item.cancelled = true
@@ -845,6 +932,12 @@ end
 -- @param {number} y The ending X position of the Active.
 -- @returns {Active} A new instance of the Active class.
 function Engine:addActive(name, x, y)
+  local f = 'addActive'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'name', name, 'string')
+  MintCrate.Assert.type(f, 'x', x, 'number', true)
+  MintCrate.Assert.type(f, 'y', y, 'number', true)
+  
   local x = x or 0
   local y = y or 0
   local collider = self._data.actives[name].collider or {}
@@ -883,9 +976,19 @@ end
 -- @param {number} options.height The height of the backdrop.
 -- @returns {Backdrop} A new instance of the Backdrop class.
 function Engine:addBackdrop(name, x, y, options)
+  local options = options or {}
+  
+  local f = 'addBackdrop'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'name', name, 'string')
+  MintCrate.Assert.type(f, 'x', x, 'number', true)
+  MintCrate.Assert.type(f, 'y', y, 'number', true)
+  MintCrate.Assert.type(f, 'options', options, 'table', true)
+  MintCrate.Assert.type(f, 'options.width', options.width, 'number', true)
+  MintCrate.Assert.type(f, 'options.height', options.height, 'number', true)
+  
   local x = x or 0
   local y = y or 0
-  local options = options or {}
   local image = self._data.backdrops[name].image
   local width = options.width or image:getWidth()
   local height = options.height or image:getHeight()
@@ -925,10 +1028,25 @@ end
 -- @param {boolean} options.wordWrap Whether entire words should wrap or break.
 -- @returns {Paragraph} A new instance of the Paragraph class.
 function Engine:addParagraph(name, x, y, startingTextContent, options)
+  local options = options or {}
+  
+  local f = 'addParagraph'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'name', name, 'string')
+  MintCrate.Assert.type(f, 'x', x, 'number')
+  MintCrate.Assert.type(f, 'y', y, 'number')
+  MintCrate.Assert.type(f, 'startingTextContent', startingTextContent, 'string')
+  MintCrate.Assert.type(f, 'options', options, 'table', true)
+  MintCrate.Assert.type(
+    f, 'options.maxCharsPerLine', options.maxCharsPerLine, 'number', true)
+  MintCrate.Assert.type(
+    f, 'options.lineSpacing', options.lineSpacing, 'number', true)
+  MintCrate.Assert.type(
+    f, 'options.wordWrap', options.wordWrap, 'boolean', true)
+  
   local x = x or 0
   local y = y or 0
   local startingTextContent = startingTextContent or ""
-  local options = options or {}
   local maxCharsPerLine = options.maxCharsPerLine or 9999
   local lineSpacing = options.lineSpacing or 0
   local wordWrap = options.wordWrap or false

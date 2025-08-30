@@ -9,6 +9,9 @@ local Active = {}
 -- Constructor
 -- -----------------------------------------------------------------------------
 
+-- Set class's type.
+Active.type = "Active"
+
 -- Creates an instance of the Active class.
 -- @param {table} instances List of all Actives being managed by the engine.
 -- @param {string} name Name of the Active, for definition & instantiation.

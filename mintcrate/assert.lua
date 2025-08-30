@@ -1,41 +1,40 @@
 -- -----------------------------------------------------------------------------
 -- MintCrate - Assert
--- An engine utility for performing function argument validation.
+-- An engine utility class for performing function argument validation.
 -- -----------------------------------------------------------------------------
 
-return function(expectedType, funcName, argName, val, options)
-  local options = options or {}
-  local optional = false
-  if (type(options.optional) ~= 'nil') then optional = options.optional end
-  local condition = true
-  if (type(options.condition) ~= 'nil') then condition = options.condition end
+local Assert = {}
+
+function Assert.type(funcName, argName, val, expectedType, isOptional)
+  if (not isOptional) then isOptional = false end
   
-  local faultCode = 0
-  
-  -- Get argument type, including pseudo types from classes.
+  -- Get argument type, including pseudo-types from classes.
   local argType = type(val)
   if (argType == 'table' and val.type) then argType = val.type end
-  -- print(val.type)
   
-  -- Skip all checking if argument is optional and no value was supplied.
-  if (optional and argType == 'nil') then goto done end
+  -- Check for errors.
+  local faultCode = 0
   
-  -- Check that an argument was supplied.
-  if (argType == nil) then faultCode = 1
-  -- Check type.
-  elseif (argType ~= expectedType) then faultCode = 2
-  -- Check conditional.
-  elseif (not condition) then faultCode = 3 end
+  if (not isOptional or argType ~= 'nil') then
+    -- Check that an argument was supplied.
+    if (argType == 'nil') then faultCode = 1
+    -- Check type.
+    elseif (argType ~= expectedType) then faultCode = 2 end
+  end
   
-  ::done::
-  
-  if (faultCode ~= 0) then
-    if     (faultCode == 1) then
-      error('Missing mandatory argument "'..argName..'" in function "'..funcName..'".')
-    elseif (faultCode == 2) then
-      error('Argument "'..argName..'" in function "'..funcName..'" must be of type "'..expectedType..'".')
-    elseif (faultCode == 3) then
-      error('Argument "'..argName..'" in function "'..funcName..'" failed to meet required condition(s).')
-    end
+  if     (faultCode == 1) then
+    error('Missing mandatory argument "'..argName..'" in function "'..funcName..'".', 3)
+  elseif (faultCode == 2) then
+    error('Argument "'..argName..'" in function "'..funcName..'" must be of type "'..expectedType..'".', 3)
   end
 end
+
+function Assert.self(funcName, val)
+  if (type(val) == 'nil') then
+    error('Missing reference to "self" in function "'..funcName..'". Most likely, you called this function via a dot instead of a colon.', 3)
+  end
+end
+
+-- -----------------------------------------------------------------------------
+
+return Assert

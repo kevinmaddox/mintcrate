@@ -9,6 +9,9 @@ local Backdrop = {}
 -- Constructor
 -- -----------------------------------------------------------------------------
 
+-- Set class's type.
+Backdrop.type = "Backdrop"
+
 -- Creates an instance of the Backdrop class.
 -- @param {table} instances List of all Backdrops being managed by the engine.
 -- @param {string} name Name of the Backdrop, for definition & instantiation.
