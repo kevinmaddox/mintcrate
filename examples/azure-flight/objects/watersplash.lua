@@ -1,4 +1,4 @@
-WaterSplash = {}
+WaterSplash = {type = MintCrate.Active.type}
 
 function WaterSplash:new(x, y, scaleSpeed, scaleX)
   local o = mint:addActive('splash', x, y)

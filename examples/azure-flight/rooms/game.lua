@@ -1,4 +1,4 @@
-Game = {}
+Game = {type = MintCrate.Room.type}
 
 --[[
   Note: The formulas and values in this code can be a bit weird. I cobbled

@@ -1,4 +1,4 @@
-Splash = {}
+Splash = {type = MintCrate.Room.type}
 
 function Splash:new()
   local o = MintCrate.Room:new("Splash", 240, 160)

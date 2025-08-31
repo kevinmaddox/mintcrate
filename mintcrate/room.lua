@@ -22,6 +22,11 @@ function Room:new(roomName, roomWidth, roomHeight)
   setmetatable(o, self)
   self.__index = self
   
+  local f = 'new'
+  MintCrate.Assert.type(f, 'roomName', roomName, 'string')
+  MintCrate.Assert.type(f, 'roomWidth', roomWidth, 'number')
+  MintCrate.Assert.type(f, 'roomHeight', roomHeight, 'number')
+  
   -- Set room name
   self._roomName = roomName
   
@@ -69,15 +74,11 @@ end
 -- Methods for configuring the room's fade in/out settings
 -- -----------------------------------------------------------------------------
 
-function Room:persistMusicOnLeave(enabled)
-  -- TODO: This
-end
-
-function Room:persistSoundsOnLeave(enabled)
-  -- TODO: This
-end
-
 function Room:configureFadeIn(fadeDuration, pauseDuration, color)
+  local f = 'configureFadeIn'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
+  
   local pauseDuration = pauseDuration or 0
   local color = color or {r=0, g=0, b=0}
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)

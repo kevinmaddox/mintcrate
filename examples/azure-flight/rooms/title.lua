@@ -1,4 +1,4 @@
-Title = {}
+Title = {type = MintCrate.Room.type}
 
 function Title:new()
   local o = MintCrate.Room:new("Title", 240, 160)
