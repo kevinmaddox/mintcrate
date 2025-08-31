@@ -41,7 +41,9 @@ MintCrate To-do List
   [ ] Finish final touches on JSON parser
 [ ] Add validation and error-checking to functions
   [ ] Loader
-  [ ] Engine
+  [/] Engine core
+    [x] Main functions
+    [ ] Object-defining functions (defineActives, etc.)
   [ ] Room
   [ ] Inputhandler
   [ ] Entity
@@ -50,8 +52,14 @@ MintCrate To-do List
   [ ] Paragraph
   [ ] MathX
   [ ] Util
-[ ] Think really hard about function/class names (i.e. setTextContent should just be setText)
+[ ] Think really hard about function/class names
+  [ ] setTextContent should just be setText
+  [ ] Paragraph probably should just be Text
+  [ ] engine.lua should be core.lua
 [ ] Debug collision mask rectangle looks jumpy when moving
+[ ] Findings
+  [ ] Remove pathPrefix from engine core constructor?
+  [ ] Why am I not pushing the system fonts into defineFonts?
 
 Decisions
 - none

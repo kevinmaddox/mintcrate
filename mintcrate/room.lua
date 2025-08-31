@@ -74,13 +74,26 @@ end
 -- Methods for configuring the room's fade in/out settings
 -- -----------------------------------------------------------------------------
 
+-- Sets the fade-in effect when the room is changed to.
+-- @param {number} fadeDuration The length of the fade, in frames.
+-- @param {number} pauseDuration How long until the fade starts, in frames.
+-- @param {table} color The color of the fade, as a keyed RGB table, 0-255.
 function Room:configureFadeIn(fadeDuration, pauseDuration, color)
+  local pauseDuration = pauseDuration or 0
+  local color = color or {}
+  if (color.r == nil) then color.r = 0 end
+  if (color.g == nil) then color.g = 0 end
+  if (color.b == nil) then color.b = 0 end
+  
   local f = 'configureFadeIn'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
+  MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number', true)
+  MintCrate.Assert.type(f, 'color', color, 'table', true)
+  MintCrate.Assert.type(f, 'color.r', color.r, 'number')
+  MintCrate.Assert.type(f, 'color.g', color.g, 'number')
+  MintCrate.Assert.type(f, 'color.b', color.b, 'number')
   
-  local pauseDuration = pauseDuration or 0
-  local color = color or {r=0, g=0, b=0}
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
   
   self._fadeConf.fadeIn = {
@@ -94,9 +107,23 @@ function Room:configureFadeIn(fadeDuration, pauseDuration, color)
   self._fadeLevel = 0 - (self._fadeConf.fadeIn.fadeValue * pauseDuration)
 end
 
+-- Sets the fade-out effect when the room is changed from.
+-- @param {number} fadeDuration The length of the fade, in frames.
+-- @param {number} pauseDuration How long to pause after fade, in frames.
+-- @param {table} color The color of the fade, as a keyed RGB table, 0-255.
 function Room:configureFadeOut(fadeDuration, pauseDuration, color)
   local pauseDuration = pauseDuration or 0
   local color = color or {r=0, g=0, b=0}
+  
+  -- local f = 'configureFadeIn'
+  -- MintCrate.Assert.self(f, self)
+  -- MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
+  -- MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number', true)
+  -- MintCrate.Assert.type(f, 'color', color, 'table', true)
+  -- MintCrate.Assert.type(f, 'color.r', color.r, 'number')
+  -- MintCrate.Assert.type(f, 'color.g', color.g, 'number')
+  -- MintCrate.Assert.type(f, 'color.b', color.b, 'number')
+  
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
   
   self._fadeConf.fadeOut = {
