@@ -55,18 +55,27 @@ end
 -- Returns the room's name.
 -- @returns {string} Room's name.
 function Room:getRoomName()
+  local f = 'getRoomName'
+  MintCrate.Assert.self(f, self)
+  
   return self._roomName
 end
 
 -- Returns the width of the room.
 -- @returns {number} Room's width.
 function Room:getRoomWidth()
+  local f = 'getRoomWidth'
+  MintCrate.Assert.self(f, self)
+  
   return self._roomWidth
 end
 
 -- Returns the width of the room.
 -- @returns {number} Room's height.
 function Room:getRoomHeight()
+  local f = 'getRoomHeight'
+  MintCrate.Assert.self(f, self)
+  
   return self._roomHeight
 end
 
@@ -79,19 +88,23 @@ end
 -- @param {number} pauseDuration How long until the fade starts, in frames.
 -- @param {table} color The color of the fade, as a keyed RGB table, 0-255.
 function Room:configureFadeIn(fadeDuration, pauseDuration, color)
-  local pauseDuration = pauseDuration or 0
-  local color = color or {}
-  if (color.r == nil) then color.r = 0 end
-  if (color.g == nil) then color.g = 0 end
-  if (color.b == nil) then color.b = 0 end
-  
   local f = 'configureFadeIn'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
-  MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number', true)
-  MintCrate.Assert.type(f, 'color', color, 'table', true)
+  
+  local pauseDuration = pauseDuration or 0
+  MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
+  
+  local color = color or {}
+  MintCrate.Assert.type(f, 'color', color, 'table')
+  
+  if (color.r == nil) then color.r = 0 end
   MintCrate.Assert.type(f, 'color.r', color.r, 'number')
+  
+  if (color.g == nil) then color.g = 0 end
   MintCrate.Assert.type(f, 'color.g', color.g, 'number')
+  
+  if (color.b == nil) then color.b = 0 end
   MintCrate.Assert.type(f, 'color.b', color.b, 'number')
   
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
@@ -112,17 +125,24 @@ end
 -- @param {number} pauseDuration How long to pause after fade, in frames.
 -- @param {table} color The color of the fade, as a keyed RGB table, 0-255.
 function Room:configureFadeOut(fadeDuration, pauseDuration, color)
-  local pauseDuration = pauseDuration or 0
-  local color = color or {r=0, g=0, b=0}
+  local f = 'configureFadeIn'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
   
-  -- local f = 'configureFadeIn'
-  -- MintCrate.Assert.self(f, self)
-  -- MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
-  -- MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number', true)
-  -- MintCrate.Assert.type(f, 'color', color, 'table', true)
-  -- MintCrate.Assert.type(f, 'color.r', color.r, 'number')
-  -- MintCrate.Assert.type(f, 'color.g', color.g, 'number')
-  -- MintCrate.Assert.type(f, 'color.b', color.b, 'number')
+  local pauseDuration = pauseDuration or 0
+  MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
+  
+  local color = color or {}
+  MintCrate.Assert.type(f, 'color', color, 'table')
+  
+  if (color.r == nil) then color.r = 0 end
+  MintCrate.Assert.type(f, 'color.r', color.r, 'number')
+  
+  if (color.g == nil) then color.g = 0 end
+  MintCrate.Assert.type(f, 'color.g', color.g, 'number')
+  
+  if (color.b == nil) then color.b = 0 end
+  MintCrate.Assert.type(f, 'color.b', color.b, 'number')
   
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
   
@@ -136,36 +156,6 @@ function Room:configureFadeOut(fadeDuration, pauseDuration, color)
 end
 
 -- -----------------------------------------------------------------------------
--- Methods for managing the room's active tilemap
--- -----------------------------------------------------------------------------
-
--- Returns the full name of the currently-set tilemap graphic/layout pair.
--- @returns {string} Tilemap's full name.
-function Room:_getTilemapLayoutName()
-  return self._tilemapFullName
-end
-
--- Returns the name of the currently-set tilemap graphic.
--- @returns {string} Tilemap graphic's name.
-function Room:_getTilemapName()
-  return self._tilemapName
-end
-
--- Returns the name of the currently-set tilemap layout.
--- @returns {string} Tilemap layout's name.
-function Room:_getLayoutName()
-  return self._layoutName
-end
-
--- Sets the tilemap graphic/layout for the room.
--- @param {string} tilemapLayoutName The full name of the tilemap.
-function Room:setTilemap(tilemapLayoutName)
-  self._tilemapFullName = tilemapLayoutName
-  self._tilemapName = MintCrate.Util.string.split(tilemapLayoutName, '_')[1]
-  self._layoutName = MintCrate.Util.string.split(tilemapLayoutName, '_')[2]
-end
-
--- -----------------------------------------------------------------------------
 -- Methods for changing room visuals
 -- -----------------------------------------------------------------------------
 
@@ -174,7 +164,17 @@ end
 -- @param {number} g The color's green value (0 - 255).
 -- @param {number} b The color's blue value (0 - 255).
 function Room:setBackgroundColor(r, g, b)
-  local r, g, b = love.math.colorFromBytes(r, g, b)
+  local f = 'setBackgroundColor'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'r', r, 'number')
+  MintCrate.Assert.type(f, 'g', g, 'number')
+  MintCrate.Assert.type(f, 'b', b, 'number')
+  
+  local r = MintCrate.MathX.clamp(r, 0, 255)
+  local g = MintCrate.MathX.clamp(g, 0, 255)
+  local b = MintCrate.MathX.clamp(b, 0, 255)
+  
+  r, g, b = love.math.colorFromBytes(r, g, b)
   self._backgroundColor = {r = r, g = g, b = b}
 end
 

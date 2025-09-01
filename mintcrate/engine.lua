@@ -17,7 +17,6 @@ local Engine = {}
 -- @param {number} options.windowScale Starting graphical scale of the window.
 -- @param {string} options.windowTitle Title shown on the window title bar.
 -- @param {string} options.windowIconPath Icon shown on the window title bar.
--- @param {string} options.pathPrefix For edge-case project directory setups.
 -- @returns {Engine} A new instance of the Engine class.
 function Engine:new(
   baseWidth,
@@ -48,9 +47,6 @@ function Engine:new(
   if (options.windowIconPath == nil) then options.windowIconPath = "" end
   MintCrate.Assert.type(f, 'options.windowIconPath', options.windowIconPath,
     'string')
-  
-  if (options.pathPrefix == nil) then options.pathPrefix = "" end
-  MintCrate.Assert.type(f, 'options.pathPrefix', options.pathPrefix, 'string')
   
   -- Initialize Love
   love.graphics.setLineStyle("rough")
@@ -199,17 +195,18 @@ function Engine:ready()
   local f = 'ready'
   MintCrate.Assert.self(f, self)
   
-  -- Load system images
+  -- Load system images (these are not Actives, just raw images)
   self._systemImages = {
     point_origin = self:_loadImage(self._sysImgPath.."point_origin", true),
     point_action = self:_loadImage(self._sysImgPath.."point_action", true)
   }
   
-  -- Load system fonts
+  -- Load system fonts (done here in case defineFonts is not called)
   self._data.fonts["system_boot"]    = self:_loadFont("system_boot")
   self._data.fonts["system_dialog"]  = self:_loadFont("system_dialog")
   self._data.fonts["system_counter"] = self:_loadFont("system_counter")
   
+  -- Change to starting room
   self:changeRoom(self._startingRoom)
 end
 
@@ -241,12 +238,12 @@ end
 
 -- Specifies paths for loading resource files (all paths must end with a slash).
 -- @param {table} resourcePaths Paths for where to find resource files.
--- @param {table} resourcePaths.actives Path for Actives.
--- @param {table} resourcePaths.backdrops Path for Backdrops.
--- @param {table} resourcePaths.fonts Path for Fonts.
--- @param {table} resourcePaths.music Path for Music.
--- @param {table} resourcePaths.sounds Path for Sounds.
--- @param {table} resourcePaths.tilemaps Path for Tilemaps.
+-- @param {string} resourcePaths.actives Path for Actives.
+-- @param {string} resourcePaths.backdrops Path for Backdrops.
+-- @param {string} resourcePaths.fonts Path for Fonts.
+-- @param {string} resourcePaths.music Path for Music.
+-- @param {string} resourcePaths.sounds Path for Sounds.
+-- @param {string} resourcePaths.tilemaps Path for Tilemaps.
 function Engine:setResourcePaths(resourcePaths)
   -- Validate function.
   local f = 'setResourcePaths'
@@ -256,29 +253,35 @@ function Engine:setResourcePaths(resourcePaths)
   MintCrate.Assert.type(f, 
     'resourcePaths', resourcePaths, 'table')
   
-  if (resourcePaths.actives == nil) then resourcePaths.actives = {} end
+  if (resourcePaths.actives == nil) then
+    resourcePaths.actives = self._resPaths.actives end
   MintCrate.Assert.type(f,
-    'resourcePaths.actives', resourcePaths.actives, 'table')
+    'resourcePaths.actives', resourcePaths.actives, 'string')
   
-  if (resourcePaths.backdrops == nil) then resourcePaths.backdrops = {} end
+  if (resourcePaths.backdrops == nil) then
+    resourcePaths.backdrops = self._resPaths.backdrops end
   MintCrate.Assert.type(f,
-    'resourcePaths.backdrops', resourcePaths.backdrops, 'table')
+    'resourcePaths.backdrops', resourcePaths.backdrops, 'string')
   
-  if (resourcePaths.fonts == nil) then resourcePaths.fonts = {} end
+  if (resourcePaths.fonts == nil) then
+    resourcePaths.fonts = self._resPaths.fonts end
   MintCrate.Assert.type(f,
-    'resourcePaths.fonts', resourcePaths.fonts, 'table')
+    'resourcePaths.fonts', resourcePaths.fonts, 'string')
   
-  if (resourcePaths.music == nil) then resourcePaths.music = {} end
+  if (resourcePaths.music == nil) then
+    resourcePaths.music = self._resPaths.music end
   MintCrate.Assert.type(f,
-    'resourcePaths.music', resourcePaths.music, 'table')
+    'resourcePaths.music', resourcePaths.music, 'string')
   
-  if (resourcePaths.sounds == nil) then resourcePaths.sounds = {} end
+  if (resourcePaths.sounds == nil) then
+    resourcePaths.sounds = self._resPaths.sounds end
   MintCrate.Assert.type(f,
-    'resourcePaths.sounds', resourcePaths.sounds, 'table')
+    'resourcePaths.sounds', resourcePaths.sounds, 'string')
   
-  if (resourcePaths.tilemaps == nil) then resourcePaths.sounds = {} end
+  if (resourcePaths.tilemaps == nil) then
+    resourcePaths.tilemaps = self._resPaths.tilemaps end
   MintCrate.Assert.type(f,
-    'resourcePaths.tilemaps', resourcePaths.tilemaps, 'table')
+    'resourcePaths.tilemaps', resourcePaths.tilemaps, 'string')
   
   -- Store resource paths.
   for resType, path in pairs(resourcePaths) do
@@ -759,8 +762,8 @@ end
 -- Retrieves the collision masks for the currently-loaded tilemap.
 -- @returns {table} Tilemap collision masks.
 function Engine:_getTilemapCollisionMasks()
-  return self._data.tilemaps[self._currentRoom:_getTilemapName()]
-    .layouts[self._currentRoom:_getLayoutName()].collisionMasks
+  return self._data.tilemaps[self._tilemapName]
+    .layouts[self._layoutName].collisionMasks
 end
 
 -- -----------------------------------------------------------------------------
@@ -896,6 +899,11 @@ function Engine:_changeRoom(room, persistAudio)
   self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
   self._cameraIsBound = false
   
+  -- Remove tilemap from scene.
+  self._tilemapFullName = nil
+  self._tilemapName = nil
+  self._layoutName = nil
+  
   -- Clear out delayed/repeated functions.
   for _, item in ipairs(self._queuedFunctions) do
     item.cancelled = true
@@ -989,8 +997,9 @@ function Engine:addActive(name, x, y)
 
   MintCrate.Assert.type(f, 'name', name, 'string')
   if (not self._data.actives[name]) then
-    error('Argument "name" in function "addActive" does not refer ' ..
-    'to a valid Active object.') end
+    MintCrate.Error('Argument "name" in function "addActive" does not ' ..
+      'refer to a valid Active object.')
+  end
   
   local x = x or 0
   MintCrate.Assert.type(f, 'x', x, 'number')
@@ -1040,8 +1049,9 @@ function Engine:addBackdrop(name, x, y, options)
   
   MintCrate.Assert.type(f, 'name', name, 'string')
   if (not self._data.backdrops[name]) then
-    error('Argument "name" in function "addBackdrop" does not refer ' ..
-    'to a valid Backdrop object.') end
+    MintCrate.Error('Argument "name" in function "addBackdrop" does not ' ..
+      'refer to a valid Backdrop object.')
+  end
   
   local x = x or 0
   MintCrate.Assert.type(f, 'x', x, 'number')
@@ -1061,11 +1071,13 @@ function Engine:addBackdrop(name, x, y, options)
   MintCrate.Assert.type(f, 'options.height', options.height, 'number')
   
   if (options.width <= 0) then
-    error('Argument "options.width" in function "addBackdrop" ' ..
-    'must be a value greater than 0.') end
+    MintCrate.Error('Argument "options.width" in function "addBackdrop" ' ..
+    'must be a value greater than 0.')
+  end
   if (options.height <= 0) then
-    error('Argument "options.height" in function "addBackdrop" ' ..
-    'must be a value greater than 0.') end
+    MintCrate.Error('Argument "options.height" in function "addBackdrop" ' ..
+    'must be a value greater than 0.')
+  end
   
   -- Add backdrop to scene.
   local width = options.width
@@ -1113,8 +1125,9 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   MintCrate.Assert.type(f, 'name', name, 'string')
   
   if (not self._data.fonts[name]) then
-    error('Argument "name" in function "addParagraph" does not refer ' ..
-    'to a valid Font object.') end
+    MintCrate.Error('Argument "name" in function "addParagraph" does not ' ..
+      'refer to a valid Font object.')
+  end
   
   local x = x or 0
   MintCrate.Assert.type(f, 'x', x, 'number')
@@ -1279,6 +1292,33 @@ end
 -- TODO: Move camera functions and other stuff; separate x and y as well?
 
 -- -----------------------------------------------------------------------------
+-- Methods for managing Tilemaps
+-- -----------------------------------------------------------------------------
+
+-- Sets the tilemap graphic/layout for the room.
+-- @param {string} tilemapLayoutName The full name of the tilemap.
+function Engine:setTilemap(tilemapLayoutName)
+  -- Validate function.
+  local f = 'setTilemap'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'tilemapLayoutName', tilemapLayoutName, 'string')
+  
+  -- Parse tilemap and layout names from full tilemap_layout name.
+  self._tilemapFullName = tilemapLayoutName
+  self._tilemapName = MintCrate.Util.string.split(tilemapLayoutName, '_')[1]
+  self._layoutName = MintCrate.Util.string.split(tilemapLayoutName, '_')[2]
+  
+  -- Ensure tilemap exists.
+  if (
+    not self._data.tilemaps[self._tilemapName] or
+    not self._data.tilemaps[self._tilemapName].layouts[self._layoutName]
+  ) then
+    MintCrate.Error('Argument "tilemapLayoutName" in function "setTilemap" ' ..
+      'does not refer to a valid Tilemap layout.')
+  end
+end
+
+-- -----------------------------------------------------------------------------
 -- Methods for storing and loading data
 -- -----------------------------------------------------------------------------
 
@@ -1292,6 +1332,7 @@ function Engine:saveData(filename, data)
   MintCrate.Assert.type(f, 'filename', filename, 'string')
   MintCrate.Assert.type(f, 'data', data, 'table')
   
+  -- Convert data to JSON string and save in a JSON file.
   local json = self.util.json.encode(data)
   love.filesystem.write(filename..'.json', json)
 end
@@ -1305,6 +1346,7 @@ function Engine:loadData(filename)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'filename', filename, 'string')
   
+  -- Load JSON data from file and parse into a table.
   local json = love.filesystem.read(filename..'.json')
   local data = {}
   if (json ~= nil) then data = self.util.json.decode(json) end
@@ -1367,7 +1409,7 @@ function Engine:sys_update()
     active:_getCollider().mouseOver = false
   end
   
-  if self._currentRoom:_getTilemapLayoutName() then
+  if self._tilemapFullName then
     for _, maskCollection in pairs(self:_getTilemapCollisionMasks()) do
       for __, mask in ipairs(maskCollection) do
         mask.collision = false
@@ -1492,8 +1534,8 @@ function Engine:sys_draw()
   end
   
   -- Draw Tilemap
-  if self._currentRoom:_getTilemapLayoutName() then
-    local fullName = self._currentRoom:_getTilemapLayoutName()
+  if self._tilemapFullName then
+    local fullName = self._tilemapFullName
     local tilemapName = self.util.string.split(fullName, '_')[1]
     local layoutName = self.util.string.split(fullName, '_')[2]
     
@@ -1577,7 +1619,7 @@ function Engine:sys_draw()
   -- Draw debug graphics for Tilemap
   if (
     (self._showTilemapColliisonMasks or self._showTilemapBehaviorValues) and
-    self._currentRoom:_getTilemapLayoutName()
+    self._tilemapFullName
   ) then
     for tileType, maskCollection in pairs(self:_getTilemapCollisionMasks()) do
       for _, mask in ipairs(maskCollection) do
@@ -2106,7 +2148,7 @@ function Engine:testMapCollision(active, tileType)
   
   local collisions = {}
   
-  if self._currentRoom:_getTilemapLayoutName() then
+  if self._tilemapFullName then
     local mapColliders = self:_getTilemapCollisionMasks()[tileType]
     
     for _, collider in ipairs(mapColliders) do
@@ -2486,6 +2528,10 @@ function Engine:playSound(soundName, options)
   local f = 'playSound'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'soundName', soundName, 'string')
+  if (not self._data.sounds[soundName]) then
+    MintCrate.Error('Argument "name" in function "playSound" does not ' ..
+      'refer to a valid sound file.')
+  end
   
   local options = options or {}
   MintCrate.Assert.type(f, 'options', options, 'table')
@@ -2653,6 +2699,11 @@ function Engine:playMusic(trackName, fadeLength)
   -- Use previously-played track if one wasn't specified.
   if (trackName == "" and self._currentMusic) then
     trackName = self._currentMusic
+  end
+  
+  if (not self._data.music[trackName]) then
+    MintCrate.Error('Argument "trackName" in function "playMusic" does not ' ..
+      'refer to a valid music file.')
   end
   
   -- Play track.

@@ -39,11 +39,12 @@ MintCrate To-do List
 [x] Option to fade or persist audio when fading out a room
 [/] Saving/loading data
   [ ] Finish final touches on JSON parser
-[ ] Add validation and error-checking to functions
-  [ ] Loader
+[/] Add validation and error-checking to functions
+  [x] Loader
   [/] Engine core
     [x] Main functions
     [ ] Object-defining functions (defineActives, etc.)
+    [ ] Saving/loading data valiation
   [ ] Room
   [ ] Inputhandler
   [ ] Entity
@@ -57,9 +58,10 @@ MintCrate To-do List
   [ ] Paragraph probably should just be Text
   [ ] engine.lua should be core.lua
 [ ] Debug collision mask rectangle looks jumpy when moving
-[ ] Findings
-  [ ] Remove pathPrefix from engine core constructor?
-  [ ] Why am I not pushing the system fonts into defineFonts?
+[ ] Findings/issues
+  [x] Remove pathPrefix from engine core constructor
+  [x] Alter it so that tilemap calls aren't in Room but are instead in Engine core
+  [ ] Custom error handler not working in example files
 
 Decisions
 - none
