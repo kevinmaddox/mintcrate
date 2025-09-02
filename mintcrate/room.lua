@@ -92,10 +92,10 @@ function Room:configureFadeIn(fadeDuration, pauseDuration, color)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
   
-  local pauseDuration = pauseDuration or 0
+  if (pauseDuration == nil) then pauseDuration = 0 end
   MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
   
-  local color = color or {}
+  if (color == nil) then color = {} end
   MintCrate.Assert.type(f, 'color', color, 'table')
   
   if (color.r == nil) then color.r = 0 end
@@ -129,10 +129,10 @@ function Room:configureFadeOut(fadeDuration, pauseDuration, color)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
   
-  local pauseDuration = pauseDuration or 0
+  if (pauseDuration == nil) then pauseDuration = 0 end
   MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
   
-  local color = color or {}
+  if (color == nil) then color = {} end
   MintCrate.Assert.type(f, 'color', color, 'table')
   
   if (color.r == nil) then color.r = 0 end

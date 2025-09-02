@@ -34,7 +34,7 @@ function Engine:new(
   MintCrate.Assert.type(f, 'baseHeight', baseHeight, 'number')
   MintCrate.Assert.type(f, 'startingRoom', startingRoom, 'Room')
   
-  local options = options or {}
+  if (options == nil) then options = {} end
   MintCrate.Assert.type(f, 'options', options, 'table')
   
   if (options.windowScale == nil) then options.windowScale = 1 end
@@ -70,11 +70,11 @@ function Engine:new(
   o._baseHeight = baseHeight
   
   -- Window values
-  self._windowTitle = options.windowTitle or ""
-  self._windowIconPath = options.windowIconPath or ""
+  self._windowTitle = options.windowTitle
+  self._windowIconPath = options.windowIconPath
   
   -- Graphics scaling values
-  o._windowScale = options.windowScale or 1 -- Unaffected by fullscreen
+  o._windowScale = options.windowScale -- Unaffected by fullscreen
   o._gfxScale = o._windowScale -- The actual graphics scaling value
   o._fullscreen = false
   o._fullscreenDirty = false -- Indicates scale was changed in fullscreen mode
@@ -218,10 +218,10 @@ function Engine:quit(fadeBeforeQuitting, fadeMusic)
   local f = 'quit'
   MintCrate.Assert.self(f, self)
   
-  local fadeBeforeQuitting = fadeBeforeQuitting or false
+  if (fadeBeforeQuitting == nil) then fadeBeforeQuitting = false end
   MintCrate.Assert.type(f, 'fadeBeforeQuitting', fadeBeforeQuitting, 'boolean')
   
-  local fadeMusic = fadeMusic or false
+  if (fadeMusic == nil) then fadeMusic = false end
   MintCrate.Assert.type(f, 'fadeMusic', fadeMusic, 'boolean')
   
   -- Trigger the fade-out effect, then change room when it's done.
@@ -249,7 +249,7 @@ function Engine:setResourcePaths(resourcePaths)
   local f = 'setResourcePaths'
   MintCrate.Assert.self(f, self)
   
-  local resourcePaths = resourcePaths or {}
+  if (resourcePaths == nil) then resourcePaths = {} end
   MintCrate.Assert.type(f, 
     'resourcePaths', resourcePaths, 'table')
   
@@ -305,7 +305,7 @@ end
 -- @param {boolean} isEngineResource Whether the file is an engine resource.
 -- @returns {Source} Chroma-keyed image resource.
 function Engine:_loadImage(imagePath, isEngineResource)
-  isEngineResource = isEngineResource or false
+  if (isEngineResource == nil) then isEngineResource = false end
   
   local imageData
   -- Load Base64 image if it's an engine resource
@@ -781,7 +781,7 @@ function Engine:changeRoom(room, options)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'room', room, 'Room')
   
-  local options = options or {}
+  if (options == nil) then options = {} end
   MintCrate.Assert.type(f, 'options', options, 'table')
   
   if (options.fadeMusic == nil) then options.fadeMusic = false end
@@ -958,7 +958,7 @@ function Engine:repeatFunction(callback, numFrames, fireImmediately)
   MintCrate.Assert.type(f, 'callback', callback, 'function')
   MintCrate.Assert.type(f, 'numFrames', numFrames, 'number')
   
-  local fireImmediately = fireImmediately or false
+  if (fireImmediately == nil) then fireImmediately = false end
   MintCrate.Assert.type(f, 'fireImmediately', fireImmediately, 'boolean')
   
   if fireImmediately then callback() end
@@ -1001,10 +1001,10 @@ function Engine:addActive(name, x, y)
       'refer to a valid Active object.')
   end
   
-  local x = x or 0
+  if (x == nil) then x = 0 end
   MintCrate.Assert.type(f, 'x', x, 'number')
   
-  local y = y or 0
+  if (y == nil) then y = 0 end
   MintCrate.Assert.type(f, 'y', y, 'number')
   
   local collider = self._data.actives[name].collider or {}
@@ -1053,15 +1053,15 @@ function Engine:addBackdrop(name, x, y, options)
       'refer to a valid Backdrop object.')
   end
   
-  local x = x or 0
+  if (x == nil) then x = 0 end
   MintCrate.Assert.type(f, 'x', x, 'number')
   
-  local y = y or 0
+  if (y == nil) then y = 0 end
   MintCrate.Assert.type(f, 'y', y, 'number')
   
   local image = self._data.backdrops[name].image
   
-  local options = options or {}
+  if (options == nil) then options = {} end
   MintCrate.Assert.type(f, 'options', options, 'table')
   
   if (options.width == nil) then options.width = image:getWidth() end
@@ -1129,16 +1129,16 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
       'refer to a valid Font object.')
   end
   
-  local x = x or 0
+  if (x == nil) then x = 0 end
   MintCrate.Assert.type(f, 'x', x, 'number')
   
-  local y = y or 0
+  if (y == nil) then y = 0 end
   MintCrate.Assert.type(f, 'y', y, 'number')
   
-  local startingTextContent = startingTextContent or ""
+  if (startingTextContent == nil) then startingTextContent = "" end
   MintCrate.Assert.type(f, 'startingTextContent', startingTextContent, 'string')
   
-  local options = options or {}
+  if (options == nil) then options = {} end
   MintCrate.Assert.type(f, 'options', options, 'table')
   
   if (options.maxCharsPerLine == nil) then options.maxCharsPerLine = 9999 end
@@ -1890,10 +1890,10 @@ function Engine:_drawText(
   x, y,
   maxCharsPerLine, lineSpacing, wordWrap, alignment
 )
-  maxCharsPerLine = maxCharsPerLine or 9999
-  lineSpacing = lineSpacing or 0
-  wordWrap = wordWrap or false
-  alignment = alignment or "left"
+  if (maxCharsPerLine == nil) then maxCharsPerLine = 9999 end
+  if (lineSpacing == nil) then lineSpacing = 0 end
+  if (wordWrap == nil) then wordWrap = false end
+  if (alignment == nil) then alignment = "left" end
   
   -- Draw lines of text, character-by-character
   for lineNum, line in ipairs(textLines) do
@@ -1998,7 +1998,7 @@ function Engine:setWindowScale(scale, forceResize)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scale', scale, 'number')
   
-  local forceResize = forceResize or false
+  if (forceResize == nil) then forceResize = false end
   MintCrate.Assert.type(f, 'forceResize', forceResize, 'boolean')
   
   if self._windowScale ~= scale or forceResize then
@@ -2533,7 +2533,7 @@ function Engine:playSound(soundName, options)
       'refer to a valid sound file.')
   end
   
-  local options = options or {}
+  if (options == nil) then options = {} end
   MintCrate.Assert.type(f, 'options', options, 'table')
   
   if (options.volume == nil) then options.volume = 1 end
@@ -2572,7 +2572,7 @@ end
 -- @param {number} fadeLength How much to fade in the song, in frames.
 function Engine:_playMusic(trackName, fadeLength)
   local track = self._data.music[trackName]
-  local fadeLength = fadeLength or 0
+  if (fadeLength == nil) then fadeLength = 0 end
   
   -- Stop current track and reset fade lengths
   love.audio.stop(track.source)
@@ -2690,10 +2690,10 @@ function Engine:playMusic(trackName, fadeLength)
   local f = 'playMusic'
   MintCrate.Assert.self(f, self)
   
-  local trackName = trackName or ""
+  if (trackName == nil) then trackName = "" end
   MintCrate.Assert.type(f, 'trackName', trackName, 'string')
   
-  local fadeLength = fadeLength or 0
+  if (fadeLength == nil) then fadeLength = 0 end
   MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
   
   -- Use previously-played track if one wasn't specified.
@@ -2754,7 +2754,7 @@ function Engine:stopMusic(fadeLength)
   local f = 'stopMusic'
   MintCrate.Assert.self(f, self)
   
-  local fadeLength = fadeLength or 0
+  if (fadeLength == nil) then fadeLength = 0 end
   MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
   
   self:_stopMusic(self._currentMusic, fadeLength)

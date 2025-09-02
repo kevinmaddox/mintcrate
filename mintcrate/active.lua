@@ -82,18 +82,29 @@ end
 -- Returns the current angle, in degrees.
 -- @returns {number} The current angle.
 function Active:getAngle()
+  local f = 'getAngle'
+  MintCrate.Assert.self(f, self)
+  
   return self._angle
 end
 
 -- Sets the active's angle.
 -- @param {number} degrees The new angle, in degrees.
 function Active:setAngle(degrees)
+  local f = 'setAngle'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'degrees', degrees, 'number')
+  
   self._angle = degrees
 end
 
 -- Rotates the active by a specified number of degrees.
 -- @param {number} degrees The number of degrees to rotate by.
 function Active:rotate(degrees)
+  local f = 'rotate'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'degrees', degress, 'number')
+  
   self._angle = self._angle + degrees
 end
 
@@ -101,6 +112,11 @@ end
 -- @param {number} x The X coordinate of the point to look at.
 -- @param {number} y The Y coordinate of the point to look at.
 function Active:angleLookAtPoint(x, y)
+  local f = 'angleLookAtPoint'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'x', x, 'number')
+  MintCrate.Assert.type(f, 'y', y, 'number')
+  
   local ax = self:getX()
   local ay = self:getY()
   
@@ -115,69 +131,101 @@ end
 -- Returns the active's horizontal scaling value.
 -- @returns {number} Horizontal scaling value.
 function Active:getScaleX()
+  local f = 'getScaleX'
+  MintCrate.Assert.self(f, self)
+  
   return self._scaleX
 end
 
 -- Returns the active's vertical scaling value.
 -- @returns {number} Vertical scaling value.
 function Active:getScaleY()
+  local f = 'getScaleY'
+  MintCrate.Assert.self(f, self)
+  
   return self._scaleY
 end
 
 -- Sets the active's horizontal scaling value.
 -- @param {number} scaleX The new horizontal scaling value (1.0 is normal).
 function Active:setScaleX(scaleX)
+  local f = 'setScaleX'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'scaleX', scaleX, 'number')
+  
   self._scaleX = scaleX
 end
 
 -- Sets the active's vertical scaling value.
 -- @param {number} scaleX The new vertical scaling value (1.0 is normal).
 function Active:setScaleY(scaleY)
+  local f = 'setScaleY'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'scaleY', scaleY, 'number')
+  
   self._scaleY = scaleY
 end
 
 -- Scales the active horizontally by a specified amount.
 -- @param {number} scaleX The amount to scale horizontally by.
 function Active:scaleX(scaleX)
+  local f = 'scaleX'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'scaleX', scaleX, 'number')
+  
   self._scaleX = self._scaleX + scaleX
 end
 
 -- Scales the active vertically by a specified amount.
 -- @param {number} scaleY The amount to scale vertically by.
 function Active:scaleY(scaleY)
+  local f = 'scaleY'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'scaleY', scaleY, 'number')
+  
   self._scaleY = self._scaleY + scaleY
 end
 
 -- Returns whether the active is flipped horizontally.
 -- @returns {boolean} Horizontal-flip state.
 function Active:isFlippedHorizontally()
+  local f = 'isFlippedHorizontally'
+  MintCrate.Assert.self(f, self)
+  
   return self._flippedHorizontally
 end
 
 -- Returns whether the active is flipped vertically.
 -- @returns {boolean} Vertical-flip state.
 function Active:isFlippedVertically()
+  local f = 'isFlippedVertically'
+  MintCrate.Assert.self(f, self)
+  
   return self._flippedVertically
 end
 
 -- Flips the active horizontally.
 -- @param {boolean} isFlipped Forces whether the active is flipped or not.
 function Active:flipHorizontally(isFlipped)
-  if type(isFlipped) == "nil" then
-    self._flippedHorizontally = not self._flippedHorizontally
-  else
-    self._flippedHorizontally = isFlipped
-  end
+  local f = 'flipHorizontally'
+  MintCrate.Assert.self(f, self)
+  
+  if (isFlipped == nil) then isFlipped = (not self._flippedHorizontally) end
+  MintCrate.Assert.type(f, 'isFlipped', isFlipped, 'boolean')
+  
+  self._flippedHorizontally = isFlipped
 end
 
 -- Flips the active vertically.
 -- @param {boolean} isFlipped Forces whether the active is flipped or not.
 function Active:flipVertically(isFlipped)
-  if type(isFlipped) == "nil" then
-    self._flippedVertically = not self._flippedVertically
-  else
-    self._flippedVertically = isFlipped
-  end
+  local f = 'flipVertically'
+  MintCrate.Assert.self(f, self)
+  
+  if (isFlipped == nil) then isFlipped = (not self._flippedVertically) end
+  MintCrate.Assert.type(f, 'isFlipped', isFlipped, 'boolean')
+  
+  self._flippedVertically = isFlipped
 end
 
 -- -----------------------------------------------------------------------------
@@ -187,12 +235,18 @@ end
 -- Returns the currently-playing animation's name.
 -- @returns {string} Current animation name.
 function Active:getAnimationName()
+  local f = 'getAnimationName'
+  MintCrate.Assert.self(f, self)
+  
   return self._animationName or ""
 end
 
 -- Returns the currently-playing animation's frame number.
 -- @returns {number} Current animation frame.
 function Active:getAnimationFrameNumber()
+  local f = 'getAnimationFrameNumber'
+  MintCrate.Assert.self(f, self)
+  
   return self._animationFrameNumber
 end
 
@@ -200,7 +254,12 @@ end
 -- @param {string} animationName The animation to play.
 -- @param {boolean} forceRestart Forces the animation to always start over.
 function Active:playAnimation(animationName, forceRestart)
-  forceRestart = forceRestart or false
+  local f = 'playAnimation'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'animationName', animationName, 'string')
+  
+  if (forceRestart == nil) then forceRestart = false end
+  MintCrate.Assert.type(f, 'forceRestart', forceRestart, 'boolean')
   
   self._animationName = animationName
   if forceRestart then
@@ -230,6 +289,9 @@ end
 -- Returns the width of the current animation frame.
 -- @returns {number} Current frame width.
 function Active:getImageWidth()
+  local f = 'getImageWidth'
+  MintCrate.Assert.self(f, self)
+  
   local val = 0
   if self._currentAnimation then val = self._currentAnimation.frameWidth end
   return val
@@ -238,12 +300,18 @@ end
 -- Returns the height of the current animation frame.
 -- @returns {number} Current frame height.
 function Active:getImageHeight()
+  local f = 'getImageHeight'
+  MintCrate.Assert.self(f, self)
+  
   local val = 0
   if self._currentAnimation then val = self._currentAnimation.frameHeight end
   return val
 end
 
 function Active:getTransformedImageWidth()
+  local f = 'getTransformedImageWidth'
+  MintCrate.Assert.self(f, self)
+  
   local width  = self:getImageWidth()  * self._scaleX
   local height = self:getImageHeight() * self._scaleY
   local rotation = math.rad(math.abs(self._angle))
@@ -254,6 +322,10 @@ function Active:getTransformedImageWidth()
 end
 
 function Active:getTransformedImageHeight()
+  local f = 'getTransformedImageHeight'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'scaleY', scaleY, 'number')
+  
   local width  = self:getImageWidth()  * self._scaleX
   local height = self:getImageHeight() * self._scaleY
   local rotation = math.rad(math.abs(self._angle))
@@ -276,42 +348,63 @@ end
 -- Returns the collision mask's width (for rectangular masks).
 -- @returns {number} Collider width.
 function Active:getWidth()
+  local f = 'getWidth'
+  MintCrate.Assert.self(f, self)
+  
   return self._collider.w
 end
 
 -- Returns the collision mask's height (for rectangular masks).
 -- @returns {number} Collider height.
 function Active:getHeight()
+  local f = 'getHeight'
+  MintCrate.Assert.self(f, self)
+  
   return self._collider.h
 end
 
 -- Returns the X position of the collider's left edge (for rectangular masks).
 -- @returns {number} Collider left edge.
 function Active:getLeftEdgeX()
+  local f = 'getLeftEdgeX'
+  MintCrate.Assert.self(f, self)
+  
   return self._collider.x
 end
 
 -- Returns the X position of the collider's right edge (for rectangular masks).
 -- @returns {number} Collider right edge.
 function Active:getRightEdgeX()
+  local f = 'getRightEdgeX'
+  MintCrate.Assert.self(f, self)
+  
   return self._collider.x + self._collider.w
 end
 
 -- Returns the Y position of the collider's top edge (for rectangular masks).
 -- @returns {number} Collider top edge.
 function Active:getTopEdgeY()
+  local f = 'getTopEdgeY'
+  MintCrate.Assert.self(f, self)
+  
   return self._collider.y
 end
 
 -- Returns the Y position of the collider's bottom edge (for rectangular masks).
 -- @returns {number} Collider bottom edge.
 function Active:getBottomEdgeY()
+  local f = 'getBottomEdgeY'
+  MintCrate.Assert.self(f, self)
+  
   return self._collider.y + self._collider.h
 end
 
 -- Returns the collision mask's radius (for circular masks).
 -- @returns {number} Collider radius.
 function Active:getRadius()
+  local f = 'getRadius'
+  MintCrate.Assert.self(f, self)
+  
   return self._collider.r
 end
 
@@ -322,6 +415,9 @@ end
 -- Returns the current X coordinate of the active's action point.
 -- @returns {number} Action point X.
 function Active:getActionPointX()
+  local f = 'getActionPointX'
+  MintCrate.Assert.self(f, self)
+  
   self:_updateActionPoints()
   return self._actionPointX
 end
@@ -329,6 +425,9 @@ end
 -- Returns the current Y coordinate of the active's action point.
 -- @returns {number} Action point Y.
 function Active:getActionPointY()
+  local f = 'getActionPointY'
+  MintCrate.Assert.self(f, self)
+  
   self:_updateActionPoints()
   return self._actionPointY
 end

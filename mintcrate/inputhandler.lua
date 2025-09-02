@@ -42,6 +42,11 @@ end
 -- @param {string} inputName Name of the input (used when getting its state).
 -- @param {string} inputCode Keyboard input's scancode.
 function InputHandler:mapKeyboardInput(inputName, inputCode)
+  local f = 'mapKeyboardInput'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'inputName', inputName, 'string')
+  MintCrate.Assert.type(f, 'inputCode', inputCode, 'string')
+  
   self:_mapInput(self._TYPES.KB, inputName, inputCode)
 end
 
@@ -49,6 +54,11 @@ end
 -- @param {string} inputName Name of the input (used when getting its state).
 -- @param {string} inputCode Gamepad input button/analog/trigger code.
 function InputHandler:mapGamepadInput(inputName, inputCode)
+  local f = 'mapGamepadInput'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'inputName', inputName, 'string')
+  MintCrate.Assert.type(f, 'inputCode', inputCode, 'string')
+  
   self:_mapInput(self._TYPES.GP, inputName, inputCode)
 end
 
@@ -82,18 +92,30 @@ end
 -- Specifies the joystick to listen to inputs from.
 -- @param {number} joystickNumber Joystick index number assigned by the OS.
 function InputHandler:setJoystickNumber(joystickNumber)
+  local f = 'setJoystickNumber'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'joystickNumber', joystickNumber, 'number')
+  
   self._joystickNumber = joystickNumber
 end
 
 -- Sets the deadzone value (minimum input threshold) for analog joysticks.
 -- @param {number} deadzoneValue Minimum input threshold, between 0 and 1.
 function InputHandler:setAnalogDeadzone(deadzoneValue)
+  local f = 'setAnalogDeadzone'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'deadzoneValue', deadzoneValue, 'number')
+  
   self._analogDeadzone = deadzoneValue
 end
 
 -- Sets the deadzone value (minimum input threshold) for analog triggers.
 -- @param {number} deadzoneValue Minimum input threshold, between 0 and 1.
 function InputHandler:setTriggerDeadzone(deadzoneValue)
+  local f = 'setTriggerDeadzone'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'deadzoneValue', deadzoneValue, 'number')
+  
   self._triggerDeadzone = deadzoneValue
 end
 
@@ -102,6 +124,11 @@ end
 -- @param {number} repeatWaitTime How many frames to wait before repeat firing.
 -- @param {number} repeatDelay How long wait between repeat fires.
 function InputHandler:setRepeatValues(repeatWaitTime, repeatDelay)
+  local f = 'setRepeatValues'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'repeatWaitTime', repeatWaitTime, 'number')
+  MintCrate.Assert.type(f, 'repeatDelay', repeatDelay, 'number')
+  
   self._repeatWaitTime = repeatWaitTime
   self._repeatDelay = repeatDelay
 end
@@ -115,6 +142,11 @@ end
 -- @param {boolean} enableRepeat boolean Whether the input should repeat fire.
 -- @returns {boolean} Whether the input was pressed.
 function InputHandler:pressed(inputName, enableRepeat)
+  local f = 'pressed'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'inputName', inputName, 'string')
+  MintCrate.Assert.type(f, 'enableRepeat', enableRepeat, 'boolean')
+  
   inputName = tostring(inputName)
   local state = false
   local input = self._inputs[inputName]
@@ -133,6 +165,10 @@ end
 -- @param {string} inputName The name of the input.
 -- @returns {boolean} Whether the input was released.
 function InputHandler:released(inputName)
+  local f = 'released'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'inputName', inputName, 'string')
+  
   inputName = tostring(inputName)
   return self._inputs[inputName].released
 end
@@ -141,6 +177,10 @@ end
 -- @param {string} inputName The name of the input.
 -- @returns {boolean} Whether the input is being held.
 function InputHandler:held(inputName)
+  local f = 'held'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'inputName', inputName, 'string')
+  
   inputName = tostring(inputName)
   return self._inputs[inputName].held
 end
@@ -148,6 +188,9 @@ end
 -- Retrieves data regarding the states of analog joysticks and triggers.
 -- @returns {table} Analog joystick/trigger axis values.
 function InputHandler:getAxes()
+  local f = 'getAxes'
+  MintCrate.Assert.self(f, self)
+  
   local axes = {
     left    = {x = 0, y = 0},
     right   = {x = 0, y = 0},

@@ -54,12 +54,19 @@ end
 -- Returns the currently-displayed text.
 -- @returns {string} Current text.
 function Paragraph:getTextContent()
+  local f = 'getTextContent'
+  MintCrate.Assert.self(f, self)
+  
   return self._textContent
 end
 
 -- Sets the currently-displayed text.
 -- @param {string} textContent The new text to be displayed.
 function Paragraph:setTextContent(textContent)
+  local f = 'setTextContent'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'textContent', textContent, 'string')
+  
   self._textContent = textContent
   
   textContent = string.gsub(textContent, "\r\n", "\n")
@@ -127,12 +134,18 @@ end
 -- Returns the width of a single glyph (character).
 -- @returns {number} The width of a glyph/character.
 function Paragraph:getGlyphWidth()
+  local f = 'getGlyphWidth'
+  MintCrate.Assert.self(f, self)
+  
   return self._glyphWidth
 end
 
 -- Returns the height of a single glyph (character).
 -- @returns {number} The height of a glyph/character.
 function Paragraph:getGlyphHeight()
+  local f = 'getGlyphHeight'
+  MintCrate.Assert.self(f, self)
+  
   return self._glyphHeight
 end
 

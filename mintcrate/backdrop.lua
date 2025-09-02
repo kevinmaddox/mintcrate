@@ -54,18 +54,27 @@ end
 -- Returns the full Backdrop width.
 -- @returns {number} Backdrop width.
 function Backdrop:getWidth()
+  local f = 'getWidth'
+  MintCrate.Assert.self(f, self)
+  
   return self._width
 end
 
 -- Returns the full Backdrop height.
 -- @returns {number} Backdrop height.
 function Backdrop:getHeight()
+  local f = 'getHeight'
+  MintCrate.Assert.self(f, self)
+  
   return self._height
 end
 
 -- Returns the width of only the backdrop texture.
 -- @returns {number} Backdrop texture width.
 function Backdrop:getTextureWidth()
+  local f = 'getTextureWidth'
+  MintCrate.Assert.self(f, self)
+  
   local w, h = self._quad:getTextureDimensions()
   return w
 end
@@ -73,6 +82,9 @@ end
 -- Returns the height of only the backdrop texture.
 -- @returns {number} Backdrop texture height.
 function Backdrop:getTextureHeight()
+  local f = 'getTextureHeight'
+  MintCrate.Assert.self(f, self)
+  
   local w, h = self._quad:getTextureDimensions()
   return h
 end

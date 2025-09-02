@@ -45,12 +45,12 @@ MintCrate To-do List
     [x] Main functions
     [ ] Object-defining functions (defineActives, etc.)
     [ ] Saving/loading data valiation
-  [ ] Room
-  [ ] Inputhandler
-  [ ] Entity
-  [ ] Active
-  [ ] Backdrop
-  [ ] Paragraph
+  [x] Room
+  [x] Inputhandler
+  [x] Entity
+  [x] Active
+  [x] Backdrop
+  [x] Paragraph
   [ ] MathX
   [ ] Util
 [ ] Think really hard about function/class names
