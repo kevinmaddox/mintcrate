@@ -14,8 +14,9 @@ local Util = {}
 -- @returns {*} A randomly-selected entry from the provided list of items.
 function Util.randomChoice(...)
   local values = {...}
-  if (#values == 0) then MintCrate.Error('Function "randomChoice" expects ' ..
-    'at least one argument.') end
+  local f = 'randomChoice'
+  MintCrate.Assert.cond(f, '...', (#values > 0),
+    'expects at least one argument')
   return values[love.math.random(1, #values)]
 end
 
@@ -58,32 +59,37 @@ end
 Util.table = {}
 
 -- Formats a table as a newline-delimited string, useful for debugging.
--- @param {table} o The table to be formatted.
+-- @param {table} tbl The table to be formatted.
 -- @param {number} indent How much to indent each nested item.
 -- @returns {string} A formatted string representing a table.
-function Util.table.toString(o, indent)
+function Util.table.toString(tbl, indent)
   local f = 'table.toString'
-  MintCrate.Assert.type(f, 'o', o, 'table')
+  
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
   if (indent == nil) then indent = 1 end
   MintCrate.Assert.type(f, 'indent', indent, 'number')
-
-  if type(o) == "table" then
-    local s = "{"
-      for k, v in pairs(o) do
-        if type(k) ~= "number" then k = "\""..k.."\"" end
-        s = s .. "\n" .. string.rep("  ", indent) .. "["..k.."] = " ..
-          Util.table.toString(v, indent + 1) .. ","
-      end
-    if s:sub(-1) == "," then s = s:sub(1, -2) end
-    return s .. "\n" .. string.rep("  ", indent - 1) .. "}"
-  else
-    if type(o) == "string" then
-      return "\""..o.."\""
+  
+  function printTbl(o, indent)
+    if type(o) == "table" then
+      local s = "{"
+        for k, v in pairs(o) do
+          if type(k) ~= "number" then k = "\""..k.."\"" end
+          s = s .. "\n" .. string.rep("  ", indent) .. "["..k.."] = " ..
+            printTbl(v, indent + 1) .. ","
+        end
+      if s:sub(-1) == "," then s = s:sub(1, -2) end
+      return s .. "\n" .. string.rep("  ", indent - 1) .. "}"
     else
-      return tostring(o)
+      if type(o) == "string" then
+        return "\""..o.."\""
+      else
+        return tostring(o)
+      end
     end
   end
+  
+  return printTbl(tbl, indent)
 end
 
 -- Prints a table.

@@ -3,7 +3,7 @@
 -- An engine utility class for performing function argument validation.
 -- -----------------------------------------------------------------------------
 
-local Assert = {}
+local Assert = {ERROR_LEVEL = 3}
 
 -- Asserts that a function parameter is defined and is of a specified type.
 -- @param {string} funcName The name of the housing function.
@@ -26,10 +26,10 @@ function Assert.type(funcName, argName, val, expectedType)
   -- Throw error based on fault code.
   if     (faultCode == 1) then
     error('Missing mandatory argument "' .. argName .. 
-      '" in function "' .. funcName .. '".', 3)
+      '" in function "' .. funcName .. '".', Assert.ERROR_LEVEL)
   elseif (faultCode == 2) then
     error('Argument "' .. argName .. '" in function "' .. funcName .. 
-      '" must be of type "' .. expectedType .. '".', 3)
+      '" must be of type "' .. expectedType .. '".', Assert.ERROR_LEVEL)
   end
 end
 
@@ -40,7 +40,18 @@ function Assert.self(funcName, selfInstance)
   if (type(selfInstance) == 'nil') then
     error('Missing reference to "self" in function "' .. funcName .. 
       '". Most likely, you called this function via a dot ' ..
-      'instead of a colon.', 3)
+      'instead of a colon.', Assert.ERROR_LEVEL)
+  end
+end
+
+-- Asserts that a specified condition is met.
+-- @param {string} funcName The name of the housing function.
+-- @param {string} argName The name of the argument to check.
+-- @param {boolean} conditionPassed Resulting value of the tested condition.
+-- @param {string} failMsg The reason why the conditional failed.
+function Assert.cond(funcName, argName, conditionPassed, failMsg)
+  if (conditionPassed == false) then
+    error('Argument "'.. argName .. '" in function "' .. funcName .. '" ' .. failMsg .. '.', Assert.ERROR_LEVEL)
   end
 end
 

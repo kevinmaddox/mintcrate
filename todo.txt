@@ -54,6 +54,7 @@ MintCrate To-do List
   [/] MathX
   [/] Util
 [ ] Think really hard about function/class names
+  [ ] Get rid of toggles, make sure it's all where you have to set it to true/false
   [ ] setTextContent should just be setText
   [ ] Paragraph probably should just be Text
   [ ] engine.lua should be core.lua
@@ -62,16 +63,18 @@ MintCrate To-do List
   [x] Remove pathPrefix from engine core constructor
   [x] Alter it so that tilemap calls aren't in Room but are instead in Engine core
   [ ] Custom error handler not working in example files
-[ ] Go through every class and try to break stuff
-  [ ] Engine core
-  [ ] Room
-  [ ] Inputhandler
-  [ ] Entity
-  [ ] Active
-  [ ] Backdrop
-  [ ] Paragraph
-  [ ] MathX
-  [ ] Util
+[ ] Testing
+  [ ] Ensure that you can't break camera bounds... maybe add some extra conditional validation?
+  [ ] Go through every class and try to break stuff
+    [ ] Engine core
+    [ ] Room
+    [ ] Inputhandler
+    [ ] Entity
+    [ ] Active
+    [ ] Backdrop
+    [ ] Paragraph
+    [ ] MathX
+    [ ] Util
 
 Decisions
 - none

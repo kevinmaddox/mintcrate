@@ -14,8 +14,9 @@ local MathX = {}
 -- @returns {number} Average of all numbers.
 function MathX.average(...)
   local values = {...}
-  if (#values == 0) then MintCrate.Error('Function "average" expects ' ..
-    'at least one argument.') end
+  local f = 'average'
+  MintCrate.Assert.cond(f, '...', (#values > 0),
+    'expects at least one argument')
   
   local total = 0
   
@@ -43,6 +44,13 @@ function MathX.clamp(value, limitLower, limitUpper)
   end
   
   return math.max(limitLower, math.min(limitUpper, value))
+end
+
+-- Tests whether a number is an integer.
+-- @param {number} value The value to test.
+-- @returns {boolean} Whether the value is integral.
+function MathX.isIntegral(value)
+  return (math.floor(value) == value)
 end
 
 -- Returns the midpoint X,Y coordinates for a line (two points in space).

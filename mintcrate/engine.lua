@@ -30,8 +30,15 @@ function Engine:new(
   
   -- Validate function.
   local f = 'new'
+  
   MintCrate.Assert.type(f, 'baseWidth', baseWidth, 'number')
+  MintCrate.Assert.cond(f, 'baseWidth', (baseWidth > 0),
+    'must be a value greater than 0')
+  
   MintCrate.Assert.type(f, 'baseHeight', baseHeight, 'number')
+  MintCrate.Assert.cond(f, 'baseHeight', (baseHeight > 0),
+    'must be a value greater than 0')
+  
   MintCrate.Assert.type(f, 'startingRoom', startingRoom, 'Room')
   
   if (options == nil) then options = {} end
@@ -39,6 +46,10 @@ function Engine:new(
   
   if (options.windowScale == nil) then options.windowScale = 1 end
   MintCrate.Assert.type(f, 'options.windowScale', options.windowScale, 'number')
+  MintCrate.Assert.cond(f, 'options.windowScale', (options.windowScale > 0),
+    'must be a value greater than 0')
+  MintCrate.Assert.cond(f, 'options.windowScale',
+    (MintCrate.MathX.isIntegral(options.windowScale)), 'must be an integer')
   
   if (options.windowTitle == nil) then
     options.windowTitle = "MintCrate Project" end
@@ -296,6 +307,12 @@ function Engine:defineColorKeys(rgbSets)
   local f = 'defineColorKeys'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'rgbSets', rgbSets, 'table')
+  
+  for _, rgb in pairs(rgbSets) do
+    MintCrate.Assert.type(f, 'rgbSets.table.r', rgbSets.table.r, 'number')
+    MintCrate.Assert.type(f, 'rgbSets.table.g', rgbSets.table.g, 'number')
+    MintCrate.Assert.type(f, 'rgbSets.table.b', rgbSets.table.b, 'number')
+  end
   
   self._colorKeyColors = rgbSets
 end
@@ -942,6 +959,8 @@ function Engine:delayFunction(callback, numFrames)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'callback', callback, 'function')
   MintCrate.Assert.type(f, 'numFrames', numFrames, 'number')
+  MintCrate.Assert.cond(f, 'numFrames', (numFrames >= 0),
+    'cannot be a negative value')
   
   table.insert(self._queuedFunctions,
     {callback = callback, remainingFrames = numFrames})
@@ -957,6 +976,8 @@ function Engine:repeatFunction(callback, numFrames, fireImmediately)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'callback', callback, 'function')
   MintCrate.Assert.type(f, 'numFrames', numFrames, 'number')
+  MintCrate.Assert.cond(f, 'numFrames', (numFrames >= 0),
+    'cannot be a negative value')
   
   if (fireImmediately == nil) then fireImmediately = false end
   MintCrate.Assert.type(f, 'fireImmediately', fireImmediately, 'boolean')
@@ -996,10 +1017,8 @@ function Engine:addActive(name, x, y)
   MintCrate.Assert.self(f, self)
 
   MintCrate.Assert.type(f, 'name', name, 'string')
-  if (not self._data.actives[name]) then
-    MintCrate.Error('Argument "name" in function "addActive" does not ' ..
-      'refer to a valid Active object.')
-  end
+  MintCrate.Assert.cond(f, 'name', (self._data.actives[name] ~= nil),
+    'does not refer to a valid Active object')
   
   if (x == nil) then x = 0 end
   MintCrate.Assert.type(f, 'x', x, 'number')
@@ -1048,10 +1067,8 @@ function Engine:addBackdrop(name, x, y, options)
   MintCrate.Assert.self(f, self)
   
   MintCrate.Assert.type(f, 'name', name, 'string')
-  if (not self._data.backdrops[name]) then
-    MintCrate.Error('Argument "name" in function "addBackdrop" does not ' ..
-      'refer to a valid Backdrop object.')
-  end
+  MintCrate.Assert.cond(f, 'name', (self._data.backdrops[name] ~= nil),
+    'does not refer to a valid Backdrop object')
   
   if (x == nil) then x = 0 end
   MintCrate.Assert.type(f, 'x', x, 'number')
@@ -1066,18 +1083,13 @@ function Engine:addBackdrop(name, x, y, options)
   
   if (options.width == nil) then options.width = image:getWidth() end
   MintCrate.Assert.type(f, 'options.width', options.width, 'number')
+  MintCrate.Assert.cond(f, 'options.width', (options.width > 0),
+    'must be a value greater than 0')
   
   if (options.height == nil) then options.height = image:getHeight() end
   MintCrate.Assert.type(f, 'options.height', options.height, 'number')
-  
-  if (options.width <= 0) then
-    MintCrate.Error('Argument "options.width" in function "addBackdrop" ' ..
-    'must be a value greater than 0.')
-  end
-  if (options.height <= 0) then
-    MintCrate.Error('Argument "options.height" in function "addBackdrop" ' ..
-    'must be a value greater than 0.')
-  end
+  MintCrate.Assert.cond(f, 'options.height', (options.height > 0),
+    'must be a value greater than 0')
   
   -- Add backdrop to scene.
   local width = options.width
@@ -1123,11 +1135,8 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   local f = 'addParagraph'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'name', name, 'string')
-  
-  if (not self._data.fonts[name]) then
-    MintCrate.Error('Argument "name" in function "addParagraph" does not ' ..
-      'refer to a valid Font object.')
-  end
+  MintCrate.Assert.cond(f, 'name', (self._data.fonts[name] ~= nil),
+    'does not refer to a valid Font object')
   
   if (x == nil) then x = 0 end
   MintCrate.Assert.type(f, 'x', x, 'number')
@@ -1144,15 +1153,22 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   if (options.maxCharsPerLine == nil) then options.maxCharsPerLine = 9999 end
   MintCrate.Assert.type(
     f, 'options.maxCharsPerLine', options.maxCharsPerLine, 'number')
+  MintCrate.Assert.cond(f, 'options.maxCharsPerLine',
+    (options.maxCharsPerLine > 0), 'must be a value greater than zero')
   
   if (options.lineSpacing == nil) then options.lineSpacing = 0 end
   MintCrate.Assert.type(f, 'options.lineSpacing', options.lineSpacing, 'number')
+  MintCrate.Assert.cond(f, 'options.lineSpacing', (options.lineSpacing >= 0),
+    'cannot be a negative value')
   
   if (options.wordWrap == nil) then options.wordWrap = false end
   MintCrate.Assert.type(f, 'options.wordWrap', options.wordWrap, 'boolean')
   
   if (options.alignment == nil) then options.alignment = "left" end
   MintCrate.Assert.type(f, 'options.alignment', options.alignment, 'string')
+  MintCrate.Assert.cond(f, 'numFrames', (options.alignment == 'left' or
+    options.alignment == 'right' or options.alignment == 'center'),
+    'must be either "left", "right", or "center"')
   
   -- Add text to scene.
   local maxCharsPerLine = options.maxCharsPerLine
@@ -1309,13 +1325,10 @@ function Engine:setTilemap(tilemapLayoutName)
   self._layoutName = MintCrate.Util.string.split(tilemapLayoutName, '_')[2]
   
   -- Ensure tilemap exists.
-  if (
-    not self._data.tilemaps[self._tilemapName] or
-    not self._data.tilemaps[self._tilemapName].layouts[self._layoutName]
-  ) then
-    MintCrate.Error('Argument "tilemapLayoutName" in function "setTilemap" ' ..
-      'does not refer to a valid Tilemap layout.')
-  end
+  MintCrate.Assert.cond(f, 'tilemapLayoutName', (
+    self._data.tilemaps[self._tilemapName] and
+    self._data.tilemaps[self._tilemapName].layouts[self._layoutName]
+  ), 'does not refer to a valid Tilemap layout')
 end
 
 -- -----------------------------------------------------------------------------
@@ -1793,7 +1806,7 @@ function Engine:sys_draw()
     
     love.graphics.rectangle(
       "fill",
-      0, 0,
+      self._camera.x, self._camera.y,
       self._baseWidth, self._baseHeight
     )
   end
@@ -1997,6 +2010,10 @@ function Engine:setWindowScale(scale, forceResize)
   local f = 'setWindowScale'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scale', scale, 'number')
+  MintCrate.Assert.cond(f, 'scale', (scale > 0),
+    'must be a value greater than 0')
+  MintCrate.Assert.cond(f, 'scale', (self.math.isIntegral(scale)),
+    'must be an integer')
   
   if (forceResize == nil) then forceResize = false end
   MintCrate.Assert.type(f, 'forceResize', forceResize, 'boolean')
@@ -2540,10 +2557,8 @@ function Engine:playSound(soundName, options)
   local f = 'playSound'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'soundName', soundName, 'string')
-  if (not self._data.sounds[soundName]) then
-    MintCrate.Error('Argument "name" in function "playSound" does not ' ..
-      'refer to a valid sound file.')
-  end
+  MintCrate.Assert.cond(f, 'soundName', (self._data.sounds[soundName] ~= nil),
+    'does not refer to a valid sound file')
   
   if (options == nil) then options = {} end
   MintCrate.Assert.type(f, 'options', options, 'table')
@@ -2707,16 +2722,17 @@ function Engine:playMusic(trackName, fadeLength)
   
   if (fadeLength == nil) then fadeLength = 0 end
   MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
+  MintCrate.Assert.cond(f, 'fadeLength', (fadeLength >= 0),
+    'cannot be a negative value')
+
   
   -- Use previously-played track if one wasn't specified.
   if (trackName == "" and self._currentMusic) then
     trackName = self._currentMusic
   end
   
-  if (not self._data.music[trackName]) then
-    MintCrate.Error('Argument "trackName" in function "playMusic" does not ' ..
-      'refer to a valid music file.')
-  end
+  MintCrate.Assert.cond(f, 'trackName', (self._data.music[trackName] ~= nil),
+    'does not refer to a valid music file')
   
   -- Play track.
   if (trackName ~= "") then
@@ -2768,6 +2784,8 @@ function Engine:stopMusic(fadeLength)
   
   if (fadeLength == nil) then fadeLength = 0 end
   MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
+  MintCrate.Assert.cond(f, 'fadeLength', (fadeLength >= 0),
+    'cannot be a negative value')
   
   self:_stopMusic(self._currentMusic, fadeLength)
 end
@@ -2776,158 +2794,122 @@ end
 -- Methods for displaying debug data overlays in the game
 -- -----------------------------------------------------------------------------
 
--- Toggles an overlay that shows the current frames-per-second rate.
+-- Shows/hides an overlay that shows the current frames-per-second rate.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:showFps(enabled)
+function Engine:setFpsVisibility(enabled)
   -- Validate function.
-  local f = 'showFps'
+  local f = 'setFpsVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  if type(enabled) == "nil" then
-    self._showFps = not self._showFps
-  else
-    self._showFps = enabled
-  end
+  self._showFps = enabled
 end
 
--- Toggles an overlay that shows information regarding the current room.
+-- Shows/hides an overlay that shows information regarding the current room.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:showRoomInfo(enabled)
+function Engine:setRoomInfoVisibility(enabled)
   -- Validate function.
-  local f = 'showRoomInfo'
+  local f = 'setRoomInfoVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  if type(enabled) == "nil" then
-    self._showRoomInfo = not self._showRoomInfo
-  else
-    self._showRoomInfo = enabled
-  end
+  self._showRoomInfo = enabled
 end
 
--- Toggles an overlay that shows information regarding the camera.
+-- Shows/hides an overlay that shows information regarding the camera.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:showCameraInfo(enabled)
+function Engine:setCameraInfoVisibility(enabled)
   -- Validate function.
-  local f = 'showCameraInfo'
+  local f = 'setCameraInfoVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  if type(enabled) == "nil" then
-    self._showCameraInfo = not self._showCameraInfo
-  else
-    self._showCameraInfo = enabled
-  end
+  self._showCameraInfo = enabled
 end
 
--- Toggles an overlay that displays collision masks for tilemaps.
+-- Shows/hides an overlay that displays collision masks for tilemaps.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:showTilemapCollisionMasks(enabled)
+function Engine:setTilemapCollisionMaskVisibility(enabled)
   -- Validate function.
-  local f = 'showTilemapCollisionMasks'
+  local f = 'setTilemapCollisionMaskVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  if type(enabled) == "nil" then
-    self._showTilemapCollisionMasks = not self._showTilemapCollisionMasks
-  else
-    self._showTilemapCollisionMasks = enabled
-  end
+  self._showTilemapCollisionMasks = enabled
 end
 
--- Toggles an overlay that displays behavior value numbers for tilemaps.
+-- Shows/hides an overlay that displays behavior value numbers for tilemaps.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:showTilemapBehaviorValues(enabled)
+function Engine:setTilemapBehaviorValueVisibility(enabled)
   -- Validate function.
-  local f = 'showTilemapBehaviorValues'
+  local f = 'setTilemapBehaviorValueVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  if type(enabled) == "nil" then
-    self._showTilemapBehaviorValues = not self._showTilemapBehaviorValues
-  else
-    self._showTilemapBehaviorValues = enabled
-  end
+  self._showTilemapBehaviorValues = enabled
 end
 
--- Toggles an overlay that displays collision masks for Active instances.
+-- Shows/hides an overlay that displays collision masks for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:showActiveCollisionMasks(enabled)
+function Engine:setActiveCollisionMaskVisibility(enabled)
   -- Validate function.
-  local f = 'showActiveCollisionMasks'
+  local f = 'setActiveCollisionMaskVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  if type(enabled) == "nil" then
-    self._showActiveCollisionMasks = not self._showActiveCollisionMasks
-  else
-    self._showActiveCollisionMasks = enabled
-  end
+  self._showActiveCollisionMasks = enabled
 end
 
--- Toggles an overlay that displays data for Active instances.
+-- Shows/hides an overlay that displays data for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:showActiveInfo(enabled)
+function Engine:setActiveInfoVisibility(enabled)
   -- Validate function.
-  local f = 'showActiveInfo'
+  local f = 'setActiveInfoVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  if type(enabled) == "nil" then
-    self._showActiveInfo = not self._showActiveInfo
-  else
-    self._showActiveInfo = enabled
-  end
+  self._showActiveInfo = enabled
 end
 
--- Toggles an overlay that visualizes the origin point for Active instances.
+-- Shows/hides an overlay that visualizes the origin point for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:showOriginPoints(enabled)
+function Engine:setOriginPointVisibility(enabled)
   -- Validate function.
-  local f = 'showOriginPoints'
+  local f = 'setOriginPointVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  if type(enabled) == "nil" then
-    self._showActiveOriginPoints = not self._showActiveOriginPoints
-  else
-    self._showActiveOriginPoints = enabled
-  end
+  self._showActiveOriginPoints = enabled
 end
 
--- Toggles an overlay that visualizes the action point for Active instances.
+-- Shows/hides an overlay that visualizes the action point for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:showActionPoints(enabled)
+function Engine:setActionPointVisibility(enabled)
   -- Validate function.
-  local f = 'showActionPoints'
+  local f = 'setActionPointVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  if type(enabled) == "nil" then
-    self._showActiveActionPoints = not self._showActiveActionPoints
-  else
-    self._showActiveActionPoints = enabled
-  end
+  self._showActiveActionPoints = enabled
 end
 
--- Toggles all debug overlays.
+-- Shows/hides all debug overlays.
 -- @param {boolean} enabled Whether the overlays should be shown or not.
-function Engine:showAllDebugOverlays(enabled)
+function Engine:setAllDebugOverlayVisibility(enabled)
     -- Validate function.
-  local f = 'showAllDebugOverlays'
+  local f = 'setAllDebugOverlayVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
-  self:showFps(enabled)
-  self:showRoomInfo(enabled)
-  self:showCameraInfo(enabled)
-  self:showTilemapCollisionMasks(enabled)
-  self:showTilemapBehaviorValues(enabled)
-  self:showActiveCollisionMasks(enabled)
-  self:showActiveInfo(enabled)
-  self:showOriginPoints(enabled)
-  self:showActionPoints(enabled)
+  self:setFpsVisibility(enabled)
+  self:setRoomInfoVisibility(enabled)
+  self:setCameraInfoVisibility(enabled)
+  self:setTilemapCollisionMaskVisibility(enabled)
+  self:setTilemapBehaviorValueVisibility(enabled)
+  self:setActiveCollisionMaskVisibility(enabled)
+  self:setActiveInfoVisibility(enabled)
+  self:setOriginPointVisibility(enabled)
+  self:setActionPointVisibility(enabled)
 end
 
 -- -----------------------------------------------------------------------------
