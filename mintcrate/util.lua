@@ -14,6 +14,8 @@ local Util = {}
 -- @returns {*} A randomly-selected entry from the provided list of items.
 function Util.randomChoice(...)
   local values = {...}
+  if (#values == 0) then MintCrate.Error('Function "randomChoice" expects ' ..
+    'at least one argument.') end
   return values[love.math.random(1, #values)]
 end
 
@@ -27,6 +29,9 @@ Util.boolean = {}
 -- @param {boolean} b A boolean value.
 -- @returns {number} Numeric representation of a boolean value.
 function Util.boolean.toNumber(b)
+  local f = 'boolean.toNumber'
+  MintCrate.Assert.type(f, 'b', b, 'boolean')
+  
   return b and 1 or 0
 end
 
@@ -40,6 +45,9 @@ Util.number = {}
 -- @param {number} n A numeric value (1 or 0).
 -- @returns {boolean} Boolean representation of a numeric value.
 function Util.number.toBoolean(n)
+  local f = 'number.toBoolean'
+  MintCrate.Assert.type(f, 'n', n, 'number')
+  
   return n > 0 and true or false
 end
 
@@ -54,7 +62,11 @@ Util.table = {}
 -- @param {number} indent How much to indent each nested item.
 -- @returns {string} A formatted string representing a table.
 function Util.table.toString(o, indent)
-  local indent = indent or 1
+  local f = 'table.toString'
+  MintCrate.Assert.type(f, 'o', o, 'table')
+  
+  if (indent == nil) then indent = 1 end
+  MintCrate.Assert.type(f, 'indent', indent, 'number')
 
   if type(o) == "table" then
     local s = "{"
@@ -76,9 +88,11 @@ end
 
 -- Prints a table.
 -- @param {table} tbl The table to be printed.
--- @param {boolean} numericallyIndexed Whether keys are numeric & sequential.
-function Util.table.print(tbl, numericallyIndexed)
-  if (numericallyIndexed) then
+function Util.table.print(tbl)
+  local f = 'table.print'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
+  if (Util.table.matchesArrayPattern(tbl)) then
     for i,v in ipairs(tbl) do print(i,v) end
   else
     for k,v in pairs(tbl) do print(k,v) end
@@ -89,6 +103,10 @@ end
 -- @param {table} tbl The table to be rearranged.
 -- @param {number} index The index of the item to be moved.
 function Util.table.moveItemDown(tbl, index)
+  local f = 'table.moveItemDown'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  MintCrate.Assert.type(f, 'index', index, 'number')
+  
   if index > 1 and index <= #tbl then
     local val = tbl[index]
     table.remove(tbl, index)
@@ -100,6 +118,10 @@ end
 -- @param {table} tbl The table to be rearranged.
 -- @param {number} index The index of the item to be moved.
 function Util.table.moveItemUp(tbl, index)
+  local f = 'table.moveItemUp'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  MintCrate.Assert.type(f, 'index', index, 'number')
+  
   if index >= 1 and index < #tbl then
     local val = tbl[index]
     table.remove(tbl, index)
@@ -111,6 +133,10 @@ end
 -- @param {table} tbl The table to be rearranged.
 -- @param {number} index The index of the item to be moved.
 function Util.table.moveItemToStart(tbl, index)
+  local f = 'table.moveItemToStart'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  MintCrate.Assert.type(f, 'index', index, 'number')
+  
   if index > 1 and index <= #tbl then
     local val = tbl[index]
     table.remove(tbl, index)
@@ -122,6 +148,10 @@ end
 -- @param {table} tbl The table to be rearranged.
 -- @param {number} index The index of the item to be moved.
 function Util.table.moveItemToEnd(tbl, index)
+  local f = 'table.moveItemToEnd'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  MintCrate.Assert.type(f, 'index', index, 'number')
+  
   if index >= 1 and index < #tbl then
     local val = tbl[index]
     table.remove(tbl, index)
@@ -132,6 +162,9 @@ end
 -- Reverses the order of a table (for numerically-indexed tables).
 -- @param {table} tbl The table to be reversed.
 function Util.table.reverse(tbl)
+  local f = 'table.reverse'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
   local i, j = 1, #tbl
   
   while i < j do
@@ -145,6 +178,9 @@ end
 -- @param {table} tbl The table to be tallied.
 -- @returns {number} The total number of table elements.
 function Util.table.count(tbl)
+  local f = 'table.count'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
   local c = 0
   for k,v in pairs(tbl) do c = c + 1 end
   return c
@@ -153,6 +189,9 @@ end
 -- Checks whether a table resembles an array (numeric+sequential keys).
 -- @param {table} tbl The table to check.
 function Util.table.matchesArrayPattern(tbl)
+  local f = 'table.matchesArrayPattern'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
   local i = 0
   local isArray = true
   for _,__ in pairs(tbl) do
@@ -176,7 +215,12 @@ Util.string = {}
 -- @param {string} delimiter The character to split on (omit to split all).
 -- @returns {table} The split-up parts of a string.
 function Util.string.split(str, delimiter)
-  delimiter = delimiter or ''
+  local f = 'string.split'
+  MintCrate.Assert.type(f, 'str', str, 'string')
+  
+  if (delimiter == nil) then delimiter = '' end
+  MintCrate.Assert.type(f, 'delimiter', delimiter, 'string')
+  
   str = tostring(str)
   delimiter = tostring(delimiter)
   local split = {}
@@ -203,6 +247,9 @@ end
 -- @param {string} str The string to be converted.
 -- @returns {boolean} A boolean representation of a string.
 function Util.string.toBoolean(str)
+  local f = 'string.toBoolean'
+  MintCrate.Assert.type(f, 'str', str, 'string')
+  
   local bool = false
   if str == 'true' then bool = true end
   return bool
@@ -212,41 +259,38 @@ end
 -- @param {string} str The string to be trimmed.
 -- @returns {string} A string with its leading/trailing whitespace removed.
 function Util.string.trim(str)
+  local f = 'string.trim'
+  MintCrate.Assert.type(f, 'str', str, 'string')
+  
   return str:gsub("^%s*(.-)%s*$", "%1")
 end
 
--- Repeats a string.
--- @param {string} str The string to be repeated.
--- @param {number} numRepeat The number of times to repeat the string.
--- @returns {string} A repeated string.
-function Util.string.reiterate(str, numRepeat)
-  local repStr = ""
-  for i = 1, numRepeat do
-    repStr = repStr .. str
-  end
-  return repStr
-end
-
 -- Pads the left side of a string with characters to a specified length.
--- @param {string} str The string to be padded (numbers work too).
+-- @param {string} str The string to be padded.
 -- @param {number} length The length to pad the string to.
 -- @param {string} padChar The character to pad the string with.
 -- @returns {string} A left-padded string.
 function Util.string.padLeft(str, length, padChar)
-  str = str or ""
-  str = tostring(str)
+  local f = 'string.padLeft'
+  MintCrate.Assert.type(f, 'str', str, 'string')
+  MintCrate.Assert.type(f, 'length', length, 'number')
+  MintCrate.Assert.type(f, 'padChar', padChar, 'string')
+  
   while string.len(str) < length do str = padChar .. str end
   return str
 end
 
 -- Pads the right side of a string with characters to a specified length.
--- @param {string} str The string to be padded (numbers work too).
+-- @param {string} str The string to be padded.
 -- @param {number} length The length to pad the string to.
 -- @param {string} padChar The character to pad the string with.
 -- @returns {string} A right-padded string.
 function Util.string.padRight(str, length, padChar)
-  str = str or ""
-  str = tostring(str)
+  local f = 'string.padRight'
+  MintCrate.Assert.type(f, 'str', str, 'string')
+  MintCrate.Assert.type(f, 'length', length, 'number')
+  MintCrate.Assert.type(f, 'padChar', padChar, 'string')
+  
   while string.len(str) < length do str = str .. padChar end
   return str
 end
@@ -263,6 +307,14 @@ Util.json = {}
 -- @param {number} numSpaces How many spaces should be used for a tab.
 -- @returns {string} A JSON string representing the table.
 function Util.json.encode(tbl, prettyPrint, numSpaces)
+  local f = 'json.encode'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
+  if (prettyPrint == nil) then prettyPrint = false end
+  MintCrate.Assert.type(f, 'prettyPrint', prettyPrint, 'boolean')
+  
+  if (numSpaces == nil) then numSpaces = 2 end
+  MintCrate.Assert.type(f, 'numSpaces', numSpaces, 'number')
   
   function serializeValue(val, key, indent, tab, newline)
     local str = ''
@@ -334,9 +386,6 @@ function Util.json.encode(tbl, prettyPrint, numSpaces)
     return str
   end
   
-  local prettyPrint = prettyPrint or false
-  local numSpaces = numSpaces or 2
-  
   local indent = 0
   local tab = ''
   local newline = ''
@@ -353,6 +402,9 @@ end
 -- @param {string} json The JSON string to deserialize.
 -- @returns {string} A table parsed from the JSON string.
 function Util.json.decode(json)
+  local f = 'json.encode'
+  MintCrate.Assert.type(f, 'json', json, 'string')
+  
   function unescapeChar(str)
     if     (str == '\\"')  then str = '"'       -- Double quote
     elseif (str == '\\b')  then str = '\b'      -- Backspace

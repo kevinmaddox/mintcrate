@@ -2427,7 +2427,11 @@ function Engine:keyPressed(scancode)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
   
-  return (self._keystates[scancode] and self._keystates[scancode].pressed)
+  local pressed = false
+  if (self._keystates[scancode] and self._keystates[scancode].pressed) then
+    pressed = true end
+  
+  return pressed
 end
 
 -- Returns whether a keybaord key was released on the current frame.
@@ -2439,7 +2443,11 @@ function Engine:keyReleased(scancode)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
   
-  return (self._keystates[scancode] and self._keystates[scancode].released)
+  local released = false
+  if (self._keystates[scancode] and self._keystates[scancode].released) then
+    released = true end
+  
+  return released
 end
 
 -- Returns whether a keybaord key is being held down.
@@ -2451,7 +2459,11 @@ function Engine:keyHeld(scancode)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
   
-  return (self._keystates[scancode] and self._keystates[scancode].held)
+  local held = false
+  if (self._keystates[scancode] and self._keystates[scancode].held) then
+    held = true end
+  
+  return held
 end
 
 -- Sets raw keyboard states for key presses.

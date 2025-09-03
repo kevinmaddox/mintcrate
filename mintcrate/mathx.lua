@@ -14,6 +14,9 @@ local MathX = {}
 -- @returns {number} Average of all numbers.
 function MathX.average(...)
   local values = {...}
+  if (#values == 0) then MintCrate.Error('Function "average" expects ' ..
+    'at least one argument.') end
+  
   local total = 0
   
   for i, value in pairs(values) do
@@ -29,6 +32,11 @@ end
 -- @param {number} limitUpper The upper value of the clamping range.
 -- @returns {number} Clamped value.
 function MathX.clamp(value, limitLower, limitUpper)
+  local f = 'clamp'
+  MintCrate.Assert.type(f, 'value', value, 'number')
+  MintCrate.Assert.type(f, 'limitLower', limitLower, 'number')
+  MintCrate.Assert.type(f, 'limitUpper', limitUpper, 'number')
+  
   -- Allow checking regardless of range order
   if limitLower > limitUpper then
     limitLower, limitUpper = limitUpper, limitLower
@@ -44,6 +52,12 @@ end
 -- @param {number} y2 Y coordinate of the second point.
 -- @returns {number, number} X,Y coordinates of the midpoint.
 function MathX.midpoint(x1, y1, x2, y2)
+  local f = 'midpoint'
+  MintCrate.Assert.type(f, 'x1', x1, 'number')
+  MintCrate.Assert.type(f, 'y1', y1, 'number')
+  MintCrate.Assert.type(f, 'x2', x2, 'number')
+  MintCrate.Assert.type(f, 'y2', y2, 'number')
+  
   return ((x1 + x2) / 2), ((y1 + y2) / 2)
 end
 
@@ -52,7 +66,13 @@ end
 -- @param {number} numDecimalPlaces The number of decimal places to round to.
 -- @returns {number} Rounded value.
 function MathX.round(value, numDecimalPlaces)
-  local mult = 10^(numDecimalPlaces or 0)
+  local f = 'round'
+  MintCrate.Assert.type(f, 'value', value, 'number')
+  
+  if (numDecimalPlaces == nil) then numDecimalPlaces = 0 end
+  MintCrate.Assert.type(f, 'numDecimalPlaces', numDecimalPlaces, 'number')
+  
+  local mult = 10^(numDecimalPlaces)
   return math.floor(value * mult + 0.5) / mult
 end
 
@@ -60,6 +80,9 @@ end
 -- @param {number} n A numeric value.
 -- @returns {number} A representation of the state of the number's sign.
 function MathX.sign(value)
+  local f = 'sign'
+  MintCrate.Assert.type(f, 'value', value, 'number')
+  
   local sign = 0
   if (n > 0) then sign = 1 elseif (n < 0) then sign = -1 end
   return sign
@@ -71,6 +94,11 @@ end
 -- @param {number} default Value returned if the condition is not met.
 -- @returns {number} Thresholded-above value.
 function MathX.thresholdAbove(value, threshold, default)
+  local f = 'thresholdAbove'
+  MintCrate.Assert.type(f, 'value', value, 'number')
+  MintCrate.Assert.type(f, 'threshold', threshold, 'number')
+  MintCrate.Assert.type(f, 'default', default, 'number')
+  
   local result = default
   if value >= threshold then result = value end
   return result
@@ -82,6 +110,11 @@ end
 -- @param {number} default Value returned if the condition is not met.
 -- @returns {number} Thresholded-below value.
 function MathX.thresholdBelow(value, threshold, default)
+  local f = 'thresholdBelow'
+  MintCrate.Assert.type(f, 'value', value, 'number')
+  MintCrate.Assert.type(f, 'threshold', threshold, 'number')
+  MintCrate.Assert.type(f, 'default', default, 'number')
+  
   local result = default
   if value <= threshold then result = value end
   return result
