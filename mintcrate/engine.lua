@@ -402,6 +402,30 @@ function Engine:defineActives(data)
       end
     -- Active's sprites/animations
     else
+      -- Validation
+      MintCrate.Assert.cond(f, 'data.table.name',
+        love.filesystem.getInfo(self._resPaths.actives .. item.name),
+        'must reference a valid image file (without extension)')
+      
+      if (item.offset == nil) then item.offset = {0, 0} end
+      MintCrate.Assert.type(f, 'data.table.offset', item.offset, 'table')
+      
+      if (item.actionPoints == nil) then item.actionPoints = {0, 0} end
+      MintCrate.Assert.type(
+        f, 'data.table.actionPoints', item.actionPoints, 'table')
+      
+      if (item.frameCount == nil) then item.frameCount = 1 end
+      MintCrate.Assert.cond(f, 'data.table.frameCount',
+        (item.frameCount > 0), 'must be a value greater than 0')
+      MintCrate.Assert.cond(f, 'data.table.frameCount',
+        (self.math.isIntegral(item.frameCount)), 'must be an integer')
+      
+      if (item.frameDuration == nil) then item.frameDuration = 20 end
+      MintCrate.Assert.cond(f, 'data.table.frameDuration',
+        (item.frameDuration >= 0), 'cannot be a negative value')
+      MintCrate.Assert.cond(f, 'data.table.frameDuration',
+        (self.math.isIntegral(item.frameDuration)), 'must be an integer')
+
       local activeName = self.util.string.split(item.name, '_')[1]
       local animationName = self.util.string.split(item.name, '_')[2]
       
@@ -420,14 +444,14 @@ function Engine:defineActives(data)
       
       local actionPoints = {}
       if item.actionPoints and type(item.actionPoints[1]) == 'number' then
-        for i = 1, (item.frameCount or 1) do
+        for i = 1, item.frameCount do
           table.insert(actionPoints,
             {item.actionPoints[1], item.actionPoints[2]})
         end
       elseif item.actionPoints and type(item.actionPoints[1]) == 'table' then
         actionPoints = item.actionPoints
       else
-        for i = 1, (item.frameCount or 1) do
+        for i = 1, item.frameCount do
           table.insert(actionPoints, {0, 0})
         end
       end
@@ -437,11 +461,11 @@ function Engine:defineActives(data)
         quads = {},
         offsetX = offsetX,
         offsetY = offsetY,
-        transformX = item.tx or 0,
-        transformY = item.ty or 0,
+        -- transformX = item.tx or 0, -- TODO: Remove me?
+        -- transformY = item.ty or 0, -- TODO: Remove me?
         actionPoints = actionPoints,
-        frameCount = item.frameCount or 1,
-        frameDuration = item.frameDuration or -1
+        frameCount = item.frameCount,
+        frameDuration = item.frameDuration
       }
       
       animation.frameWidth = animation.image:getWidth() / animation.frameCount
@@ -1664,7 +1688,7 @@ function Engine:sys_draw()
         -- Draw collison mask behavior numbers
         if self._showTilemapBehaviorValues then
           self:_drawText(
-            {tileType}, self._data.fonts["system_counter"],
+            {tostring(tileType)}, self._data.fonts["system_counter"],
             mask.x + 2, mask.y + 2,
             3, 0, false
           )
@@ -1767,15 +1791,15 @@ function Engine:sys_draw()
         local x = self.math.round(active:getX(), 2)
         local y = self.math.round(active:getY(), 2)
         
-        local xParts = self.util.string.split(x, ".")
-        local yParts = self.util.string.split(y, ".")
+        local xParts = self.util.string.split(tostring(x), ".")
+        local yParts = self.util.string.split(tostring(y), ".")
         
         x =
           self.util.string.padLeft(xParts[1], pad, " ") .. "." ..
-          self.util.string.padRight(xParts[2], 2, "0")
+          self.util.string.padRight((xParts[2] or ''), 2, "0")
         y =
           self.util.string.padLeft(yParts[1], pad, " ") .. "." ..
-          self.util.string.padRight(yParts[2], 2, "0")
+          self.util.string.padRight((yParts[2] or ''), 2, "0")
         
         self:_drawText(
           {
@@ -1822,8 +1846,8 @@ function Engine:sys_draw()
     
     local strLines = {
       "Camera",
-      "X:" .. self.util.string.padLeft(self._camera.x, pad, " "),
-      "Y:" .. self.util.string.padLeft(self._camera.y, pad, " ")
+      "X:" .. self.util.string.padLeft(tostring(self._camera.x), pad, " "),
+      "Y:" .. self.util.string.padLeft(tostring(self._camera.y), pad, " ")
     }
     
     if not self._cameraIsBound then
@@ -1855,7 +1879,7 @@ function Engine:sys_draw()
   -- Draw FPS debug overlay
   if self._showFps then
     self:_drawText(
-      {love.timer.getFPS()},
+      {tostring(love.timer.getFPS())},
       self._data.fonts["system_counter"],
       self._camera.x, self._camera.y,
       self._baseWidth / self._data.fonts["system_counter"].charWidth,
@@ -1889,7 +1913,7 @@ function Engine:sys_draw()
 end
 
 -- Renders text via a bitmap font.
--- @param {string} textContent The text to be displayed.
+-- @param {table} textLines The lines of text to be displayed.
 -- @param {table} font The bitmap font to write the text with.
 -- @param {number} x The X position to write the text at.
 -- @param {number} y The Y position to write the text at.

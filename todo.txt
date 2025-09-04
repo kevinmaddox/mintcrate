@@ -75,6 +75,7 @@ MintCrate To-do List
     [ ] Paragraph
     [ ] MathX
     [ ] Util
+[ ] Make everything nice and clean
 
 Decisions
 - none
