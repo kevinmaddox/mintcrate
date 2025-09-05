@@ -37,14 +37,12 @@ MintCrate To-do List
 [x] Engine setting to turn BGM/SFX on/off (and adjust volume, perhaps?)
 [x] Bug - Sounds not stopping when changing rooms (stopAllSounds not working?)
 [x] Option to fade or persist audio when fading out a room
-[/] Saving/loading data
-  [ ] Finish final touches on JSON parser
 [/] Add validation and error-checking to functions
   [x] Loader
-  [/] Engine core
+  [x] Engine core
     [x] Main functions
-    [ ] Object-defining functions (defineActives, etc.)
-    [ ] Saving/loading data valiation
+    [x] Object-defining functions (defineActives, etc.)
+    [x] Saving/loading data valiation
   [/] Room
   [/] Inputhandler
   [/] Entity
@@ -53,6 +51,9 @@ MintCrate To-do List
   [/] Paragraph
   [/] MathX
   [/] Util
+    [ ] Main stuff
+    [x] JSON encoder/decoder
+[ ] Dump/log utility
 [ ] Think really hard about function/class names
   [ ] Get rid of toggles, make sure it's all where you have to set it to true/false
   [ ] setTextContent should just be setText
@@ -76,6 +77,8 @@ MintCrate To-do List
     [ ] MathX
     [ ] Util
 [ ] Make everything nice and clean
+[ ] Reconsider fonts/text, and how it affects localizations
+[ ] Long-term: Make the JSON parser handle more bad-JSON errors
 
 Decisions
 - none

@@ -322,19 +322,24 @@ function Util.json.encode(tbl, prettyPrint, numSpaces)
   if (numSpaces == nil) then numSpaces = 2 end
   MintCrate.Assert.type(f, 'numSpaces', numSpaces, 'number')
   
+  -- This sub-function attempts to serialize a value
   function serializeValue(val, key, indent, tab, newline)
     local str = ''
+    local errorMsg = ''
     
+    -- Add formatting
     str = str .. newline .. str.rep(tab, indent)
     
+    -- Add key if table has named keys
     if (key) then str = str .. '"'..key..'":' end
     
+    -- Serialize value
     if (type(val) == 'boolean') then
       str = str .. tostring(val) .. ','
     elseif (type(val) == 'number') then
       str = str .. val .. ','
     elseif (type(val) == 'string') then
-      -- Escape characters
+      -- Handle characters which need to be escaped
       val = val:gsub('\\', '\\\\') -- Backslash
       val = val:gsub('/', '\\/')    -- Forward slash
       val = val:gsub('"', '\\"')    -- Double quote
@@ -346,17 +351,29 @@ function Util.json.encode(tbl, prettyPrint, numSpaces)
       
       str = str .. '"'..val..'"' .. ','
     elseif (type(val) == 'table') then
-      str = str .. serializeTable(val, indent, tab, newline) .. ','
+      -- Recursively serialize sub-table
+      local result
+      result, errorMsg = serializeTable(val, indent, tab, newline)
+      if (result ~= nil) then
+        str = str .. result .. ','
+      else
+        return nil, errorMsg
+      end
     else
-      -- TODO: Throw error
+      -- Return error if type was not serializable
+      return
+        nil,
+        'Attempted to serialize data of invalid type "' .. type(val) .. '".'
     end
     
-    return str
+    return str, errorMsg
   end
   
+  -- This sub-function attempts to serialize a table
   function serializeTable(tbl, indent, tab, newline)
     -- Prepare for serialization
     local str = ''
+    local errorMsg = ''
     
     -- Determine whether table matches the pattern of a JS array or object
     local isArray = Util.table.matchesArrayPattern(tbl)
@@ -371,10 +388,26 @@ function Util.json.encode(tbl, prettyPrint, numSpaces)
     indent = indent + 1
     
     -- Serialize value
-    if (Util.table.matchesArrayPattern(tbl)) then
-      for _, val in ipairs(tbl) do str = str .. serializeValue(val, nil, indent, tab, newline) end
+    if (isArray) then
+      for _, val in ipairs(tbl) do
+        local result
+        result, errorMsg = serializeValue(val, nil, indent, tab, newline)
+        if (result ~= nil) then
+          str = str .. result
+        else
+          return nil, errorMsg
+        end
+      end
     else
-      for key, val in pairs(tbl) do str = str .. serializeValue(val, key, indent, tab, newline) end
+      for key, val in pairs(tbl) do
+        local result
+        result, errorMsg = serializeValue(val, key, indent, tab, newline)
+        if (result ~= nil) then
+          str = str .. result
+        else
+          return nil, errorMsg
+        end
+      end
     end
     
     -- Remove last comma
@@ -389,7 +422,7 @@ function Util.json.encode(tbl, prettyPrint, numSpaces)
       str = str .. newline .. str.rep(tab, indent) .. "}"
     end
     
-    return str
+    return str, errorMsg
   end
   
   local indent = 0
@@ -401,7 +434,8 @@ function Util.json.encode(tbl, prettyPrint, numSpaces)
     newline = '\n'
   end
   
-  return serializeTable(tbl, indent, tab, newline)
+  local result, errorMsg = serializeTable(tbl, indent, tab, newline)
+  return result, errorMsg
 end
 
 -- Deserializes a standard JSON string into a table.
@@ -411,6 +445,7 @@ function Util.json.decode(json)
   local f = 'json.encode'
   MintCrate.Assert.type(f, 'json', json, 'string')
   
+  -- This sub-function attempts to un-escape an escaped character
   function unescapeChar(str)
     if     (str == '\\"')  then str = '"'       -- Double quote
     elseif (str == '\\b')  then str = '\b'      -- Backspace
@@ -423,6 +458,7 @@ function Util.json.decode(json)
     return str
   end
   
+  -- This sub-function attempts to parse a JSON-encoded value
   function parseValue(json, index)
     local val = ''
     local ignoreChar = false -- Used to ignore second part of escape chars
@@ -457,7 +493,6 @@ function Util.json.decode(json)
         break
       -- Parse next 2 characters if an escape character was found
       elseif (c == '\\') then
-        -- print('ESCAPE!', json:sub(i, i+4))
         val = val .. unescapeChar(c..json:sub(i+1, i+1))
         ignoreChar = true
       -- Parse normal character
@@ -478,11 +513,13 @@ function Util.json.decode(json)
     return val, index
   end
   
+  -- This sub-function attempts to parse a JSON array/object
   function deserializeJson(json, index)
     local state = ''         -- Used to branch parsing of keys vs values
     local tableType = ''     -- Used to handle parsing objects (keyed) vs arrays
     local index = index or 1 -- The current parsing position of the JSON string
     local data = {}          -- Stores the parsed data
+    local errorMsg = ''
     
     -- Get rid of formatting-related line breaks and tabs
     json = json:gsub('\n', '')
@@ -497,11 +534,8 @@ function Util.json.decode(json)
       tableType = 'array'
       state = 'findValue'
     else
-      -- TODO: Throw error
+      return nil, nil, 'Could not find opening bracket or brace.'
     end
-    
-    
-    -- print('first:', firstChar)
     
     index = index + 1
     
@@ -517,11 +551,6 @@ function Util.json.decode(json)
       if (c == ' ' or c == ':' or c == ',' or i < index) then goto continue end
 
       if (c == '}' or c == ']') then
-        -- print('exiting...')
-        -- print('char', c)
-        -- print('loopidx', i)
-        -- print('ouridx', index)
-        -- print(json:sub(i))
         -- Exit out of current array/object
         index = i + 1
         break
@@ -532,7 +561,6 @@ function Util.json.decode(json)
         if (c == '"') then
           -- Parse key
           currentKey, index = parseValue(json, i)
-          -- print('key:', currentKey)
           
           -- Indicate we'll look for a value next time
           state = 'findValue'
@@ -542,12 +570,14 @@ function Util.json.decode(json)
         -- Parse value
         if (c == '{' or c == '[') then
           -- Recurse if we've found an array/object
-          currentValue, index = deserializeJson(json, i)
+          currentValue, index, errorMsg = deserializeJson(json, i)
+          if (currentValue == nil) then
+            return nil, nil, errorMsg
+          end
         else
           -- Parse value normally
           currentValue, index = parseValue(json, i)
         end
-        -- print('val:', currentValue)
         
         -- Store into data
         if (tableType == 'object') then
@@ -565,10 +595,16 @@ function Util.json.decode(json)
       ::continue::
     end
     
-    return data, index
+    return data, index, errorMsg
   end
   
-  return deserializeJson(json)
+  local result, index, errorMsg = deserializeJson(json)
+  
+  if (errorMsg ~= '') then
+    errorMsg = 'JSON parsing error: ' .. errorMsg
+  end
+  
+  return result, errorMsg
 end
 
 -- -----------------------------------------------------------------------------

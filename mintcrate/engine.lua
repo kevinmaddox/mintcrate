@@ -388,47 +388,47 @@ function Engine:defineActives(data)
     
     -- Active's base name
     if not string.find(item.name, '_') then
-      MintCrate.Assert.cond(f, "data.table.name (name: '"..item.name.."')",
+      MintCrate.Assert.cond(f, "data.table.name (entry: '"..item.name.."')",
         (self._data.actives[item.name] == nil), 'was already specified')
       self._data.actives[item.name] = { animations = {} }
     -- Active's collider data
     elseif string.find(item.name, 'collider') then
       local nameParts = self.util.string.split(item.name, '_')
-      MintCrate.Assert.cond(f, "data.table.name (name: '"..item.name.."')",
+      MintCrate.Assert.cond(f, "data.table.name (entry: '"..item.name.."')",
         (#nameParts == 2), 'must be formatted as "active_collider"')
       
       if (item.offset == nil) then item.offset = {0, 0} end
-      MintCrate.Assert.type(f, "data.table.offset (name: '"..item.name.."')",
+      MintCrate.Assert.type(f, "data.table.offset (entry: '"..item.name.."')",
         item.offset, 'table')
-      MintCrate.Assert.cond(f, "data.table.offset (name: '"..item.name.."')",
+      MintCrate.Assert.cond(f, "data.table.offset (entry: '"..item.name.."')",
         (#item.offset == 2), 'expects two numbers, representing ' ..
         'the X and Y offsets of the collider')
       
       if (item.width == nil) then item.width = 0 end
       if (item.height == nil) then item.height = 0 end
       if (item.radius == nil) then item.radius = 0 end
-      MintCrate.Assert.type(f, "data.table.width (name: '"..item.name.."')",
+      MintCrate.Assert.type(f, "data.table.width (entry: '"..item.name.."')",
         item.width, 'number')
-      MintCrate.Assert.type(f, "data.table.height (name: '"..item.name.."')",
+      MintCrate.Assert.type(f, "data.table.height (entry: '"..item.name.."')",
         item.height, 'number')
-      MintCrate.Assert.type(f, "data.table.radius (name: '"..item.name.."')",
+      MintCrate.Assert.type(f, "data.table.radius (entry: '"..item.name.."')",
         item.radius, 'number')
       
       if (item.width == 0 and item.height == 0 and item.radius == 0) then
         MintCrate.Error(f, 'Non-zero dimensions must be provided for this ' ..
-          "collider (name: '"..item.name.."').")
+          "collider (entry: '"..item.name.."').")
       elseif (
         (item.width ~= 0 and item.radius ~= 0) or
         (item.height ~= 0 and item.radius ~= 0) 
       ) then
         MintCrate.Error(f, 'Width/height cannot be specified along with '
-          .. "radius. They are mutually exclusive (name: '"..item.name.."').")
+          .. "radius. They are mutually exclusive (entry: '"..item.name.."').")
       elseif (item.width ~= 0 and item.height == 0) then
         MintCrate.Error(f, "Width was non-zero, but height was not " ..
-          "(name: '"..item.name.."').")
+          "(entry: '"..item.name.."').")
       elseif (item.width == 0 and item.height ~= 0) then
         MintCrate.Error(f, "Height was non-zero, but width was not " ..
-          "(name: '"..item.name.."').")
+          "(entry: '"..item.name.."').")
       end
       
       local activeName = nameParts[1]
@@ -448,20 +448,13 @@ function Engine:defineActives(data)
     else
       -- Validation
       local nameParts = self.util.string.split(item.name, '_')
-      MintCrate.Assert.cond(f, "data.table.name (name: '"..item.name.."')",
+      MintCrate.Assert.cond(f, "data.table.name (entry: '"..item.name.."')",
         (#nameParts == 2), 'must be formatted as "active_animation"')
       local activeName = nameParts[1]
       local animationName = nameParts[2]
-      MintCrate.Assert.cond(f, "data.table.name (name: '"..item.name.."')",
+      MintCrate.Assert.cond(f, "data.table.name (entry: '"..item.name.."')",
         (self._data.actives[activeName].animations[animationName] == nil),
         'was already specified')
-      
-      if (item.offset == nil) then item.offset = {0, 0} end
-      MintCrate.Assert.type(f, "data.table.offset (name: '"..item.name.."')",
-        item.offset, 'table')
-      MintCrate.Assert.cond(f, "data.table.offset (name: '"..item.name.."')",
-        (#item.offset == 2), 'expects two numbers, representing ' ..
-        'the X and Y offsets of the sprite')
       
       if (self.util.string.trim(activeName) == '') then
         MintCrate.Error(f, 'Active name for animation "' .. item.name ..
@@ -470,41 +463,48 @@ function Engine:defineActives(data)
         MintCrate.Error(f, 'Animation name for animation "' .. item.name ..
           '" cannot be blank. Expected format is "active_animation".') end
       
+      if (item.offset == nil) then item.offset = {0, 0} end
+      MintCrate.Assert.type(f, "data.table.offset (entry: '"..item.name.."')",
+        item.offset, 'table')
+      MintCrate.Assert.cond(f, "data.table.offset (entry: '"..item.name.."')",
+        (#item.offset == 2), 'expects two numbers, representing ' ..
+        'the X and Y offsets of the sprite')
+      
       if (item.actionPoints == nil) then item.actionPoints = {{0, 0}} end
       MintCrate.Assert.type(
-        f, "data.table.actionPoints (name: '"..item.name.."')",
+        f, "data.table.actionPoints (entry: '"..item.name.."')",
         item.actionPoints, 'table')
       for i = 1, #item.actionPoints do
         MintCrate.Assert.cond(f,
-          "data.table.actionPoints["..i.."] (name: '"..item.name.."')",
+          "data.table.actionPoints["..i.."] (entry: '"..item.name.."')",
           #item.actionPoints[i] == 2, 'expects two numbers, representing ' ..
           'the X and Y offsets of the action point')
         MintCrate.Assert.type(f,
-          "data.table.actionPoints["..i.."][1] (name: '"..item.name.."')",
+          "data.table.actionPoints["..i.."][1] (entry: '"..item.name.."')",
           item.actionPoints[i][1], 'number')
         MintCrate.Assert.type(f,
-          "data.table.actionPoints["..i.."][2] (name: '"..item.name.."')",
+          "data.table.actionPoints["..i.."][2] (entry: '"..item.name.."')",
           item.actionPoints[i][2], 'number')
       end
       
       if (item.frameCount == nil) then item.frameCount = 1 end
       MintCrate.Assert.type(
-        f, "data.table.frameCount (name: '"..item.name.."')",
+        f, "data.table.frameCount (entry: '"..item.name.."')",
         item.frameCount, 'number')
-      MintCrate.Assert.cond(f, "data.table.frameCount (name:'"..item.name.."')",
+      MintCrate.Assert.cond(f, "data.table.frameCount (entry:'"..item.name.."')",
         (item.frameCount > 0), 'must be a value greater than 0')
-      MintCrate.Assert.cond(f, "data.table.frameCount (name:'"..item.name.."')",
+      MintCrate.Assert.cond(f, "data.table.frameCount (entry:'"..item.name.."')",
         (self.math.isIntegral(item.frameCount)), 'must be an integer')
       
       if (item.frameDuration == nil) then item.frameDuration = 20 end
       MintCrate.Assert.type(
-        f, "data.table.frameDuration (name: '"..item.name.."')",
+        f, "data.table.frameDuration (entry: '"..item.name.."')",
         item.frameDuration, 'number')
       MintCrate.Assert.cond(f,
-        "data.table.frameDuration (name:'"..item.name.."')",
+        "data.table.frameDuration (entry:'"..item.name.."')",
         (item.frameDuration >= 0), 'cannot be a negative value')
       MintCrate.Assert.cond(f,
-        "data.table.frameDuration (name:'"..item.name.."')",
+        "data.table.frameDuration (entry:'"..item.name.."')",
         (self.math.isIntegral(item.frameDuration)), 'must be an integer')
       
       -- Specify default animation (the first one the user defines)
@@ -580,7 +580,7 @@ function Engine:defineBackdrops(data)
     )
     
     MintCrate.Assert.cond(f,
-      "data.table.name (name: '"..item.name.."')",
+      "data.table.name (entry: '"..item.name.."')",
       (self._data.backdrops[item.name] == nil),
       'was already specified'
     )
@@ -590,7 +590,7 @@ function Engine:defineBackdrops(data)
     end
     
     MintCrate.Assert.type(f,
-      "data.table.mosaic (name: '"..item.name.."')",
+      "data.table.mosaic (entry: '"..item.name.."')",
       item.mosaic,
       'boolean'
     )
@@ -622,7 +622,7 @@ function Engine:defineFonts(data)
     )
     
     MintCrate.Assert.cond(f,
-      "data.table.name (name: '"..item.name.."')",
+      "data.table.name (entry: '"..item.name.."')",
       (self._data.fonts[item.name] == nil),
       'was already specified'
     )
@@ -708,7 +708,7 @@ function Engine:defineSounds(data)
     )
     
     MintCrate.Assert.cond(f,
-      "data.table.name (name: '"..item.name.."')",
+      "data.table.name (entry: '"..item.name.."')",
       (self._data.sounds[item.name] == nil),
       'was already specified'
     )
@@ -758,7 +758,7 @@ function Engine:defineMusic(data)
     )
     
     MintCrate.Assert.cond(f,
-      "data.table.name (name: '"..item.name.."')",
+      "data.table.name (entry: '"..item.name.."')",
       (self._data.music[item.name] == nil),
       'was already specified'
     )
@@ -824,8 +824,32 @@ function Engine:defineTilemaps(data)
   MintCrate.Assert.type(f, 'data', data, 'table')
   
   for _, item in ipairs(data) do
+    MintCrate.Assert.type(f,
+      'data.table.name',
+      item.name,
+      'string'
+    )
+    
     -- Tilemap's base name (refers to the image file)
     if not string.find(item.name, '_') then
+      MintCrate.Assert.cond(f,
+        "data.table.name (entry: '"..item.name.."')",
+        (self._data.tilemaps[item.name] == nil),
+        'was already specified'
+      )
+      
+      MintCrate.Assert.type(f,
+        "data.table.tileWidth (entry: '"..item.name.."')",
+        item.tileWidth,
+        'number'
+      )
+      
+      MintCrate.Assert.type(f,
+        "data.table.tileHeight (entry: '"..item.name.."')",
+        item.tileHeight,
+        'number'
+      )
+      
       local tilemap = {
         image = self:_loadImage(self._resPaths.tilemaps .. item.name),
         quads = {},
@@ -849,12 +873,48 @@ function Engine:defineTilemaps(data)
       self._data.tilemaps[item.name] = tilemap
     -- Tilemap's actual map data files
     else
-      local tilemapName = self.util.string.split(item.name, '_')[1]
-      local layoutName = self.util.string.split(item.name, '_')[2]
+      local nameParts = self.util.string.split(item.name, '_')
+      
+      MintCrate.Assert.cond(f,
+        "data.table.name (entry: '"..item.name.."')",
+        (#nameParts == 2),
+        'must be formatted as "tilemap_layout"'
+      )
+      
+      local tilemapName = nameParts[1]
+      local layoutName = nameParts[2]
+      
+      MintCrate.Assert.cond(f,
+        "data.table.name (entry: '"..item.name.."')",
+        (self._data.tilemaps[tilemapName].layouts[layoutName] == nil),
+        'was already specified'
+      )
+      
+      if (self.util.string.trim(tilemapName) == '') then
+        MintCrate.Error(f,
+          'Tilemap name for tilemap layout "' .. item.name ..
+          '" cannot be blank. Expected format is "tilemap_layout".'
+        )
+      end
+      
+      if (self.util.string.trim(layoutName) == '') then
+        MintCrate.Error(f,
+          'Layout name for tilemap layout "' .. item.name ..
+          '" cannot be blank. Expected format is "tilemap_layout".'
+        )
+      end
+      
+      local path = self._resPaths.tilemaps .. item.name .. '.lua'
+      if (not love.filesystem.getInfo(path)) then
+        MintCrate.Error(nil,
+          'Could not locate tilemap layout file "' .. path .. 
+          '". There does not appear to be a valid LUA file at this path.'
+        )
+      end
       
       -- Load and store tilemap layouts
-      local path = string.gsub(self._resPaths.tilemaps, "/", ".")
-      local tilemapData = require(path .. item.name)
+      path = string.gsub(self._resPaths.tilemaps, "/", ".") .. item.name
+      local tilemapData = require(path)
       self._data.tilemaps[tilemapName].layouts[layoutName] = {
         tiles = tilemapData.tiles
       }
@@ -1538,32 +1598,94 @@ end
 -- Saves a table of game data to a JSON file to the user's app data folder.
 -- @param {string} filename Name of the JSON file (without file extension).
 -- @param {data} Table of data to encode and save as JSON data.
+-- @returns {boolean} Whether the data was saved successfully or not.
+-- @returns {string} An error message, if the data failed to save.
 function Engine:saveData(filename, data)
-  -- Validate function.
   local f = 'saveData'
-  MintCrate.Assert.self(f, self)
-  MintCrate.Assert.type(f, 'filename', filename, 'string')
-  MintCrate.Assert.type(f, 'data', data, 'table')
   
-  -- Convert data to JSON string and save in a JSON file.
-  local json = self.util.json.encode(data)
-  love.filesystem.write(filename..'.json', json)
+  MintCrate.Assert.self(f, self)
+  
+  MintCrate.Assert.type(f,
+    'filename',
+    filename,
+    'string'
+  )
+  
+  MintCrate.Assert.type(f,
+    'data',
+    data,
+    'table'
+  )
+  
+  local success = true
+  local msg = ''
+  
+  -- Convert table data to JSON string
+  local json, msg = self.util.json.encode(data)
+  if (json == nil) then
+    success = false
+  -- Save JSON data to file
+  elseif (not love.filesystem.write(filename..'.json', json)) then
+    success = false
+    msg = "Could not write data to filesystem."
+  end
+  
+  return success, msg
 end
 
 -- Loads a table of game data from a JSON file from the user's app data folder.
 -- @param {string} filename Name of the JSON file (without file extension).
--- @returns {table} Decoded JSON data, stored in a table.
+-- @returns {table|nil} Decoded JSON data, or nil on read error.
+-- @returns {string} An error message, if the data failed to load.
 function Engine:loadData(filename)
-  -- Validate function.
   local f = 'loadData'
-  MintCrate.Assert.self(f, self)
-  MintCrate.Assert.type(f, 'filename', filename, 'string')
   
-  -- Load JSON data from file and parse into a table.
-  local json = love.filesystem.read(filename..'.json')
-  local data = {}
-  if (json ~= nil) then data = self.util.json.decode(json) end
-  return data
+  MintCrate.Assert.self(f, self)
+  
+  MintCrate.Assert.type(f,
+    'filename',
+    filename,
+    'string'
+  )
+  
+  local data = nil
+  local msg = ''
+  
+  -- Load JSON data from file
+  local json, msg = love.filesystem.read(filename..'.json')
+  
+  if (json ~= nil) then
+    -- love.filesystem.read returns number of bytes on success, so wipe this
+    msg = ''
+    
+    -- Parse JSON data if loading was successful
+    data, msg = self.util.json.decode(json)
+  end
+  
+  return data, msg
+end
+
+-- Checks if game data JSON file exists in user's app data folder.
+-- @param {string} filename Name of the JSON file (without file extension).
+-- @returns {boolean} Wheteher the file exists or not.
+function Engine:savedDataExists(filename)
+  local f = 'savedDataExists'
+  
+  MintCrate.Assert.self(f, self)
+  
+  MintCrate.Assert.type(f,
+    'filename',
+    filename,
+    'string'
+  )
+  
+  local exists = false
+  
+  if (love.filesystem.read(filename..'.json')) then
+    exists = true
+  end
+  
+  return exists
 end
 
 -- -----------------------------------------------------------------------------
