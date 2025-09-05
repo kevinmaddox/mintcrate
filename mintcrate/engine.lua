@@ -334,13 +334,23 @@ function Engine:_loadImage(imagePath, isEngineResource)
   -- Otherwise, load as normal
   else
     -- Figure out file extension
+    local fileFound = false
     for _, ext in ipairs({'png', 'jpg'}) do
       if love.filesystem.getInfo(imagePath..'.'..ext) then
         imagePath = imagePath..'.'..ext
+        fileFound = true
         break
       end
     end
-    imageData = love.image.newImageData(imagePath)
+    
+    if (fileFound) then
+      imageData = love.image.newImageData(imagePath)
+    else
+      MintCrate.Error(nil,
+        'Could not locate entity image "' .. imagePath .. 
+        '". There does not appear to be a valid PNG or JPG file at this path.'
+      )
+    end
   end
   
   
@@ -374,95 +384,151 @@ function Engine:defineActives(data)
   MintCrate.Assert.type(f, 'data', data, 'table')
   
   for _, item in ipairs(data) do
+    MintCrate.Assert.type(f, 'data.table.name', item.name, 'string')
+    
     -- Active's base name
     if not string.find(item.name, '_') then
+      MintCrate.Assert.cond(f, "data.table.name (name: '"..item.name.."')",
+        (self._data.actives[item.name] == nil), 'was already specified')
       self._data.actives[item.name] = { animations = {} }
     -- Active's collider data
     elseif string.find(item.name, 'collider') then
-      local activeName = self.util.string.split(item.name, '_')[1]
-      local offsetX = 0
-      local offsetY = 0
-      if item.offset then
-        offsetX = item.offset[1]
-        offsetY = item.offset[2]
+      local nameParts = self.util.string.split(item.name, '_')
+      MintCrate.Assert.cond(f, "data.table.name (name: '"..item.name.."')",
+        (#nameParts == 2), 'must be formatted as "active_collider"')
+      
+      if (item.offset == nil) then item.offset = {0, 0} end
+      MintCrate.Assert.type(f, "data.table.offset (name: '"..item.name.."')",
+        item.offset, 'table')
+      MintCrate.Assert.cond(f, "data.table.offset (name: '"..item.name.."')",
+        (#item.offset == 2), 'expects two numbers, representing ' ..
+        'the X and Y offsets of the collider')
+      
+      if (item.width == nil) then item.width = 0 end
+      if (item.height == nil) then item.height = 0 end
+      if (item.radius == nil) then item.radius = 0 end
+      MintCrate.Assert.type(f, "data.table.width (name: '"..item.name.."')",
+        item.width, 'number')
+      MintCrate.Assert.type(f, "data.table.height (name: '"..item.name.."')",
+        item.height, 'number')
+      MintCrate.Assert.type(f, "data.table.radius (name: '"..item.name.."')",
+        item.radius, 'number')
+      
+      if (item.width == 0 and item.height == 0 and item.radius == 0) then
+        MintCrate.Error(f, 'Non-zero dimensions must be provided for this ' ..
+          "collider (name: '"..item.name.."').")
+      elseif (
+        (item.width ~= 0 and item.radius ~= 0) or
+        (item.height ~= 0 and item.radius ~= 0) 
+      ) then
+        MintCrate.Error(f, 'Width/height cannot be specified along with '
+          .. "radius. They are mutually exclusive (name: '"..item.name.."').")
+      elseif (item.width ~= 0 and item.height == 0) then
+        MintCrate.Error(f, "Width was non-zero, but height was not " ..
+          "(name: '"..item.name.."').")
+      elseif (item.width == 0 and item.height ~= 0) then
+        MintCrate.Error(f, "Height was non-zero, but width was not " ..
+          "(name: '"..item.name.."').")
       end
+      
+      local activeName = nameParts[1]
+      local shape = self._COLLIDER_SHAPES.RECTANGLE
+      if (item.radius ~= 0) then shape = self._COLLIDER_SHAPES.CIRCLE end
       
       self._data.actives[activeName].collider = {
-        width = item.width or 0,
-        height = item.height or 0,
-        radius = item.radius or 0,
-        offsetX = offsetX,
-        offsetY = offsetY,
-        shape = self._COLLIDER_SHAPES.RECTANGLE
+        width = item.width,
+        height = item.height,
+        radius = item.radius,
+        offsetX = item.offset[1],
+        offsetY = item.offset[2],
+        shape = shape
       }
       
-      if item.circle then
-        self._data.actives[activeName].collider.shape =
-          self._COLLIDER_SHAPES.CIRCLE
-      end
     -- Active's sprites/animations
     else
       -- Validation
-      MintCrate.Assert.cond(f, 'data.table.name',
-        love.filesystem.getInfo(self._resPaths.actives .. item.name),
-        'must reference a valid image file (without extension)')
+      local nameParts = self.util.string.split(item.name, '_')
+      MintCrate.Assert.cond(f, "data.table.name (name: '"..item.name.."')",
+        (#nameParts == 2), 'must be formatted as "active_animation"')
+      local activeName = nameParts[1]
+      local animationName = nameParts[2]
+      MintCrate.Assert.cond(f, "data.table.name (name: '"..item.name.."')",
+        (self._data.actives[activeName].animations[animationName] == nil),
+        'was already specified')
       
       if (item.offset == nil) then item.offset = {0, 0} end
-      MintCrate.Assert.type(f, 'data.table.offset', item.offset, 'table')
+      MintCrate.Assert.type(f, "data.table.offset (name: '"..item.name.."')",
+        item.offset, 'table')
+      MintCrate.Assert.cond(f, "data.table.offset (name: '"..item.name.."')",
+        (#item.offset == 2), 'expects two numbers, representing ' ..
+        'the X and Y offsets of the sprite')
       
-      if (item.actionPoints == nil) then item.actionPoints = {0, 0} end
+      if (self.util.string.trim(activeName) == '') then
+        MintCrate.Error(f, 'Active name for animation "' .. item.name ..
+          '" cannot be blank. Expected format is "active_animation".') end
+      if (self.util.string.trim(animationName) == '') then
+        MintCrate.Error(f, 'Animation name for animation "' .. item.name ..
+          '" cannot be blank. Expected format is "active_animation".') end
+      
+      if (item.actionPoints == nil) then item.actionPoints = {{0, 0}} end
       MintCrate.Assert.type(
-        f, 'data.table.actionPoints', item.actionPoints, 'table')
+        f, "data.table.actionPoints (name: '"..item.name.."')",
+        item.actionPoints, 'table')
+      for i = 1, #item.actionPoints do
+        MintCrate.Assert.cond(f,
+          "data.table.actionPoints["..i.."] (name: '"..item.name.."')",
+          #item.actionPoints[i] == 2, 'expects two numbers, representing ' ..
+          'the X and Y offsets of the action point')
+        MintCrate.Assert.type(f,
+          "data.table.actionPoints["..i.."][1] (name: '"..item.name.."')",
+          item.actionPoints[i][1], 'number')
+        MintCrate.Assert.type(f,
+          "data.table.actionPoints["..i.."][2] (name: '"..item.name.."')",
+          item.actionPoints[i][2], 'number')
+      end
       
       if (item.frameCount == nil) then item.frameCount = 1 end
-      MintCrate.Assert.cond(f, 'data.table.frameCount',
+      MintCrate.Assert.type(
+        f, "data.table.frameCount (name: '"..item.name.."')",
+        item.frameCount, 'number')
+      MintCrate.Assert.cond(f, "data.table.frameCount (name:'"..item.name.."')",
         (item.frameCount > 0), 'must be a value greater than 0')
-      MintCrate.Assert.cond(f, 'data.table.frameCount',
+      MintCrate.Assert.cond(f, "data.table.frameCount (name:'"..item.name.."')",
         (self.math.isIntegral(item.frameCount)), 'must be an integer')
       
       if (item.frameDuration == nil) then item.frameDuration = 20 end
-      MintCrate.Assert.cond(f, 'data.table.frameDuration',
+      MintCrate.Assert.type(
+        f, "data.table.frameDuration (name: '"..item.name.."')",
+        item.frameDuration, 'number')
+      MintCrate.Assert.cond(f,
+        "data.table.frameDuration (name:'"..item.name.."')",
         (item.frameDuration >= 0), 'cannot be a negative value')
-      MintCrate.Assert.cond(f, 'data.table.frameDuration',
+      MintCrate.Assert.cond(f,
+        "data.table.frameDuration (name:'"..item.name.."')",
         (self.math.isIntegral(item.frameDuration)), 'must be an integer')
-
-      local activeName = self.util.string.split(item.name, '_')[1]
-      local animationName = self.util.string.split(item.name, '_')[2]
       
       -- Specify default animation (the first one the user defines)
       if not self._data.actives[activeName].initialAnimationName then
         self._data.actives[activeName].initialAnimationName = animationName
       end
       
-      -- Load and store animation images
-      local offsetX = 0
-      local offsetY = 0
-      if item.offset then
-        offsetX = item.offset[1]
-        offsetY = item.offset[2]
-      end
-      
+      -- Store action points
       local actionPoints = {}
-      if item.actionPoints and type(item.actionPoints[1]) == 'number' then
-        for i = 1, item.frameCount do
-          table.insert(actionPoints,
-            {item.actionPoints[1], item.actionPoints[2]})
-        end
-      elseif item.actionPoints and type(item.actionPoints[1]) == 'table' then
-        actionPoints = item.actionPoints
-      else
-        for i = 1, item.frameCount do
-          table.insert(actionPoints, {0, 0})
-        end
+      -- Fill with available action points
+      for i = 1, #item.actionPoints do
+        table.insert(actionPoints, item.actionPoints[i])
+      end
+      -- Propagate remaining slots with last set if full list wasn't provided
+      for i = #actionPoints + 1, item.frameCount do
+        table.insert(actionPoints, item.actionPoints[#item.actionPoints])
       end
       
+      -- Store animation data
       local animation = {
         image = self:_loadImage(self._resPaths.actives .. item.name),
         quads = {},
-        offsetX = offsetX,
-        offsetY = offsetY,
-        -- transformX = item.tx or 0, -- TODO: Remove me?
-        -- transformY = item.ty or 0, -- TODO: Remove me?
+        offsetX = item.offset[1],
+        offsetY = item.offset[2],
         actionPoints = actionPoints,
         frameCount = item.frameCount,
         frameDuration = item.frameDuration
@@ -470,6 +536,11 @@ function Engine:defineActives(data)
       
       animation.frameWidth = animation.image:getWidth() / animation.frameCount
       animation.frameHeight = animation.image:getHeight()
+      
+      if (not self.math.isIntegral(animation.frameWidth)) then
+        MintCrate.Error(f, 'Calculated frame width for animation "' .. item.name
+          .. '" was non-integral. Are all your frames the same width? And, did '
+          .. 'you provide the correct number of frames?') end
       
       -- Generate quads
       for
@@ -495,15 +566,43 @@ function Engine:defineBackdrops(data)
   -- Validate function.
   local f = 'defineBackdrops'
   MintCrate.Assert.self(f, self)
-  MintCrate.Assert.type(f, 'data', data, 'table')
+  MintCrate.Assert.type(f,
+    'data',
+    data,
+    'table'
+  )
   
   for _, item in ipairs(data) do
-    local image = self:_loadImage(self._resPaths.backdrops .. item.name)
-    if item.mosaic then image:setWrap("repeat", "repeat") end
+    MintCrate.Assert.type(f,
+      'data.table.name',
+      item.name,
+      'string'
+    )
+    
+    MintCrate.Assert.cond(f,
+      "data.table.name (name: '"..item.name.."')",
+      (self._data.backdrops[item.name] == nil),
+      'was already specified'
+    )
+    
+    if (item.mosaic == nil) then
+      item.mosaic = false
+    end
+    
+    MintCrate.Assert.type(f,
+      "data.table.mosaic (name: '"..item.name.."')",
+      item.mosaic,
+      'boolean'
+    )
+    
     self._data.backdrops[item.name] = {
-      image = image,
+      image = self:_loadImage(self._resPaths.backdrops .. item.name),
       mosaic = item.mosaic
     }
+    
+    if (item.mosaic) then
+      self._data.backdrops[item.name].image:setWrap("repeat", "repeat")
+    end
   end
 end
 
@@ -516,6 +615,18 @@ function Engine:defineFonts(data)
   MintCrate.Assert.type(f, 'data', data, 'table')
   
   for _, item in ipairs(data) do
+    MintCrate.Assert.type(f,
+      'data.table.name',
+      item.name,
+      'string'
+    )
+    
+    MintCrate.Assert.cond(f,
+      "data.table.name (name: '"..item.name.."')",
+      (self._data.fonts[item.name] == nil),
+      'was already specified'
+    )
+    
     self._data.fonts[item.name] = self:_loadFont(item.name)
   end
 end
@@ -536,6 +647,18 @@ function Engine:_loadFont(fontName)
   
   font.charWidth = font.image:getWidth() / 32
   font.charHeight = font.image:getHeight() / 3
+  
+  if (not self.math.isIntegral(font.charWidth)) then
+    MintCrate.Error(f, 'Calculated character width for font "' .. fontName ..
+      '" was non-integral. Are all your characters the same width? ' ..
+      'And, does it have the correct number of columns (32)?')
+  end
+  
+  if (not self.math.isIntegral(font.charHeight)) then
+    MintCrate.Error(f, 'Calculated character height for font "' .. fontName ..
+      '" was non-integral. Are all your characters the same height? ' ..
+      'And, does it have the correct number of rows (3)?')
+  end
   
   -- Generate quads
   local asciiMap = {
@@ -578,14 +701,35 @@ function Engine:defineSounds(data)
   MintCrate.Assert.type(f, 'data', data, 'table')
   
   for _, item in ipairs(data) do
+    MintCrate.Assert.type(f,
+      'data.table.name',
+      item.name,
+      'string'
+    )
+    
+    MintCrate.Assert.cond(f,
+      "data.table.name (name: '"..item.name.."')",
+      (self._data.sounds[item.name] == nil),
+      'was already specified'
+    )
+    
     local path = self._resPaths.sounds .. item.name
     
     -- Figure out file extension
+    local fileFound = false
     for _, ext in ipairs({'wav', 'ogg'}) do
       if love.filesystem.getInfo(path..'.'..ext) then
         path = path..'.'..ext
+        fileFound = true
         break
       end
+    end
+    
+    if (not fileFound) then
+      MintCrate.Error(nil,
+        'Could not locate audio file "' .. path .. 
+        '". There does not appear to be a valid WAV or OGG file at this path.'
+      )
     end
     
     local sound = {
@@ -593,7 +737,7 @@ function Engine:defineSounds(data)
       volume = 1
     }
     
-    -- Load sound
+    -- Store sound
     self._data.sounds[item.name] = sound
   end
 end
@@ -607,6 +751,18 @@ function Engine:defineMusic(data)
   MintCrate.Assert.type(f, 'data', data, 'table')
   
   for _, item in ipairs(data) do
+    MintCrate.Assert.type(f,
+      'data.table.name',
+      item.name,
+      'string'
+    )
+    
+    MintCrate.Assert.cond(f,
+      "data.table.name (name: '"..item.name.."')",
+      (self._data.music[item.name] == nil),
+      'was already specified'
+    )
+    
     local path = self._resPaths.music .. item.name
     
     -- Figure out file extension
@@ -617,25 +773,43 @@ function Engine:defineMusic(data)
       end
     end
     
+    if (not fileFound) then
+      MintCrate.Error(nil,
+        'Could not locate audio file "' .. path .. 
+        '". There does not appear to be a valid OGG, IT, XM, MOD, or S3M ' ..
+        'file at this path.'
+      )
+    end
+    
+    if (item.loop == nil) then
+      item.loop = false
+    end
+    
+    local source = love.audio.newSource(path, "stream")
+    music.source:setLooping(item.loop)
+    
+    if (item.loopStart == nil) then
+      item.loopStart = 0
+    end
+    
+    if (item.loopEnd == nil) then
+      item.loopEnd = source:getDuration('seconds')
+    end
+    
     local music = {
-      source = love.audio.newSource(path, "stream"),
-      loop = item.loop or false,
-      loopStart = item.loopStart or nil,
-      loopEnd = item.loopEnd or nil,
+      source = source,
+      loop = item.loop,
+      loopStart = item.loopStart,
+      loopEnd = item.loopEnd,
       volume = 1
     }
-    
-    if (
-      music.loop and
-      (type(music.loopStart) == "nil" or type(music.loopEnd) == "nil")
-    ) then
-      music.source:setLooping(true)
-    end
     
     self._data.music[item.name] = music
     
     -- Default the "currently-playing" track to the first track loaded
-    if (not self._currentMusic) then self._currentMusic = item.name end
+    if (self._currentMusic == nil) then
+      self._currentMusic = item.name
+    end
   end
 end
 

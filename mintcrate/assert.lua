@@ -50,8 +50,9 @@ end
 -- @param {boolean} conditionPassed Resulting value of the tested condition.
 -- @param {string} failMsg The reason why the conditional failed.
 function Assert.cond(funcName, argName, conditionPassed, failMsg)
-  if (conditionPassed == false) then
-    error('Argument "'.. argName .. '" in function "' .. funcName .. '" ' .. failMsg .. '.', Assert.ERROR_LEVEL)
+  if (conditionPassed == false or conditionPassed == nil) then
+    error('Argument "' .. argName .. '" in function "' .. funcName ..
+      '" ' .. failMsg .. '.', Assert.ERROR_LEVEL)
   end
 end
 
