@@ -766,9 +766,11 @@ function Engine:defineMusic(data)
     local path = self._resPaths.music .. item.name
     
     -- Figure out file extension
+    local fileFound = false
     for _, ext in ipairs({'ogg', 'it', 'xm', 'mod', 's3m'}) do
       if love.filesystem.getInfo(path..'.'..ext) then
         path = path..'.'..ext
+        fileFound = true
         break
       end
     end
@@ -786,7 +788,7 @@ function Engine:defineMusic(data)
     end
     
     local source = love.audio.newSource(path, "stream")
-    music.source:setLooping(item.loop)
+    source:setLooping(item.loop)
     
     if (item.loopStart == nil) then
       item.loopStart = 0
