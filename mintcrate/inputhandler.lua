@@ -67,7 +67,7 @@ end
 -- @param {string} inputName Name of the input (used when getting its state).
 -- @param {string} inputCode Device input's scan/button/analog/trigger code.
 function InputHandler:_mapInput(inputType, inputName, inputCode)
-  inputCode = tostring(inputCode)
+  inputCode = inputCode
   
   if not self._inputs[inputName] then
     self._inputs[inputName] = {
@@ -106,6 +106,8 @@ function InputHandler:setAnalogDeadzone(deadzoneValue)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'deadzoneValue', deadzoneValue, 'number')
   
+  deadzoneValue = MintCrate.MathX.clamp(deadzoneValue, 0, 1)
+  
   self._analogDeadzone = deadzoneValue
 end
 
@@ -115,6 +117,8 @@ function InputHandler:setTriggerDeadzone(deadzoneValue)
   local f = 'setTriggerDeadzone'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'deadzoneValue', deadzoneValue, 'number')
+  
+  deadzoneValue = MintCrate.MathX.clamp(deadzoneValue, 0, 1)
   
   self._triggerDeadzone = deadzoneValue
 end
@@ -126,8 +130,22 @@ end
 function InputHandler:setRepeatValues(repeatWaitTime, repeatDelay)
   local f = 'setRepeatValues'
   MintCrate.Assert.self(f, self)
+  
   MintCrate.Assert.type(f, 'repeatWaitTime', repeatWaitTime, 'number')
+  
+  MintCrate.Assert.cond(f,
+    'repeatWaitTime',
+    (repeatWaitTime >= 0),
+    'cannot be a negative value'
+  )
+  
   MintCrate.Assert.type(f, 'repeatDelay', repeatDelay, 'number')
+  
+  MintCrate.Assert.cond(f,
+    'repeatDelay',
+    (repeatDelay >= 0),
+    'cannot be a negative value'
+  )
   
   self._repeatWaitTime = repeatWaitTime
   self._repeatDelay = repeatDelay
@@ -145,6 +163,9 @@ function InputHandler:pressed(inputName, enableRepeat)
   local f = 'pressed'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'inputName', inputName, 'string')
+  
+  if (enableRepeat == nil) then enableRepeat = false end
+  
   MintCrate.Assert.type(f, 'enableRepeat', enableRepeat, 'boolean')
   
   inputName = tostring(inputName)

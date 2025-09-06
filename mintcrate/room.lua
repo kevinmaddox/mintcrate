@@ -23,9 +23,24 @@ function Room:new(roomName, roomWidth, roomHeight)
   self.__index = self
   
   local f = 'new'
+  
   MintCrate.Assert.type(f, 'roomName', roomName, 'string')
+  
   MintCrate.Assert.type(f, 'roomWidth', roomWidth, 'number')
+  
+  MintCrate.Assert.cond(f,
+    'roomWidth',
+    (roomWidth > 0),
+    'must be a value greater than 0'
+  )
+  
   MintCrate.Assert.type(f, 'roomHeight', roomHeight, 'number')
+  
+  MintCrate.Assert.cond(f,
+    'roomHeight',
+    (roomHeight > 0),
+    'must be a value greater than 0'
+  )
   
   -- Set room name
   self._roomName = roomName
@@ -56,6 +71,7 @@ end
 -- @returns {string} Room's name.
 function Room:getRoomName()
   local f = 'getRoomName'
+  
   MintCrate.Assert.self(f, self)
   
   return self._roomName
@@ -65,6 +81,7 @@ end
 -- @returns {number} Room's width.
 function Room:getRoomWidth()
   local f = 'getRoomWidth'
+  
   MintCrate.Assert.self(f, self)
   
   return self._roomWidth
@@ -74,6 +91,7 @@ end
 -- @returns {number} Room's height.
 function Room:getRoomHeight()
   local f = 'getRoomHeight'
+  
   MintCrate.Assert.self(f, self)
   
   return self._roomHeight
@@ -90,22 +108,40 @@ end
 function Room:configureFadeIn(fadeDuration, pauseDuration, color)
   local f = 'configureFadeIn'
   MintCrate.Assert.self(f, self)
+  
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
   
+  MintCrate.Assert.cond(f,
+    'fadeDuration',
+    (fadeDuration >= 0),
+    'cannot be a negative value'
+  )
+  
   if (pauseDuration == nil) then pauseDuration = 0 end
+  
   MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
   
+  MintCrate.Assert.cond(f,
+    'pauseDuration',
+    (pauseDuration >= 0),
+    'cannot be a negative value'
+  )
+  
   if (color == nil) then color = {} end
+  
   MintCrate.Assert.type(f, 'color', color, 'table')
   
   if (color.r == nil) then color.r = 0 end
-  MintCrate.Assert.type(f, 'color.r', color.r, 'number')
-  
   if (color.g == nil) then color.g = 0 end
-  MintCrate.Assert.type(f, 'color.g', color.g, 'number')
-  
   if (color.b == nil) then color.b = 0 end
+  
+  MintCrate.Assert.type(f, 'color.r', color.r, 'number' )
+  MintCrate.Assert.type(f, 'color.g', color.g, 'number')
   MintCrate.Assert.type(f, 'color.b', color.b, 'number')
+  
+  color.r = MintCrate.MathX.clamp(color.r, 0, 255)
+  color.g = MintCrate.MathX.clamp(color.g, 0, 255)
+  color.b = MintCrate.MathX.clamp(color.b, 0, 255)
   
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
   
@@ -127,22 +163,40 @@ end
 function Room:configureFadeOut(fadeDuration, pauseDuration, color)
   local f = 'configureFadeIn'
   MintCrate.Assert.self(f, self)
+  
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
   
+  MintCrate.Assert.cond(f,
+    'fadeDuration',
+    (fadeDuration >= 0),
+    'cannot be a negative value'
+  )
+  
   if (pauseDuration == nil) then pauseDuration = 0 end
+  
   MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
   
+  MintCrate.Assert.cond(f,
+    'pauseDuration',
+    (pauseDuration >= 0),
+    'cannot be a negative value'
+  )
+  
   if (color == nil) then color = {} end
+  
   MintCrate.Assert.type(f, 'color', color, 'table')
   
   if (color.r == nil) then color.r = 0 end
-  MintCrate.Assert.type(f, 'color.r', color.r, 'number')
-  
   if (color.g == nil) then color.g = 0 end
-  MintCrate.Assert.type(f, 'color.g', color.g, 'number')
-  
   if (color.b == nil) then color.b = 0 end
+  
+  MintCrate.Assert.type(f, 'color.r', color.r, 'number')
+  MintCrate.Assert.type(f, 'color.g', color.g, 'number')
   MintCrate.Assert.type(f, 'color.b', color.b, 'number')
+  
+  color.r = MintCrate.MathX.clamp(color.r, 0, 255)
+  color.g = MintCrate.MathX.clamp(color.g, 0, 255)
+  color.b = MintCrate.MathX.clamp(color.b, 0, 255)
   
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
   
@@ -166,13 +220,14 @@ end
 function Room:setBackgroundColor(r, g, b)
   local f = 'setBackgroundColor'
   MintCrate.Assert.self(f, self)
+  
   MintCrate.Assert.type(f, 'r', r, 'number')
   MintCrate.Assert.type(f, 'g', g, 'number')
   MintCrate.Assert.type(f, 'b', b, 'number')
   
-  local r = MintCrate.MathX.clamp(r, 0, 255)
-  local g = MintCrate.MathX.clamp(g, 0, 255)
-  local b = MintCrate.MathX.clamp(b, 0, 255)
+  r = MintCrate.MathX.clamp(r, 0, 255)
+  g = MintCrate.MathX.clamp(g, 0, 255)
+  b = MintCrate.MathX.clamp(b, 0, 255)
   
   r, g, b = love.math.colorFromBytes(r, g, b)
   self._backgroundColor = {r = r, g = g, b = b}

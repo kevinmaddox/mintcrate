@@ -43,16 +43,17 @@ MintCrate To-do List
     [x] Main functions
     [x] Object-defining functions (defineActives, etc.)
     [x] Saving/loading data valiation
-  [/] Room
-  [/] Inputhandler
-  [/] Entity
-  [/] Active
-  [/] Backdrop
-  [/] Paragraph
+  [x] Room
+  [x] Inputhandler
+  [x] Entity
+  [x] Active
+  [x] Backdrop
+  [x] Paragraph
   [/] MathX
   [/] Util
     [ ] Main stuff
     [x] JSON encoder/decoder
+  [ ] Change Assert.Cond to Assert.Condition
 [ ] Dump/log utility
 [ ] Think really hard about function/class names
   [ ] Get rid of toggles, make sure it's all where you have to set it to true/false

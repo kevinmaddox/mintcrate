@@ -192,6 +192,18 @@ function Util.table.count(tbl)
   return c
 end
 
+-- Checks if a table contains a specified item.
+-- @param {table} tbl The table to search in.
+-- @param {*} item The item to search for.
+-- @returns {boolean} Whether the item was found in the table.
+function Util.table.contains(tbl, item)
+  local found = false
+  for _,v in pairs(tbl) do
+    if (v == item) then found = true end
+  end
+  return found
+end
+
 -- Checks whether a table resembles an array (numeric+sequential keys).
 -- @param {table} tbl The table to check.
 function Util.table.matchesArrayPattern(tbl)

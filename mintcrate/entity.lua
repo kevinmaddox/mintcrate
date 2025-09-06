@@ -181,20 +181,13 @@ end
 -- Methods for managing visibility
 -- -----------------------------------------------------------------------------
 
--- Shows the entity if hidden.
-function Entity:show()
-  local f = 'show'
+-- Returns whether the entity is visible or not.
+-- @returns {boolean} Whether the entity is visible or not.
+function Entity:getVisibility()
+  local f = 'isVisible'
   MintCrate.Assert.self(f, self)
   
-  self._isVisible = true
-end
-
--- Hides the entity if visible.
-function Entity:hide()
-  local f = 'hide'
-  MintCrate.Assert.self(f, self)
-  
-  self._isVisible = false
+  return self._isVisible
 end
 
 -- Sets the visibility of the entity.
@@ -205,15 +198,6 @@ function Entity:setVisibility(isVisible)
   MintCrate.Assert.type(f, 'isVisible', isVisible, 'boolean')
   
   self._isVisible = isVisible
-end
-
--- Returns whether the entity is visible or not.
--- @returns {boolean} Whether the entity is visible or not.
-function Entity:isVisible()
-  local f = 'isVisible'
-  MintCrate.Assert.self(f, self)
-  
-  return self._isVisible
 end
 
 -- Returns the entity's current opacity value.
@@ -231,6 +215,8 @@ function Entity:setOpacity(opacity)
   local f = 'setOpacity'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'opacity', opacity, 'number')
+  
+  opacity = MintCrate.MathX.clamp(opacity, 0, 1)
   
   self._opacity = opacity
 end

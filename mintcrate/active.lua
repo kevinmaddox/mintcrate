@@ -23,11 +23,13 @@ Active.type = "Active"
 -- @param {number} colliderWidth Width of the collision mask (rectangle type).
 -- @param {number} colliderHeight Height of the collision mask (rectangle type).
 -- @param {number} colliderRadius Radius of the collision mask (circle type).
--- @param {string} initialAnimationName Active's starting animation.
+-- @param {table} animationList List of all of the Active's animations.
+-- @param {string} initialAnimationName Active's starting animation name.
+-- @param {string} initialAnimation Active's starting animation data.
 -- @returns {Active} A new instance of the Active class.
 function Active:new(instances, drawOrder, name, x, y, colliderShape,
   colliderOffsetX, colliderOffsetY, colliderWidth, colliderHeight,
-  colliderRadius, initialAnimationName, initialAnimation
+  colliderRadius, animationList, initialAnimationName, initialAnimation
 )
   local o = MintCrate.Entity:new()
   setmetatable(self, {__index = MintCrate.Entity})
@@ -63,6 +65,7 @@ function Active:new(instances, drawOrder, name, x, y, colliderShape,
   o._colliderOffsetX = colliderOffsetX
   o._colliderOffsetY = colliderOffsetY
   
+  o._animationList = animationList
   o._animationName = initialAnimationName
   o._currentAnimation = initialAnimation
   o._animationFrameNumber = 1
@@ -103,7 +106,7 @@ end
 function Active:rotate(degrees)
   local f = 'rotate'
   MintCrate.Assert.self(f, self)
-  MintCrate.Assert.type(f, 'degrees', degress, 'number')
+  MintCrate.Assert.type(f, 'degrees', degrees, 'number')
   
   self._angle = self._angle + degrees
 end
@@ -256,9 +259,17 @@ end
 function Active:playAnimation(animationName, forceRestart)
   local f = 'playAnimation'
   MintCrate.Assert.self(f, self)
+  
   MintCrate.Assert.type(f, 'animationName', animationName, 'string')
   
+  MintCrate.Assert.cond(f,
+    'animationName',
+    (MintCrate.Util.table.contains(self._animationList, animationName)),
+    'does not refer to a valid animation'
+  )
+  
   if (forceRestart == nil) then forceRestart = false end
+  
   MintCrate.Assert.type(f, 'forceRestart', forceRestart, 'boolean')
   
   self._animationName = animationName
@@ -324,7 +335,6 @@ end
 function Active:getTransformedImageHeight()
   local f = 'getTransformedImageHeight'
   MintCrate.Assert.self(f, self)
-  MintCrate.Assert.type(f, 'scaleY', scaleY, 'number')
   
   local width  = self:getImageWidth()  * self._scaleX
   local height = self:getImageHeight() * self._scaleY

@@ -28,7 +28,6 @@ function Engine:new(
   setmetatable(o, self)
   self.__index = self
   
-  -- Validate function.
   local f = 'new'
   
   MintCrate.Assert.type(f, 'baseWidth', baseWidth, 'number')
@@ -183,7 +182,6 @@ end
 
 -- Prepares the game engine for use after instantiation.
 function Engine:init()
-  -- Validate function.
   local f = 'init'
   MintCrate.Assert.self(f, self)
   
@@ -202,7 +200,6 @@ end
 
 -- Signifies that all loading has been completed and the game should run.
 function Engine:ready()
-  -- Validate function.
   local f = 'ready'
   MintCrate.Assert.self(f, self)
   
@@ -225,7 +222,6 @@ end
 -- @param {boolean} fadeBeforeQuitting Trigger's the Room's fadeout first.
 -- @param {boolean} fadeMusic Fades the music with the visual fade-out.
 function Engine:quit(fadeBeforeQuitting, fadeMusic)
-  -- Validate function.
   local f = 'quit'
   MintCrate.Assert.self(f, self)
   
@@ -256,7 +252,6 @@ end
 -- @param {string} resourcePaths.sounds Path for Sounds.
 -- @param {string} resourcePaths.tilemaps Path for Tilemaps.
 function Engine:setResourcePaths(resourcePaths)
-  -- Validate function.
   local f = 'setResourcePaths'
   MintCrate.Assert.self(f, self)
   
@@ -303,7 +298,6 @@ end
 -- Specifies which color(s) should become transparent when loading images.
 -- @param {table} rgbSets Table of {r,g,b} tables, indicating the color keys.
 function Engine:defineColorKeys(rgbSets)
-  -- Validate function.
   local f = 'defineColorKeys'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'rgbSets', rgbSets, 'table')
@@ -378,7 +372,6 @@ end
 -- Defines the active object entities that can be created during gameplay.
 -- @param {table} data A table of active object definitions (see docs).
 function Engine:defineActives(data)
-  -- Validate function.
   local f = 'defineActives'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'data', data, 'table')
@@ -563,7 +556,6 @@ end
 -- Defines the backdrop object entities that can be created during gameplay.
 -- @param {table} data A table of backdrop object definitions (see docs).
 function Engine:defineBackdrops(data)
-  -- Validate function.
   local f = 'defineBackdrops'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f,
@@ -609,7 +601,6 @@ end
 -- Defines the fonts that can be used to create Paragraph objects.
 -- @param {table} data A table of bitmap font definitions (see docs).
 function Engine:defineFonts(data)
-  -- Validate function.
   local f = 'defineFonts'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'data', data, 'table')
@@ -695,7 +686,6 @@ end
 -- Defines the sounds that can be played during gameplay.
 -- @param {table} data A table of sound resource definitions (see docs).
 function Engine:defineSounds(data)
-  -- Validate function.
   local f = 'defineSounds'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'data', data, 'table')
@@ -745,7 +735,6 @@ end
 -- Defines the music that can be played during gameplay.
 -- @param {table} data A table of music resource definitions (see docs).
 function Engine:defineMusic(data)
-  -- Validate function.
   local f = 'defineMusic'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'data', data, 'table')
@@ -818,7 +807,6 @@ end
 -- Defines the tilemaps that can be set during gameplay.
 -- @param {table} data A table of tilemap definitions (see docs).
 function Engine:defineTilemaps(data)
-  -- Validate function.
   local f = 'defineTilemaps'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'data', data, 'table')
@@ -1053,7 +1041,6 @@ end
 -- @param {boolean} options.fadeMusic Fades the music with the visual fade-out.
 -- @param {boolean} options.persistAudio Prevents the audio from stopping.
 function Engine:changeRoom(room, options)
-  -- Validate function.
   local f = 'changeRoom'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'room', room, 'Room')
@@ -1214,7 +1201,6 @@ end
 -- @param {function} callback The function to queue.
 -- @param {number} numFrames How many frames should pass before firing.
 function Engine:delayFunction(callback, numFrames)
-  -- Validate function.
   local f = 'delayFunction'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'callback', callback, 'function')
@@ -1231,7 +1217,6 @@ end
 -- @param {number} numFrames How many frames should pass before firing.
 -- @param {boolean} fireImmediately Whether the function should initially fire.
 function Engine:repeatFunction(callback, numFrames, fireImmediately)
-  -- Validate function.
   local f = 'repeatFunction'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'callback', callback, 'function')
@@ -1250,7 +1235,6 @@ end
 -- Clears a queued function.
 -- @param {function} callback The queued function to cancel/clear.
 function Engine:clearFunction(callback)
-  -- Validate function.
   local f = 'clearFunction'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'callback', callback, 'function')
@@ -1272,7 +1256,6 @@ end
 -- @param {number} y The ending X position of the Active.
 -- @returns {Active} A new instance of the Active class.
 function Engine:addActive(name, x, y)
-  -- Validate function.
   local f = 'addActive'
   MintCrate.Assert.self(f, self)
 
@@ -1288,7 +1271,14 @@ function Engine:addActive(name, x, y)
   
   local collider = self._data.actives[name].collider or {}
   
+  
+  local animationList = {}
+  for animName, _ in pairs(self._data.actives[name].animations) do
+    table.insert(animationList, animName)
+  end
+  
   local initialAnimationName = self._data.actives[name].initialAnimationName
+  
   local animation
   if initialAnimationName then
     animation = self._data.actives[name].animations[initialAnimationName]
@@ -1303,6 +1293,7 @@ function Engine:addActive(name, x, y)
     collider.offsetX or 0, collider.offsetY or 0,
     collider.width or 0, collider.height or 0,
     collider.radius or 0,
+    animationList,
     initialAnimationName,
     animation
   )
@@ -1322,7 +1313,6 @@ end
 -- @param {number} options.height The height of the backdrop.
 -- @returns {Backdrop} A new instance of the Backdrop class.
 function Engine:addBackdrop(name, x, y, options)
-  -- Validate function.
   local f = 'addBackdrop'
   MintCrate.Assert.self(f, self)
   
@@ -1391,7 +1381,6 @@ end
 -- @param {string} options.alignment Either "left", "right", or "center".
 -- @returns {Paragraph} A new instance of the Paragraph class.
 function Engine:addParagraph(name, x, y, startingTextContent, options)
-  -- Validate function.
   local f = 'addParagraph'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'name', name, 'string')
@@ -1464,7 +1453,6 @@ end
 -- Returns the current X position of the camera.
 -- @returns {number} X position of camera.
 function Engine:getCameraX()
-  -- Validate function.
   local f = 'getCameraX'
   MintCrate.Assert.self(f, self)
   
@@ -1474,7 +1462,6 @@ end
 -- Returns the current Y position of the camera.
 -- @returns {number} Y position of camera.
 function Engine:getCameraY()
-  -- Validate function.
   local f = 'getCameraY'
   MintCrate.Assert.self(f, self)
   
@@ -1485,7 +1472,6 @@ end
 -- @param {number} x New X coordinate to place the camera at.
 -- @param {number} y New Y coordinate to place the camera at.
 function Engine:setCamera(x, y)
-  -- Validate function.
   local f = 'setCamera'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'x', x, 'number')
@@ -1530,7 +1516,6 @@ end
 -- @param {number} x2 Region bottom-right X.
 -- @param {number} y2 Region bottom-right Y.
 function Engine:bindCamera(x1, y1, x2, y2)
-  -- Validate function.
   local f = 'bindCamera'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'x1', x1, 'number')
@@ -1544,7 +1529,6 @@ end
 
 -- Unbinds the camera if previously bound.
 function Engine:unbindCamera()
-  -- Validate function.
   self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
   self._cameraIsBound = false
 end
@@ -1553,7 +1537,6 @@ end
 -- @param {number} x X coordinate to center the camera at.
 -- @param {number} y Y coordinate to center the camera at.
 function Engine:centerCamera(x, y)
-  -- Validate function.
   local f = 'centerCamera'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'x', x, 'number')
@@ -1574,7 +1557,6 @@ end
 -- Sets the tilemap graphic/layout for the room.
 -- @param {string} tilemapLayoutName The full name of the tilemap.
 function Engine:setTilemap(tilemapLayoutName)
-  -- Validate function.
   local f = 'setTilemap'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'tilemapLayoutName', tilemapLayoutName, 'string')
@@ -1694,7 +1676,6 @@ end
 
 -- Performs the main game update code (the game loop).
 function Engine:sys_update()
-  -- Validate function.
   local f = 'sys_update'
   MintCrate.Assert.self(f, self)
   
@@ -1818,7 +1799,6 @@ end
 
 -- Renders the current room (entities and debug visuals).
 function Engine:sys_draw()
-  -- Validate function.
   local f = 'sys_draw'
   MintCrate.Assert.self(f, self)
   
@@ -2006,8 +1986,6 @@ function Engine:sys_draw()
       if entity._entityType ~= 'active' then goto DrawActiveDebugGfxDone end
       
       local active = entity
-      local animation = self._data.actives[active:_getName()]
-        .animations[active:getAnimationName()]
       
       -- Draw collision masks
       if self._showActiveCollisionMasks then
@@ -2328,7 +2306,6 @@ end
 -- @param {number} scale The factor to scale the window by (1.0 is normal).
 -- @param {boolean} forceResize Forces a resize event to fire.
 function Engine:setWindowScale(scale, forceResize)
-  -- Validate function.
   local f = 'setWindowScale'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scale', scale, 'number')
@@ -2357,7 +2334,6 @@ end
 -- Returns the current window scale.
 -- @returns {number} Current window scale value.
 function Engine:getWindowScale()
-  -- Validate function.
   local f = 'getWindowScale'
   MintCrate.Assert.self(f, self)
   
@@ -2367,7 +2343,6 @@ end
 -- Returns the base resolution width of the game, in pixels.
 -- @returns {number} Base game width.
 function Engine:getScreenWidth()
-  -- Validate function.
   local f = 'getScreenWidth'
   MintCrate.Assert.self(f, self)
   
@@ -2377,7 +2352,6 @@ end
 -- Returns the base resolution height of the game, in pixels.
 -- @returns {number} Base game height.
 function Engine:getScreenHeight()
-  -- Validate function.
   local f = 'getScreenHeight'
   MintCrate.Assert.self(f, self)
   
@@ -2387,7 +2361,6 @@ end
 -- Tells the application to enter or exit fullscreen mode.
 -- @param {boolean} fullscreen Whether the application should be fullscreen.
 function Engine:setFullscreen(fullscreen)
-  -- Validate function.
   local f = 'setFullscreen'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'fullscreen', fullscreen, 'boolean')
@@ -2404,7 +2377,6 @@ end
 -- Returns whether the application is currently in fullscreen mode.
 -- @returns {boolean} Whether fullscreen mode is enabled.
 function Engine:getFullscreen()
-  -- Validate function.
   local f = 'getFullscreen'
   MintCrate.Assert.self(f, self)
   
@@ -2415,7 +2387,6 @@ end
 -- @param {number} w The new application window width.
 -- @param {number} h The new application window height.
 function Engine:sys_resize(w, h)
-  -- Validate function.
   local f = 'sys_resize'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'w', w, 'number')
@@ -2465,7 +2436,6 @@ end
 -- @param {Active} activeB The second Active to test.
 -- @returns {boolean} Whether a collission occurred.
 function Engine:testCollision(activeA, activeB)
-  -- Validate function.
   local f = 'testCollision'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'activeA', activeA, 'Active')
@@ -2479,7 +2449,6 @@ end
 -- @param {number} tileType The tile's behavior value to filter for.
 -- @returns {table|boolean} Data about collisions that occurred, or false.
 function Engine:testMapCollision(active, tileType)
-  -- Validate function.
   local f = 'testMapCollision'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'active', active, 'Active')
@@ -2582,7 +2551,6 @@ end
 -- @param {Active} active The Active to test.
 -- @returns {boolean} Whether the mouse cursor is over the Active.
 function Engine:mouseOverActive(active)
-  -- Validate function.
   local f = 'mouseOverActive'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'active', active, 'Active')
@@ -2616,7 +2584,6 @@ end
 -- @param {number} mouseButton Which mouse button was used to click.
 -- @param {Active} active The active to check for being clicked upon.
 function Engine:clickedOnActive(mouseButton, active)
-  -- Validate function.
   local f = 'clickedOnActive'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'mouseButton', mouseButton, 'number')
@@ -2632,7 +2599,6 @@ end
 -- Returns the X position of the mouse cursor relative to the entire room size.
 -- @returns {number} The room-relative mouse cursor X position.
 function Engine:getMouseX()
-  -- Validate function.
   local f = 'getMouseX'
   MintCrate.Assert.self(f, self)
   
@@ -2642,7 +2608,6 @@ end
 -- Returns the Y position of the mouse cursor relative to the entire room size.
 -- @returns {number} The room-relative mouse cursor Y position.
 function Engine:getMouseY()
-  -- Validate function.
   local f = 'getMouseY'
   MintCrate.Assert.self(f, self)
   
@@ -2652,7 +2617,6 @@ end
 -- Returns the X position of the mouse cursor relative to the game window.
 -- @returns {number} The screen-relative mouse cursor X position.
 function Engine:getRelativeMouseX()
-  -- Validate function.
   local f = 'getRelativeMouseX'
   MintCrate.Assert.self(f, self)
   
@@ -2662,7 +2626,6 @@ end
 -- Returns the Y position of the mouse cursor relative to the game window.
 -- @returns {number} The screen-relative mouse cursor Y position.
 function Engine:getRelativeMouseY()
-  -- Validate function.
   local f = 'getRelativeMouseY'
   MintCrate.Assert.self(f, self)
   
@@ -2673,7 +2636,6 @@ end
 -- @param {number} mouseButton The numeric button to test (see Love docs).
 -- @returns {boolean} Whether the mouse button was pressed.
 function Engine:mousePressed(mouseButton)
-  -- Validate function.
   local f = 'mousePressed'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'mouseButton', mouseButton, 'number')
@@ -2685,7 +2647,6 @@ end
 -- @param {number} mouseButton The numeric button to test (see Love docs).
 -- @returns {boolean} Whether the mouse button was released.
 function Engine:mouseReleased(mouseButton)
-  -- Validate function.
   local f = 'mouseReleased'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'mouseButton', mouseButton, 'number')
@@ -2697,7 +2658,6 @@ end
 -- @param {number} mouseButton The numeric button to test (see Love docs).
 -- @returns {boolean} Whether the mouse button is beind held.
 function Engine:mouseHeld(mouseButton)
-  -- Validate function.
   local f = 'mouseHeld'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'mouseButton', mouseButton, 'number')
@@ -2709,7 +2669,6 @@ end
 -- @param {number} x The X coordinate of the mouse cursor.
 -- @param {number} y The Y coordinate of the mouse cursor.
 function Engine:sys_mousemoved(x, y)
-  -- Validate function.
   local f = 'sys_mousemoved'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'x', x, 'number')
@@ -2722,7 +2681,6 @@ end
 -- Sets raw mouse states for button presses.
 -- @param {number} button The numeric mouse button (see Love docs).
 function Engine:sys_mousepressed(button)
-  -- Validate function.
   local f = 'sys_mousepressed'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'button', button, 'number')
@@ -2733,7 +2691,6 @@ end
 -- Sets raw mouse states for button releases.
 -- @param {number} button The numeric mouse button (see Love docs).
 function Engine:sys_mousereleased(button)
-  -- Validate function.
   local f = 'sys_mousereleased'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'button', button, 'number')
@@ -2748,7 +2705,6 @@ end
 -- Creates an Input Handler object to let a player interact with the game.
 -- @returns {InputHandler} A new instance of the InputHandler class.
 function Engine:addInputHandler()
-  -- Validate function.
   local f = 'addInputHandler'
   MintCrate.Assert.self(f, self)
   
@@ -2761,7 +2717,6 @@ end
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 -- @returns {boolean} Whether the key was pressed.
 function Engine:keyPressed(scancode)
-  -- Validate function.
   local f = 'keyPressed'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
@@ -2777,7 +2732,6 @@ end
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 -- @returns {boolean} Whether the key was released.
 function Engine:keyReleased(scancode)
-  -- Validate function.
   local f = 'keyReleased'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
@@ -2793,7 +2747,6 @@ end
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 -- @returns {boolean} Whether the key is being held.
 function Engine:keyHeld(scancode)
-  -- Validate function.
   local f = 'keyHeld'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
@@ -2808,7 +2761,6 @@ end
 -- Sets raw keyboard states for key presses.
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 function Engine:sys_keypressed(scancode)
-  -- Validate function.
   local f = 'sys_keypressed'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
@@ -2823,7 +2775,6 @@ end
 -- Sets raw keyboard states for key releases.
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 function Engine:sys_keyreleased(scancode)
-  -- Validate function.
   local f = 'sys_keyreleased'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
@@ -2839,7 +2790,6 @@ end
 -- @param {Joystick} joystick The physical device on which a button was pressed.
 -- @param {number} button The joystick button that was pressed (see Love docs).
 function Engine:sys_gamepadpressed(joystick, button)
-  -- Validate function.
   local f = 'sys_gamepadpressed'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'joystick', joystick, 'Joystick')
@@ -2854,7 +2804,6 @@ end
 -- @param {Joystick} joystick The physical device on which a button was pressed.
 -- @param {number} button The joystick button that was pressed (see Love docs).
 function Engine:sys_gamepadreleased(joystick, button)
-  -- Validate function.
   local f = 'sys_gamepadreleased'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'joystick', joystick, 'Joystick')
@@ -2875,7 +2824,6 @@ end
 -- @param {number} options.volume Volume level, between 0 and 1.
 -- @param {number} options.pitch Pitch rate, between 0.1 and 30.
 function Engine:playSound(soundName, options)
-  -- Validate function.
   local f = 'playSound'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'soundName', soundName, 'string')
@@ -2907,7 +2855,6 @@ end
 
 -- Stops any currently-playing sounds.
 function Engine:stopAllSounds()
-  -- Validate function.
   local f = 'stopAllSounds'
   MintCrate.Assert.self(f, self)
   
@@ -2962,7 +2909,6 @@ end
 -- Gets the current master/global music volume.
 -- @returns {number} The current master/global music volume.
 function Engine:getMasterMusicVolume()
-  -- Validate function.
   local f = 'getMasterMusicVolume'
   MintCrate.Assert.self(f, self)
   
@@ -2972,7 +2918,6 @@ end
 -- Gets the current master/global sound effect volume.
 -- @returns {number} The current master/global sound effect volume.
 function Engine:getMasterSoundVolume()
-  -- Validate function.
   local f = 'getMasterSoundVolume'
   MintCrate.Assert.self(f, self)
   
@@ -2982,7 +2927,6 @@ end
 -- Sets the current master/global music volume.
 -- @param {number} newVolume New volume level, between 0 and 1.
 function Engine:setMasterMusicVolume(newVolume)
-  -- Validate function.
   local f = 'setMasterMusicVolume'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'newVolume', newVolume, 'number')
@@ -2996,7 +2940,6 @@ end
 -- Sets the current master/global sound effect volume.
 -- @param {number} newVolume New volume level, between 0 and 1.
 function Engine:setMasterSoundVolume(newVolume)
-  -- Validate function.
   local f = 'setMasterSoundVolume'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'newVolume', newVolume, 'number')
@@ -3010,7 +2953,6 @@ end
 -- Gets the current master/global music pitch rate.
 -- @returns {number} The current master/global music pitch rate.
 function Engine:getMasterMusicPitch()
-  -- Validate function.
   local f = 'getMasterMusicPitch'
   MintCrate.Assert.self(f, self)
   
@@ -3020,7 +2962,6 @@ end
 -- Sets the current master/global music pitch rate.
 -- @param {number} newVolume New pitch rate, between 0.1 and 30.
 function Engine:setMasterMusicPitch(newPitch)
-  -- Validate function.
   local f = 'setMasterMusicPitch'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'newPitch', newPitch, 'number')
@@ -3035,7 +2976,6 @@ end
 -- @param {string} trackName The name of the song to play (from defineMusic).
 -- @param {number} fadeLength How much to fade/xfade in the song, in frames.
 function Engine:playMusic(trackName, fadeLength)
-  -- Validate function.
   local f = 'playMusic'
   MintCrate.Assert.self(f, self)
   
@@ -3077,7 +3017,6 @@ end
 
 -- Pauses playback of the currently-set music track.
 function Engine:pauseMusic()
-  -- Validate function.
   local f = 'pauseMusic'
   MintCrate.Assert.self(f, self)
   
@@ -3087,7 +3026,6 @@ end
 
 -- Resumes playback of the currently-set music track.
 function Engine:resumeMusic()
-  -- Validate function.
   local f = 'resumeMusic'
   MintCrate.Assert.self(f, self)
   
@@ -3100,7 +3038,6 @@ end
 -- Stops playback of the currently-set music track.
 -- @param {number} fadeLength How much to fade out the song, in frames.
 function Engine:stopMusic(fadeLength)
-  -- Validate function.
   local f = 'stopMusic'
   MintCrate.Assert.self(f, self)
   
@@ -3119,7 +3056,6 @@ end
 -- Shows/hides an overlay that shows the current frames-per-second rate.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:setFpsVisibility(enabled)
-  -- Validate function.
   local f = 'setFpsVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
@@ -3130,7 +3066,6 @@ end
 -- Shows/hides an overlay that shows information regarding the current room.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:setRoomInfoVisibility(enabled)
-  -- Validate function.
   local f = 'setRoomInfoVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
@@ -3141,7 +3076,6 @@ end
 -- Shows/hides an overlay that shows information regarding the camera.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:setCameraInfoVisibility(enabled)
-  -- Validate function.
   local f = 'setCameraInfoVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
@@ -3152,7 +3086,6 @@ end
 -- Shows/hides an overlay that displays collision masks for tilemaps.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:setTilemapCollisionMaskVisibility(enabled)
-  -- Validate function.
   local f = 'setTilemapCollisionMaskVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
@@ -3163,7 +3096,6 @@ end
 -- Shows/hides an overlay that displays behavior value numbers for tilemaps.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:setTilemapBehaviorValueVisibility(enabled)
-  -- Validate function.
   local f = 'setTilemapBehaviorValueVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
@@ -3174,7 +3106,6 @@ end
 -- Shows/hides an overlay that displays collision masks for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:setActiveCollisionMaskVisibility(enabled)
-  -- Validate function.
   local f = 'setActiveCollisionMaskVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
@@ -3185,7 +3116,6 @@ end
 -- Shows/hides an overlay that displays data for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:setActiveInfoVisibility(enabled)
-  -- Validate function.
   local f = 'setActiveInfoVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
@@ -3196,7 +3126,6 @@ end
 -- Shows/hides an overlay that visualizes the origin point for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:setOriginPointVisibility(enabled)
-  -- Validate function.
   local f = 'setOriginPointVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
@@ -3207,7 +3136,6 @@ end
 -- Shows/hides an overlay that visualizes the action point for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
 function Engine:setActionPointVisibility(enabled)
-  -- Validate function.
   local f = 'setActionPointVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
@@ -3218,7 +3146,6 @@ end
 -- Shows/hides all debug overlays.
 -- @param {boolean} enabled Whether the overlays should be shown or not.
 function Engine:setAllDebugOverlayVisibility(enabled)
-    -- Validate function.
   local f = 'setAllDebugOverlayVisibility'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
