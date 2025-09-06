@@ -262,7 +262,7 @@ function Active:playAnimation(animationName, forceRestart)
   
   MintCrate.Assert.type(f, 'animationName', animationName, 'string')
   
-  MintCrate.Assert.cond(f,
+  MintCrate.Assert.condition(f,
     'animationName',
     (MintCrate.Util.table.contains(self._animationList, animationName)),
     'does not refer to a valid animation'

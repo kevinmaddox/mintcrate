@@ -15,12 +15,21 @@ local MathX = {}
 function MathX.average(...)
   local values = {...}
   local f = 'average'
-  MintCrate.Assert.cond(f, '...', (#values > 0),
-    'expects at least one argument')
+  MintCrate.Assert.condition(f,
+    '...',
+    (#values > 0),
+    'expects at least one argument'
+  )
   
   local total = 0
   
   for i, value in pairs(values) do
+    MintCrate.Assert.condition(f,
+      '...',
+      type(value) == 'number',
+      'must only be numeric values'
+    )
+    
     total = total + value
   end
   
@@ -38,9 +47,10 @@ function MathX.clamp(value, limitLower, limitUpper)
   MintCrate.Assert.type(f, 'limitLower', limitLower, 'number')
   MintCrate.Assert.type(f, 'limitUpper', limitUpper, 'number')
   
-  -- Allow checking regardless of range order
-  if limitLower > limitUpper then
-    limitLower, limitUpper = limitUpper, limitLower
+  if (limitLower > limitUpper) then
+    MintCrate.Error(f,
+      'Argument "limitLower" cannot be greater than argument "limitUpper".'
+    )
   end
   
   return math.max(limitLower, math.min(limitUpper, value))
@@ -50,6 +60,9 @@ end
 -- @param {number} value The value to test.
 -- @returns {boolean} Whether the value is integral.
 function MathX.isIntegral(value)
+  local f = 'isIntegral'
+  MintCrate.Assert.type(f, 'value', value, 'number')
+  
   return (math.floor(value) == value)
 end
 
@@ -79,6 +92,11 @@ function MathX.round(value, numDecimalPlaces)
   
   if (numDecimalPlaces == nil) then numDecimalPlaces = 0 end
   MintCrate.Assert.type(f, 'numDecimalPlaces', numDecimalPlaces, 'number')
+  MintCrate.Assert.condition(f,
+    'numDecimalPlaces',
+    (numDecimalPlaces >= 0),
+    'cannot be a negative value'
+  )
   
   local mult = 10^(numDecimalPlaces)
   return math.floor(value * mult + 0.5) / mult

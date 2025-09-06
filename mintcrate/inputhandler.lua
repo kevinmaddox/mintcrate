@@ -133,7 +133,7 @@ function InputHandler:setRepeatValues(repeatWaitTime, repeatDelay)
   
   MintCrate.Assert.type(f, 'repeatWaitTime', repeatWaitTime, 'number')
   
-  MintCrate.Assert.cond(f,
+  MintCrate.Assert.condition(f,
     'repeatWaitTime',
     (repeatWaitTime >= 0),
     'cannot be a negative value'
@@ -141,7 +141,7 @@ function InputHandler:setRepeatValues(repeatWaitTime, repeatDelay)
   
   MintCrate.Assert.type(f, 'repeatDelay', repeatDelay, 'number')
   
-  MintCrate.Assert.cond(f,
+  MintCrate.Assert.condition(f,
     'repeatDelay',
     (repeatDelay >= 0),
     'cannot be a negative value'

@@ -28,7 +28,7 @@ function Room:new(roomName, roomWidth, roomHeight)
   
   MintCrate.Assert.type(f, 'roomWidth', roomWidth, 'number')
   
-  MintCrate.Assert.cond(f,
+  MintCrate.Assert.condition(f,
     'roomWidth',
     (roomWidth > 0),
     'must be a value greater than 0'
@@ -36,7 +36,7 @@ function Room:new(roomName, roomWidth, roomHeight)
   
   MintCrate.Assert.type(f, 'roomHeight', roomHeight, 'number')
   
-  MintCrate.Assert.cond(f,
+  MintCrate.Assert.condition(f,
     'roomHeight',
     (roomHeight > 0),
     'must be a value greater than 0'
@@ -111,7 +111,7 @@ function Room:configureFadeIn(fadeDuration, pauseDuration, color)
   
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
   
-  MintCrate.Assert.cond(f,
+  MintCrate.Assert.condition(f,
     'fadeDuration',
     (fadeDuration >= 0),
     'cannot be a negative value'
@@ -121,7 +121,7 @@ function Room:configureFadeIn(fadeDuration, pauseDuration, color)
   
   MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
   
-  MintCrate.Assert.cond(f,
+  MintCrate.Assert.condition(f,
     'pauseDuration',
     (pauseDuration >= 0),
     'cannot be a negative value'
@@ -166,7 +166,7 @@ function Room:configureFadeOut(fadeDuration, pauseDuration, color)
   
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
   
-  MintCrate.Assert.cond(f,
+  MintCrate.Assert.condition(f,
     'fadeDuration',
     (fadeDuration >= 0),
     'cannot be a negative value'
@@ -176,7 +176,7 @@ function Room:configureFadeOut(fadeDuration, pauseDuration, color)
   
   MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
   
-  MintCrate.Assert.cond(f,
+  MintCrate.Assert.condition(f,
     'pauseDuration',
     (pauseDuration >= 0),
     'cannot be a negative value'

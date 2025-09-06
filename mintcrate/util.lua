@@ -15,8 +15,12 @@ local Util = {}
 function Util.randomChoice(...)
   local values = {...}
   local f = 'randomChoice'
-  MintCrate.Assert.cond(f, '...', (#values > 0),
-    'expects at least one argument')
+  MintCrate.Assert.condition(f,
+    '...',
+    (#values > 0),
+    'expects at least one argument'
+  )
+  
   return values[love.math.random(1, #values)]
 end
 
@@ -110,8 +114,22 @@ end
 -- @param {number} index The index of the item to be moved.
 function Util.table.moveItemDown(tbl, index)
   local f = 'table.moveItemDown'
+  
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
+  MintCrate.Assert.condition(f,
+    'tbl',
+    Util.table.matchesArrayPattern(tbl),
+    'must have numerically-indexed, sequential keys'
+  )
+  
   MintCrate.Assert.type(f, 'index', index, 'number')
+  
+  MintCrate.Assert.condition(f,
+    'index',
+    (index > 0),
+    'must be a value greater than zero'
+  )
   
   if index > 1 and index <= #tbl then
     local val = tbl[index]
@@ -125,8 +143,22 @@ end
 -- @param {number} index The index of the item to be moved.
 function Util.table.moveItemUp(tbl, index)
   local f = 'table.moveItemUp'
+  
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
+  MintCrate.Assert.condition(f,
+    'tbl',
+    Util.table.matchesArrayPattern(tbl),
+    'must have numerically-indexed, sequential keys'
+  )
+  
   MintCrate.Assert.type(f, 'index', index, 'number')
+  
+  MintCrate.Assert.condition(f,
+    'index',
+    (index > 0),
+    'must be a value greater than zero'
+  )
   
   if index >= 1 and index < #tbl then
     local val = tbl[index]
@@ -140,8 +172,22 @@ end
 -- @param {number} index The index of the item to be moved.
 function Util.table.moveItemToStart(tbl, index)
   local f = 'table.moveItemToStart'
+  
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
+  MintCrate.Assert.condition(f,
+    'tbl',
+    Util.table.matchesArrayPattern(tbl),
+    'must have numerically-indexed, sequential keys'
+  )
+  
   MintCrate.Assert.type(f, 'index', index, 'number')
+  
+  MintCrate.Assert.condition(f,
+    'index',
+    (index > 0),
+    'must be a value greater than zero'
+  )
   
   if index > 1 and index <= #tbl then
     local val = tbl[index]
@@ -155,8 +201,22 @@ end
 -- @param {number} index The index of the item to be moved.
 function Util.table.moveItemToEnd(tbl, index)
   local f = 'table.moveItemToEnd'
+  
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
+  MintCrate.Assert.condition(f,
+    'tbl',
+    Util.table.matchesArrayPattern(tbl),
+    'must have numerically-indexed, sequential keys'
+  )
+  
   MintCrate.Assert.type(f, 'index', index, 'number')
+  
+  MintCrate.Assert.condition(f,
+    'index',
+    (index > 0),
+    'must be a value greater than zero'
+  )
   
   if index >= 1 and index < #tbl then
     local val = tbl[index]
@@ -169,7 +229,14 @@ end
 -- @param {table} tbl The table to be reversed.
 function Util.table.reverse(tbl)
   local f = 'table.reverse'
+  
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
+  MintCrate.Assert.condition(f,
+    'tbl',
+    Util.table.matchesArrayPattern(tbl),
+    'must have numerically-indexed, sequential keys'
+  )
   
   local i, j = 1, #tbl
   
@@ -197,6 +264,9 @@ end
 -- @param {*} item The item to search for.
 -- @returns {boolean} Whether the item was found in the table.
 function Util.table.contains(tbl, item)
+  local f = 'table.contains'
+  MintCrate.Assert.type(f, 'tbl', tbl, 'table')
+  
   local found = false
   for _,v in pairs(tbl) do
     if (v == item) then found = true end
@@ -267,6 +337,11 @@ end
 function Util.string.toBoolean(str)
   local f = 'string.toBoolean'
   MintCrate.Assert.type(f, 'str', str, 'string')
+  MintCrate.Assert.condition(f,
+    'str',
+    (str == 'true' or str == 'false'),
+    'must be a string that\'s either "true" or "false"'
+  )
   
   local bool = false
   if str == 'true' then bool = true end
@@ -292,6 +367,11 @@ function Util.string.padLeft(str, length, padChar)
   local f = 'string.padLeft'
   MintCrate.Assert.type(f, 'str', str, 'string')
   MintCrate.Assert.type(f, 'length', length, 'number')
+  MintCrate.Assert.condition(f,
+    'length',
+    (length >= 0),
+    'cannot be a negative value'
+  )
   MintCrate.Assert.type(f, 'padChar', padChar, 'string')
   
   while string.len(str) < length do str = padChar .. str end
@@ -307,6 +387,11 @@ function Util.string.padRight(str, length, padChar)
   local f = 'string.padRight'
   MintCrate.Assert.type(f, 'str', str, 'string')
   MintCrate.Assert.type(f, 'length', length, 'number')
+  MintCrate.Assert.condition(f,
+    'length',
+    (length >= 0),
+    'cannot be a negative value'
+  )
   MintCrate.Assert.type(f, 'padChar', padChar, 'string')
   
   while string.len(str) < length do str = str .. padChar end
@@ -333,6 +418,11 @@ function Util.json.encode(tbl, prettyPrint, numSpaces)
   
   if (numSpaces == nil) then numSpaces = 2 end
   MintCrate.Assert.type(f, 'numSpaces', numSpaces, 'number')
+  MintCrate.Assert.condition(f,
+    'numSpaces',
+    (numSpaces >= 0),
+    'cannot be a negative value'
+  )
   
   -- This sub-function attempts to serialize a value
   function serializeValue(val, key, indent, tab, newline)

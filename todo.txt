@@ -37,7 +37,7 @@ MintCrate To-do List
 [x] Engine setting to turn BGM/SFX on/off (and adjust volume, perhaps?)
 [x] Bug - Sounds not stopping when changing rooms (stopAllSounds not working?)
 [x] Option to fade or persist audio when fading out a room
-[/] Add validation and error-checking to functions
+[x] Add validation and error-checking to functions
   [x] Loader
   [x] Engine core
     [x] Main functions
@@ -49,22 +49,24 @@ MintCrate To-do List
   [x] Active
   [x] Backdrop
   [x] Paragraph
-  [/] MathX
-  [/] Util
-    [ ] Main stuff
+  [x] MathX
+  [x] Util
+    [x] Main stuff
     [x] JSON encoder/decoder
-  [ ] Change Assert.Cond to Assert.Condition
-[ ] Dump/log utility
+  [x] Change Assert.Cond to Assert.Condition
+  [ ] Formatting
 [ ] Think really hard about function/class names
   [ ] Get rid of toggles, make sure it's all where you have to set it to true/false
   [ ] setTextContent should just be setText
   [ ] Paragraph probably should just be Text
   [ ] engine.lua should be core.lua
-[ ] Debug collision mask rectangle looks jumpy when moving
+[ ] Dump/log utility
 [ ] Findings/issues
   [x] Remove pathPrefix from engine core constructor
   [x] Alter it so that tilemap calls aren't in Room but are instead in Engine core
   [ ] Custom error handler not working in example files
+[ ] Debug collision mask rectangle looks jumpy when moving
+[ ] Reconsider fonts/text, and how it affects localizations
 [ ] Testing
   [ ] Ensure that you can't break camera bounds... maybe add some extra conditional validation?
   [ ] Go through every class and try to break stuff
@@ -78,7 +80,6 @@ MintCrate To-do List
     [ ] MathX
     [ ] Util
 [ ] Make everything nice and clean
-[ ] Reconsider fonts/text, and how it affects localizations
 [ ] Long-term: Make the JSON parser handle more bad-JSON errors
 
 Decisions

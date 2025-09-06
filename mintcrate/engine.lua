@@ -31,11 +31,11 @@ function Engine:new(
   local f = 'new'
   
   MintCrate.Assert.type(f, 'baseWidth', baseWidth, 'number')
-  MintCrate.Assert.cond(f, 'baseWidth', (baseWidth > 0),
+  MintCrate.Assert.condition(f, 'baseWidth', (baseWidth > 0),
     'must be a value greater than 0')
   
   MintCrate.Assert.type(f, 'baseHeight', baseHeight, 'number')
-  MintCrate.Assert.cond(f, 'baseHeight', (baseHeight > 0),
+  MintCrate.Assert.condition(f, 'baseHeight', (baseHeight > 0),
     'must be a value greater than 0')
   
   MintCrate.Assert.type(f, 'startingRoom', startingRoom, 'Room')
@@ -45,9 +45,9 @@ function Engine:new(
   
   if (options.windowScale == nil) then options.windowScale = 1 end
   MintCrate.Assert.type(f, 'options.windowScale', options.windowScale, 'number')
-  MintCrate.Assert.cond(f, 'options.windowScale', (options.windowScale > 0),
+  MintCrate.Assert.condition(f, 'options.windowScale', (options.windowScale > 0),
     'must be a value greater than 0')
-  MintCrate.Assert.cond(f, 'options.windowScale',
+  MintCrate.Assert.condition(f, 'options.windowScale',
     (MintCrate.MathX.isIntegral(options.windowScale)), 'must be an integer')
   
   if (options.windowTitle == nil) then
@@ -381,19 +381,19 @@ function Engine:defineActives(data)
     
     -- Active's base name
     if not string.find(item.name, '_') then
-      MintCrate.Assert.cond(f, "data.table.name (entry: '"..item.name.."')",
+      MintCrate.Assert.condition(f, "data.table.name (entry: '"..item.name.."')",
         (self._data.actives[item.name] == nil), 'was already specified')
       self._data.actives[item.name] = { animations = {} }
     -- Active's collider data
     elseif string.find(item.name, 'collider') then
       local nameParts = self.util.string.split(item.name, '_')
-      MintCrate.Assert.cond(f, "data.table.name (entry: '"..item.name.."')",
+      MintCrate.Assert.condition(f, "data.table.name (entry: '"..item.name.."')",
         (#nameParts == 2), 'must be formatted as "active_collider"')
       
       if (item.offset == nil) then item.offset = {0, 0} end
       MintCrate.Assert.type(f, "data.table.offset (entry: '"..item.name.."')",
         item.offset, 'table')
-      MintCrate.Assert.cond(f, "data.table.offset (entry: '"..item.name.."')",
+      MintCrate.Assert.condition(f, "data.table.offset (entry: '"..item.name.."')",
         (#item.offset == 2), 'expects two numbers, representing ' ..
         'the X and Y offsets of the collider')
       
@@ -441,11 +441,11 @@ function Engine:defineActives(data)
     else
       -- Validation
       local nameParts = self.util.string.split(item.name, '_')
-      MintCrate.Assert.cond(f, "data.table.name (entry: '"..item.name.."')",
+      MintCrate.Assert.condition(f, "data.table.name (entry: '"..item.name.."')",
         (#nameParts == 2), 'must be formatted as "active_animation"')
       local activeName = nameParts[1]
       local animationName = nameParts[2]
-      MintCrate.Assert.cond(f, "data.table.name (entry: '"..item.name.."')",
+      MintCrate.Assert.condition(f, "data.table.name (entry: '"..item.name.."')",
         (self._data.actives[activeName].animations[animationName] == nil),
         'was already specified')
       
@@ -459,7 +459,7 @@ function Engine:defineActives(data)
       if (item.offset == nil) then item.offset = {0, 0} end
       MintCrate.Assert.type(f, "data.table.offset (entry: '"..item.name.."')",
         item.offset, 'table')
-      MintCrate.Assert.cond(f, "data.table.offset (entry: '"..item.name.."')",
+      MintCrate.Assert.condition(f, "data.table.offset (entry: '"..item.name.."')",
         (#item.offset == 2), 'expects two numbers, representing ' ..
         'the X and Y offsets of the sprite')
       
@@ -468,7 +468,7 @@ function Engine:defineActives(data)
         f, "data.table.actionPoints (entry: '"..item.name.."')",
         item.actionPoints, 'table')
       for i = 1, #item.actionPoints do
-        MintCrate.Assert.cond(f,
+        MintCrate.Assert.condition(f,
           "data.table.actionPoints["..i.."] (entry: '"..item.name.."')",
           #item.actionPoints[i] == 2, 'expects two numbers, representing ' ..
           'the X and Y offsets of the action point')
@@ -484,19 +484,19 @@ function Engine:defineActives(data)
       MintCrate.Assert.type(
         f, "data.table.frameCount (entry: '"..item.name.."')",
         item.frameCount, 'number')
-      MintCrate.Assert.cond(f, "data.table.frameCount (entry:'"..item.name.."')",
+      MintCrate.Assert.condition(f, "data.table.frameCount (entry:'"..item.name.."')",
         (item.frameCount > 0), 'must be a value greater than 0')
-      MintCrate.Assert.cond(f, "data.table.frameCount (entry:'"..item.name.."')",
+      MintCrate.Assert.condition(f, "data.table.frameCount (entry:'"..item.name.."')",
         (self.math.isIntegral(item.frameCount)), 'must be an integer')
       
       if (item.frameDuration == nil) then item.frameDuration = 20 end
       MintCrate.Assert.type(
         f, "data.table.frameDuration (entry: '"..item.name.."')",
         item.frameDuration, 'number')
-      MintCrate.Assert.cond(f,
+      MintCrate.Assert.condition(f,
         "data.table.frameDuration (entry:'"..item.name.."')",
         (item.frameDuration >= 0), 'cannot be a negative value')
-      MintCrate.Assert.cond(f,
+      MintCrate.Assert.condition(f,
         "data.table.frameDuration (entry:'"..item.name.."')",
         (self.math.isIntegral(item.frameDuration)), 'must be an integer')
       
@@ -571,7 +571,7 @@ function Engine:defineBackdrops(data)
       'string'
     )
     
-    MintCrate.Assert.cond(f,
+    MintCrate.Assert.condition(f,
       "data.table.name (entry: '"..item.name.."')",
       (self._data.backdrops[item.name] == nil),
       'was already specified'
@@ -612,7 +612,7 @@ function Engine:defineFonts(data)
       'string'
     )
     
-    MintCrate.Assert.cond(f,
+    MintCrate.Assert.condition(f,
       "data.table.name (entry: '"..item.name.."')",
       (self._data.fonts[item.name] == nil),
       'was already specified'
@@ -697,7 +697,7 @@ function Engine:defineSounds(data)
       'string'
     )
     
-    MintCrate.Assert.cond(f,
+    MintCrate.Assert.condition(f,
       "data.table.name (entry: '"..item.name.."')",
       (self._data.sounds[item.name] == nil),
       'was already specified'
@@ -746,7 +746,7 @@ function Engine:defineMusic(data)
       'string'
     )
     
-    MintCrate.Assert.cond(f,
+    MintCrate.Assert.condition(f,
       "data.table.name (entry: '"..item.name.."')",
       (self._data.music[item.name] == nil),
       'was already specified'
@@ -820,7 +820,7 @@ function Engine:defineTilemaps(data)
     
     -- Tilemap's base name (refers to the image file)
     if not string.find(item.name, '_') then
-      MintCrate.Assert.cond(f,
+      MintCrate.Assert.condition(f,
         "data.table.name (entry: '"..item.name.."')",
         (self._data.tilemaps[item.name] == nil),
         'was already specified'
@@ -863,7 +863,7 @@ function Engine:defineTilemaps(data)
     else
       local nameParts = self.util.string.split(item.name, '_')
       
-      MintCrate.Assert.cond(f,
+      MintCrate.Assert.condition(f,
         "data.table.name (entry: '"..item.name.."')",
         (#nameParts == 2),
         'must be formatted as "tilemap_layout"'
@@ -872,7 +872,7 @@ function Engine:defineTilemaps(data)
       local tilemapName = nameParts[1]
       local layoutName = nameParts[2]
       
-      MintCrate.Assert.cond(f,
+      MintCrate.Assert.condition(f,
         "data.table.name (entry: '"..item.name.."')",
         (self._data.tilemaps[tilemapName].layouts[layoutName] == nil),
         'was already specified'
@@ -1205,7 +1205,7 @@ function Engine:delayFunction(callback, numFrames)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'callback', callback, 'function')
   MintCrate.Assert.type(f, 'numFrames', numFrames, 'number')
-  MintCrate.Assert.cond(f, 'numFrames', (numFrames >= 0),
+  MintCrate.Assert.condition(f, 'numFrames', (numFrames >= 0),
     'cannot be a negative value')
   
   table.insert(self._queuedFunctions,
@@ -1221,7 +1221,7 @@ function Engine:repeatFunction(callback, numFrames, fireImmediately)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'callback', callback, 'function')
   MintCrate.Assert.type(f, 'numFrames', numFrames, 'number')
-  MintCrate.Assert.cond(f, 'numFrames', (numFrames >= 0),
+  MintCrate.Assert.condition(f, 'numFrames', (numFrames >= 0),
     'cannot be a negative value')
   
   if (fireImmediately == nil) then fireImmediately = false end
@@ -1260,7 +1260,7 @@ function Engine:addActive(name, x, y)
   MintCrate.Assert.self(f, self)
 
   MintCrate.Assert.type(f, 'name', name, 'string')
-  MintCrate.Assert.cond(f, 'name', (self._data.actives[name] ~= nil),
+  MintCrate.Assert.condition(f, 'name', (self._data.actives[name] ~= nil),
     'does not refer to a valid Active object')
   
   if (x == nil) then x = 0 end
@@ -1317,7 +1317,7 @@ function Engine:addBackdrop(name, x, y, options)
   MintCrate.Assert.self(f, self)
   
   MintCrate.Assert.type(f, 'name', name, 'string')
-  MintCrate.Assert.cond(f, 'name', (self._data.backdrops[name] ~= nil),
+  MintCrate.Assert.condition(f, 'name', (self._data.backdrops[name] ~= nil),
     'does not refer to a valid Backdrop object')
   
   if (x == nil) then x = 0 end
@@ -1333,12 +1333,12 @@ function Engine:addBackdrop(name, x, y, options)
   
   if (options.width == nil) then options.width = image:getWidth() end
   MintCrate.Assert.type(f, 'options.width', options.width, 'number')
-  MintCrate.Assert.cond(f, 'options.width', (options.width > 0),
+  MintCrate.Assert.condition(f, 'options.width', (options.width > 0),
     'must be a value greater than 0')
   
   if (options.height == nil) then options.height = image:getHeight() end
   MintCrate.Assert.type(f, 'options.height', options.height, 'number')
-  MintCrate.Assert.cond(f, 'options.height', (options.height > 0),
+  MintCrate.Assert.condition(f, 'options.height', (options.height > 0),
     'must be a value greater than 0')
   
   -- Add backdrop to scene.
@@ -1384,7 +1384,7 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   local f = 'addParagraph'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'name', name, 'string')
-  MintCrate.Assert.cond(f, 'name', (self._data.fonts[name] ~= nil),
+  MintCrate.Assert.condition(f, 'name', (self._data.fonts[name] ~= nil),
     'does not refer to a valid Font object')
   
   if (x == nil) then x = 0 end
@@ -1402,12 +1402,12 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   if (options.maxCharsPerLine == nil) then options.maxCharsPerLine = 9999 end
   MintCrate.Assert.type(
     f, 'options.maxCharsPerLine', options.maxCharsPerLine, 'number')
-  MintCrate.Assert.cond(f, 'options.maxCharsPerLine',
+  MintCrate.Assert.condition(f, 'options.maxCharsPerLine',
     (options.maxCharsPerLine > 0), 'must be a value greater than zero')
   
   if (options.lineSpacing == nil) then options.lineSpacing = 0 end
   MintCrate.Assert.type(f, 'options.lineSpacing', options.lineSpacing, 'number')
-  MintCrate.Assert.cond(f, 'options.lineSpacing', (options.lineSpacing >= 0),
+  MintCrate.Assert.condition(f, 'options.lineSpacing', (options.lineSpacing >= 0),
     'cannot be a negative value')
   
   if (options.wordWrap == nil) then options.wordWrap = false end
@@ -1415,7 +1415,7 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   
   if (options.alignment == nil) then options.alignment = "left" end
   MintCrate.Assert.type(f, 'options.alignment', options.alignment, 'string')
-  MintCrate.Assert.cond(f, 'numFrames', (options.alignment == 'left' or
+  MintCrate.Assert.condition(f, 'numFrames', (options.alignment == 'left' or
     options.alignment == 'right' or options.alignment == 'center'),
     'must be either "left", "right", or "center"')
   
@@ -1567,7 +1567,7 @@ function Engine:setTilemap(tilemapLayoutName)
   self._layoutName = MintCrate.Util.string.split(tilemapLayoutName, '_')[2]
   
   -- Ensure tilemap exists.
-  MintCrate.Assert.cond(f, 'tilemapLayoutName', (
+  MintCrate.Assert.condition(f, 'tilemapLayoutName', (
     self._data.tilemaps[self._tilemapName] and
     self._data.tilemaps[self._tilemapName].layouts[self._layoutName]
   ), 'does not refer to a valid Tilemap layout')
@@ -2309,9 +2309,9 @@ function Engine:setWindowScale(scale, forceResize)
   local f = 'setWindowScale'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'scale', scale, 'number')
-  MintCrate.Assert.cond(f, 'scale', (scale > 0),
+  MintCrate.Assert.condition(f, 'scale', (scale > 0),
     'must be a value greater than 0')
-  MintCrate.Assert.cond(f, 'scale', (self.math.isIntegral(scale)),
+  MintCrate.Assert.condition(f, 'scale', (self.math.isIntegral(scale)),
     'must be an integer')
   
   if (forceResize == nil) then forceResize = false end
@@ -2827,7 +2827,7 @@ function Engine:playSound(soundName, options)
   local f = 'playSound'
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'soundName', soundName, 'string')
-  MintCrate.Assert.cond(f, 'soundName', (self._data.sounds[soundName] ~= nil),
+  MintCrate.Assert.condition(f, 'soundName', (self._data.sounds[soundName] ~= nil),
     'does not refer to a valid sound file')
   
   if (options == nil) then options = {} end
@@ -2984,7 +2984,7 @@ function Engine:playMusic(trackName, fadeLength)
   
   if (fadeLength == nil) then fadeLength = 0 end
   MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
-  MintCrate.Assert.cond(f, 'fadeLength', (fadeLength >= 0),
+  MintCrate.Assert.condition(f, 'fadeLength', (fadeLength >= 0),
     'cannot be a negative value')
 
   
@@ -2993,7 +2993,7 @@ function Engine:playMusic(trackName, fadeLength)
     trackName = self._currentMusic
   end
   
-  MintCrate.Assert.cond(f, 'trackName', (self._data.music[trackName] ~= nil),
+  MintCrate.Assert.condition(f, 'trackName', (self._data.music[trackName] ~= nil),
     'does not refer to a valid music file')
   
   -- Play track.
@@ -3043,7 +3043,7 @@ function Engine:stopMusic(fadeLength)
   
   if (fadeLength == nil) then fadeLength = 0 end
   MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
-  MintCrate.Assert.cond(f, 'fadeLength', (fadeLength >= 0),
+  MintCrate.Assert.condition(f, 'fadeLength', (fadeLength >= 0),
     'cannot be a negative value')
   
   self:_stopMusic(self._currentMusic, fadeLength)
