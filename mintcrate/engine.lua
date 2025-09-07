@@ -114,7 +114,7 @@ function Engine:new(
   love.graphics.setDefaultFilter("nearest", "nearest")
   
   -- Constants
-  o._COLLIDER_SHAPES = {RECTANGLE = 0, CIRCLE = 1}
+  o._COLLIDER_SHAPES = {NONE = 0, RECTANGLE = 1, CIRCLE = 2}
   
   -- Resource directory paths
   o._resPaths = {
@@ -1508,13 +1508,23 @@ end
 function Engine:delayFunction(callback, numFrames)
   local f = 'delayFunction'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: callback
   MintCrate.Assert.type(f, 'callback', callback, 'function')
+  
+  -- Validate: numFrames
   MintCrate.Assert.type(f, 'numFrames', numFrames, 'number')
-  MintCrate.Assert.condition(f, 'numFrames', (numFrames >= 0),
+  
+  MintCrate.Assert.condition(f,
+    'numFrames',
+    (numFrames >= 0),
     'cannot be a negative value')
   
-  table.insert(self._queuedFunctions,
-    {callback = callback, remainingFrames = numFrames})
+  -- Store function to be delay-fired by engine
+  table.insert(self._queuedFunctions, {
+    callback        = callback,
+    remainingFrames = numFrames
+  })
 end
 
 -- Repeats a function every n frames.
@@ -1524,17 +1534,35 @@ end
 function Engine:repeatFunction(callback, numFrames, fireImmediately)
   local f = 'repeatFunction'
   MintCrate.Assert.self(f, self)
+  
+  -- Default params
+  if (fireImmediately == nil) then fireImmediately = false end
+  
+  -- Validate: callback
   MintCrate.Assert.type(f, 'callback', callback, 'function')
+  
+  -- Validate: numFrames
   MintCrate.Assert.type(f, 'numFrames', numFrames, 'number')
-  MintCrate.Assert.condition(f, 'numFrames', (numFrames >= 0),
+  
+  MintCrate.Assert.condition(f,
+    'numFrames',
+    (numFrames >= 0),
     'cannot be a negative value')
   
-  if (fireImmediately == nil) then fireImmediately = false end
+  -- Validate: fireImmediately
   MintCrate.Assert.type(f, 'fireImmediately', fireImmediately, 'boolean')
   
-  if fireImmediately then callback() end
-  table.insert(self._queuedFunctions,
-    {callback = callback, remainingFrames = numFrames, repeatValue = numFrames})
+  -- Do an initial run of the function if specified
+  if (fireImmediately) then
+    callback()
+  end
+  
+  -- Store function to be repeat-fired by engine
+  table.insert(self._queuedFunctions, {
+    callback        = callback,
+    remainingFrames = numFrames,
+    repeatValue     = numFrames
+  })
 end
 
 -- Clears a queued function.
@@ -1542,10 +1570,13 @@ end
 function Engine:clearFunction(callback)
   local f = 'clearFunction'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: callback
   MintCrate.Assert.type(f, 'callback', callback, 'function')
   
+  -- Find function and mark it to be cleared out
   for _, item in ipairs(self._queuedFunctions) do
-    if item.callback == callback then
+    if (item.callback == callback) then
       item.cancelled = true
     end
   end
@@ -1563,38 +1594,47 @@ end
 function Engine:addActive(name, x, y)
   local f = 'addActive'
   MintCrate.Assert.self(f, self)
-
+  
+  -- Default params
+  if (x == nil) then x = 0 end
+  if (y == nil) then y = 0 end
+  
+  -- Validate: name
   MintCrate.Assert.type(f, 'name', name, 'string')
-  MintCrate.Assert.condition(f, 'name', (self._data.actives[name] ~= nil),
+  MintCrate.Assert.condition(f,
+    'name',
+    (self._data.actives[name] ~= nil),
     'does not refer to a valid Active object')
   
-  if (x == nil) then x = 0 end
+  -- Validate: x
   MintCrate.Assert.type(f, 'x', x, 'number')
   
-  if (y == nil) then y = 0 end
+  -- Validate: y
   MintCrate.Assert.type(f, 'y', y, 'number')
   
+  -- Retrieve active's collider data (if available)
   local collider = self._data.actives[name].collider or {}
   
-  
+  -- Retrieve list of animations for the active (if available)
   local animationList = {}
   for animName, _ in pairs(self._data.actives[name].animations) do
     table.insert(animationList, animName)
   end
   
+  -- Retrieve initial animation to play upon creation (if available)
   local initialAnimationName = self._data.actives[name].initialAnimationName
-  
   local animation
-  if initialAnimationName then
+  if (initialAnimationName) then
     animation = self._data.actives[name].animations[initialAnimationName]
   end
   
+  -- Create new active
   local active = MintCrate.Active:new(
     self._instances.actives,
     self._drawOrders.main,
     name,
     x, y,
-    collider.shape,
+    collider.shape or self._COLLIDER_SHAPES.NONE,
     collider.offsetX or 0, collider.offsetY or 0,
     collider.width or 0, collider.height or 0,
     collider.radius or 0,
@@ -1603,9 +1643,11 @@ function Engine:addActive(name, x, y)
     animation
   )
   
+  -- Store entry for active in instance and draw-order lists
   table.insert(self._instances.actives, active)
   table.insert(self._drawOrders.main, active)
   
+  -- Return active
   return active
 end
 
@@ -1621,56 +1663,82 @@ function Engine:addBackdrop(name, x, y, options)
   local f = 'addBackdrop'
   MintCrate.Assert.self(f, self)
   
+  -- Validate: name
   MintCrate.Assert.type(f, 'name', name, 'string')
-  MintCrate.Assert.condition(f, 'name', (self._data.backdrops[name] ~= nil),
+  MintCrate.Assert.condition(f,
+    'name',
+    (self._data.backdrops[name] ~= nil),
     'does not refer to a valid Backdrop object')
   
-  if (x == nil) then x = 0 end
-  MintCrate.Assert.type(f, 'x', x, 'number')
-  
-  if (y == nil) then y = 0 end
-  MintCrate.Assert.type(f, 'y', y, 'number')
-  
+  -- Load background image
   local image = self._data.backdrops[name].image
   
-  if (options == nil) then options = {} end
+  -- Default params
+  if (x              == nil) then x = 0                              end
+  if (y              == nil) then y = 0                              end
+  if (options        == nil) then options = {}                       end
+  if (options.width  == nil) then options.width = image:getWidth()   end
+  if (options.height == nil) then options.height = image:getHeight() end
+  
+  -- Validate: x
+  MintCrate.Assert.type(f, 'x', x, 'number')
+  
+  -- Validate: y
+  MintCrate.Assert.type(f, 'y', y, 'number')
+  
+  -- Validate: options
   MintCrate.Assert.type(f, 'options', options, 'table')
   
-  if (options.width == nil) then options.width = image:getWidth() end
+  -- Validate: options.width
   MintCrate.Assert.type(f, 'options.width', options.width, 'number')
-  MintCrate.Assert.condition(f, 'options.width', (options.width > 0),
+  
+  MintCrate.Assert.condition(f,
+    'options.width',
+    (options.width > 0),
     'must be a value greater than 0')
   
-  if (options.height == nil) then options.height = image:getHeight() end
+  -- Validate: options.height
   MintCrate.Assert.type(f, 'options.height', options.height, 'number')
-  MintCrate.Assert.condition(f, 'options.height', (options.height > 0),
+  
+  MintCrate.Assert.condition(f,
+    'options.height',
+    (options.height > 0),
     'must be a value greater than 0')
   
-  -- Add backdrop to scene.
-  local width = options.width
-  local height = options.height
-  
+  -- Prepare some data for tiling/scaling processing
+  local textureWidth, textureHeight = image:getDimensions()
+  local width                       = options.width
+  local height                      = options.height
+  local scaleX                      = 1
+  local scaleY                      = 1
   local quad
-  local scaleX = 1
-  local scaleY = 1
-  if self._data.backdrops[name].mosaic then
+  
+  -- If image is set to tile, then create quad to handle tiling
+  if (self._data.backdrops[name].mosaic) then
     quad = love.graphics.newQuad(0, 0, width, height, image:getDimensions())
+  -- Otherwise, calculate scaling values for stretching the image
   else
-    local textureWidth, textureHeight = image:getDimensions()
     scaleX = width / textureWidth
     scaleY = height / textureHeight
   end
   
+  -- Create new backdrop
   local backdrop = MintCrate.Backdrop:new(
     self._instances.backdrops,
     self._drawOrders.backdrops,
-    name, x, y,
-    width, height, quad, scaleX, scaleY
+    name,
+    x, y,
+    width, height,
+    quad,
+    scaleX, scaleY,
+    textureWidth, textureHeight
   )
   
+  -- Store entry for backdrop in instance and draw-order lists
   table.insert(self._instances.backdrops, backdrop)
   table.insert(self._drawOrders.backdrops, backdrop)
   
+  -- Return backdrop
   return backdrop
 end
 
@@ -2787,6 +2855,13 @@ end
 -- @returns {boolean} Whether a collision occurred.
 function Engine:_testCollision(colliderA, colliderB)
   local collision = false
+  
+  if (
+    colliderA.s == self._COLLIDER_SHAPES.NONE or
+    colliderB.s == self._COLLIDER_SHAPES.NONE
+  ) then
+    return false
+  end
   
   -- Both colliders are rectangles.
   if (

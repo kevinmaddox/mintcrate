@@ -24,7 +24,7 @@ Backdrop.type = "Backdrop"
 -- @param {number} scaleY Used to scale non-mosaic Backdrops correctly.
 -- @returns {Backdrop} A new instance of the Backdrop class.
 function Backdrop:new(instances, drawOrder, name, x, y, width, height, quad,
-  scaleX, scaleY
+  scaleX, scaleY, textureWidth, textureHeight
 )
   local o = MintCrate.Entity:new()
   setmetatable(self, {__index = MintCrate.Entity})
@@ -43,6 +43,8 @@ function Backdrop:new(instances, drawOrder, name, x, y, width, height, quad,
   o._quad = quad
   o._scaleX = scaleX
   o._scaleY = scaleY
+  o._textureWidth = textureWidth
+  o._textureHeight = textureHeight
   
   return o
 end
@@ -75,8 +77,7 @@ function Backdrop:getTextureWidth()
   local f = 'getTextureWidth'
   MintCrate.Assert.self(f, self)
   
-  local w, h = self._quad:getTextureDimensions()
-  return w
+  return self._textureWidth
 end
 
 -- Returns the height of only the backdrop texture.
@@ -85,8 +86,7 @@ function Backdrop:getTextureHeight()
   local f = 'getTextureHeight'
   MintCrate.Assert.self(f, self)
   
-  local w, h = self._quad:getTextureDimensions()
-  return h
+  return self._textureHeight
 end
 
 -- -----------------------------------------------------------------------------
