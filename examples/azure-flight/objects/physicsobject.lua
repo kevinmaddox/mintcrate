@@ -1,4 +1,4 @@
-PhysicsObject = {type = MintCrate.Active.type}
+PhysicsObject = {}
 
 function PhysicsObject:new(activeName, x, y, gravity)
   local o = mint:addActive(activeName, x, y)

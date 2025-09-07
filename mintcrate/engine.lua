@@ -240,7 +240,7 @@ function Engine:init()
   love.window.setTitle(self._windowTitle)
   
   -- Set window icon path.
-  if self._windowIconPath ~= "" then
+  if (self._windowIconPath ~= "") then
     local icon = love.image.newImageData(self._windowIconPath)
     love.window.setIcon(icon)
   end
@@ -287,7 +287,7 @@ function Engine:quit(fadeBeforeQuitting, fadeMusic)
   MintCrate.Assert.type(f, 'fadeMusic', fadeMusic, 'boolean')
   
   -- Trigger the fade-out effect, then change room when it's done.
-  if fadeBeforeQuitting then
+  if (fadeBeforeQuitting) then
     self:_triggerRoomFade('fadeOut', love.event.quit, fadeMusic)
   else
     love.event.quit()
@@ -383,9 +383,9 @@ function Engine:defineColorKeys(rgbSets)
   MintCrate.Assert.type(f, 'rgbSets', rgbSets, 'table')
   
   for _, rgb in pairs(rgbSets) do
-    MintCrate.Assert.type(f, 'rgbSets.table.r', rgbSets.table.r, 'number')
-    MintCrate.Assert.type(f, 'rgbSets.table.g', rgbSets.table.g, 'number')
-    MintCrate.Assert.type(f, 'rgbSets.table.b', rgbSets.table.b, 'number')
+    MintCrate.Assert.type(f, 'rgbSets.table.r', rgb.r, 'number')
+    MintCrate.Assert.type(f, 'rgbSets.table.g', rgb.g, 'number')
+    MintCrate.Assert.type(f, 'rgbSets.table.b', rgb.b, 'number')
   end
   
   -- Store color key sets
@@ -404,7 +404,7 @@ function Engine:_loadImage(imagePath, isEngineResource)
   local imageData
   
   -- Load Base64 image if it's an MintCrate system resource
-  if isEngineResource then
+  if (isEngineResource) then
     local imageB64     = require(imagePath)
     local imageDecoded = love.data.decode("data", "base64", imageB64)
     local imageFile    = love.filesystem.newFileData(imageDecoded, 'img.png')
@@ -414,7 +414,7 @@ function Engine:_loadImage(imagePath, isEngineResource)
     -- Figure out file extension
     local fileFound = false
     for _, ext in ipairs({'png', 'jpg'}) do
-      if love.filesystem.getInfo(imagePath..'.'..ext) then
+      if (love.filesystem.getInfo(imagePath..'.'..ext)) then
         imagePath = imagePath..'.'..ext
         fileFound = true
         break
@@ -436,7 +436,7 @@ function Engine:_loadImage(imagePath, isEngineResource)
   -- Store color keys
   local colorKeyColors = self._colorKeyColors
   
-  if isEngineResource then
+  if (isEngineResource) then
     colorKeyColors = {
       {r =  82, g = 173, b = 154},
       {r = 140, g = 222, b = 205}
@@ -473,7 +473,7 @@ function Engine:defineActives(data)
     MintCrate.Assert.type(f, 'data.table.name', item.name, 'string')
     
     -- Active's base name
-    if not string.find(item.name, '_') then
+    if (not string.find(item.name, '_')) then
       -- Validate: item.name (for base name)
       MintCrate.Assert.condition(f,
         'data.table.name',
@@ -489,7 +489,7 @@ function Engine:defineActives(data)
       self._data.actives[item.name] = { animations = {} }
     
     -- Active's collider data
-    elseif string.find(item.name, 'collider') then
+    elseif (string.find(item.name, 'collider')) then
       -- Default params
       if (item.offset == nil) then item.offset = {0, 0} end
       if (item.width  == nil) then item.width = 0       end
@@ -527,8 +527,8 @@ function Engine:defineActives(data)
       
       MintCrate.Assert.condition(f,
         "data.table.offset (entry: '"..item.name.."')",
-        (#item.offset == 2), 'expects two numbers, representing ' ..
-        'the X and Y offsets of the collider')
+        (#item.offset == 2),
+        'expects two numbers, representing the X and Y offsets of the collider')
       
       -- Validate: item.width
       MintCrate.Assert.type(f,
@@ -706,7 +706,7 @@ function Engine:defineActives(data)
         'must be an integer')
       
       -- Specify default animation (the first one the user defines)
-      if not self._data.actives[activeName].initialAnimationName then
+      if (not self._data.actives[activeName].initialAnimationName) then
         self._data.actives[activeName].initialAnimationName = animationName
       end
       
@@ -953,7 +953,7 @@ function Engine:defineSounds(data)
     -- Figure out file extension
     local fileFound = false
     for _, ext in ipairs({'wav', 'ogg'}) do
-      if love.filesystem.getInfo(path..'.'..ext) then
+      if (love.filesystem.getInfo(path..'.'..ext)) then
         path = path..'.'..ext
         fileFound = true
         break
@@ -1010,7 +1010,7 @@ function Engine:defineMusic(data)
     -- Figure out file extension
     local fileFound = false
     for _, ext in ipairs({'ogg', 'it', 'xm', 'mod', 's3m'}) do
-      if love.filesystem.getInfo(path..'.'..ext) then
+      if (love.filesystem.getInfo(path..'.'..ext)) then
         path = path..'.'..ext
         fileFound = true
         break
@@ -1080,7 +1080,7 @@ function Engine:defineTilemaps(data)
       'string')
     
     -- Tilemap's base name (refers to the image file)
-    if not string.find(item.name, '_') then
+    if (not string.find(item.name, '_')) then
       -- Validate: item.name (for base name)
       MintCrate.Assert.condition(f,
         'data.table.name',
@@ -1112,7 +1112,7 @@ function Engine:defineTilemaps(data)
       
       for y = 0, image:getHeight(), item.tileHeight do
         for x = 0, image:getWidth(), item.tileWidth do
-          if x < image:getWidth() and y < image:getHeight() then
+          if (x < image:getWidth() and y < image:getHeight()) then
             table.insert(quads, love.graphics.newQuad(
               x, y,
               item.tileWidth, item.tileHeight,
@@ -1201,18 +1201,19 @@ function Engine:_generateCollisionMap(tilemapName, layoutName, behaviorMap)
    * created. We then create a collision mask out of it.
   --]]
   
+  -- Get layout data
   local layout = self._data.tilemaps[tilemapName].layouts[layoutName]
-  layout.collisionMasks = {}
+  
+  -- Generate simple on/off behavior map if none was provided
   local bMap = behaviorMap
   
-  -- Generate simple behavior map if none was provided
-  if not bMap then
+  if (not bMap) then
     bMap = {}
     for row = 1, #layout.tiles do
       bMap[row] = {}
       for col = 1, #layout.tiles[row] do
         local tileNumber = layout.tiles[row][col]
-        if tileNumber == 0 then
+        if (tileNumber == 0) then
           bMap[row][col] = 0
         else
           bMap[row][col] = 1
@@ -1222,12 +1223,14 @@ function Engine:_generateCollisionMap(tilemapName, layoutName, behaviorMap)
   end
   
   -- Generate collision map
+  layout.collisionMasks = {}
+  
   for row = 1, #bMap do
     for col = 1, #bMap[row] do
       local tileType = bMap[row][col]
       
       -- Skip if empty tile
-      if tileType == 0 then
+      if (tileType == 0) then
         goto ColumnComplete
       end
       
@@ -1238,7 +1241,7 @@ function Engine:_generateCollisionMap(tilemapName, layoutName, behaviorMap)
       -- Find ending column
       for scanCol = start.col+1, #bMap[row] do
         local scanTileType = bMap[row][scanCol]
-        if scanTileType == 0 or scanTileType ~= tileType then
+        if (scanTileType == 0 or scanTileType ~= tileType) then
           break
         else
           stop.col = scanCol
@@ -1251,10 +1254,10 @@ function Engine:_generateCollisionMap(tilemapName, layoutName, behaviorMap)
         for scanCol = start.col, stop.col do
           local scanTileType = bMap[scanRow][scanCol]
           done = (scanTileType == 0 or scanTileType ~= tileType)
-          if done then break end
+          if (done) then break end
         end
         
-        if done then break end
+        if (done) then break end
         
         stop.row = scanRow
       end
@@ -1267,7 +1270,7 @@ function Engine:_generateCollisionMap(tilemapName, layoutName, behaviorMap)
       end
       
       -- Store as collision mask
-      if not layout.collisionMasks[tileType] then
+      if (not layout.collisionMasks[tileType]) then
         layout.collisionMasks[tileType] = {}
       end
       
@@ -1277,7 +1280,7 @@ function Engine:_generateCollisionMap(tilemapName, layoutName, behaviorMap)
         y = start.row - 1,
         w = stop.col - start.col + 1,
         h = stop.row - start.row + 1,
-        -- behavior = tileType,
+        -- behavior = tileType, -- TODO: Remove me?
         collision = false
       })
       
@@ -1315,36 +1318,53 @@ end
 function Engine:changeRoom(room, options)
   local f = 'changeRoom'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: room
   MintCrate.Assert.type(f, 'room', room, 'Room')
   
-  if (options == nil) then options = {} end
-  MintCrate.Assert.type(f, 'options', options, 'table')
-  
-  if (options.fadeMusic == nil) then options.fadeMusic = false end
-  MintCrate.Assert.type(f, 'options.fadeMusic', options.fadeMusic, 'boolean')
-  
+  -- Default params
+  if (options              == nil) then options = {}                 end
+  if (options.fadeMusic    == nil) then options.fadeMusic = false    end
   if (options.persistAudio == nil) then options.persistAudio = false end
-  MintCrate.Assert.type(f, 'options.persistAudio', options.persistAudio,
+  
+  -- Validate: options
+  MintCrate.Assert.type(f,
+    'options',
+    options,
+    'table')
+  
+  -- Validate: options.fadeMusic
+  MintCrate.Assert.type(f,
+    'options.fadeMusic',
+    options.fadeMusic,
     'boolean')
   
-  local fadeMusic = options.fadeMusic
-  local persistAudio = options.persistAudio
-  if (fadeMusic and persistAudio) then fadeMusic = false end
+  -- Validate: options.persistAudio
+  MintCrate.Assert.type(f,
+    'options.persistAudio',
+    options.persistAudio,
+    'boolean')
+  
+  if (options.fadeMusic and options.persistAudio) then
+    MintCrate.Error(f,
+      'Arguments "option.fadeMusic" and "options.persistAudio" cannot be ' ..
+      'enabled simultaneously.')
+  end
   
   -- Only change room if we're not currently transitioning to another one.
-  if not self._isChangingRooms then
+  if (not self._isChangingRooms) then
     -- Indicate we're now changing rooms.
     self._isChangingRooms = true
     
     -- Handle fade-out before changing room (if configured).
-    if self._currentRoom and self._currentRoom._fadeConf.fadeOut.enabled then
+    if (self._currentRoom and self._currentRoom._fadeConf.fadeOut.enabled) then
       -- Trigger the fade-out effect, then change room when it's done.
       self:_triggerRoomFade('fadeOut', function()
-        self:_changeRoom(room, persistAudio)
-      end, fadeMusic)
+          self:_changeRoom(room, options.persistAudio)
+        end, options.fadeMusic)
     -- Otherwise, simply change room.
     else
-      self:_changeRoom(room, persistAudio)
+      self:_changeRoom(room, options.persistAudio)
     end
   end
 end
@@ -1354,20 +1374,6 @@ end
 -- @param {function} finishedCallback The function to fire after fading is done.
 -- @param {boolean} fadeMusic Fades the music with the visual fade-out.
 function Engine:_triggerRoomFade(fadeType, finishedCallback, fadeMusic)
-  -- Calculate how long until we need to wait until we execute the callback.
-  -- This value changes if we're in the midst of a fade-in.
-  local totalDuration = self._currentRoom._fadeConf.fadeOut.fadeFrames
-  totalDuration = totalDuration * (self._currentRoom._fadeLevel / 100)
-  totalDuration = math.max(totalDuration, 0)
-  
-  -- Will be used to fade the music (if needed). We want it to fade before the
-  -- fade pauses.
-  local musicFadeDuration = totalDuration
-  
-  -- Include the number of frames to pause on.
-  totalDuration =
-    totalDuration + self._currentRoom._fadeConf.fadeOut.pauseFrames
-  
   -- Cancel any current fades
   if (self._currentRoom._fadeEffectFunc) then
     self:clearFunction(self._currentRoom._fadeEffectFunc)
@@ -1376,37 +1382,57 @@ function Engine:_triggerRoomFade(fadeType, finishedCallback, fadeMusic)
     self:clearFunction(self._currentRoom._fadeDoneFunc)
   end
   
-  -- Indicate we're currently fading out.
+  -- Set the room's current fade type (used for rendering the fade overlay)
   self._currentRoom._currentFade = fadeType
   
-  -- Get the configuration for this fade.
+  -- Get the configuration for this fade
   local fadeConf = self._currentRoom._fadeConf[fadeType]
   
-  -- Handle fade in/out.
+  -- Set up function to handle fade-in/out
   local fadeEffectFunc = function()
     self._currentRoom._fadeLevel =
       self._currentRoom._fadeLevel + fadeConf.fadeValue
   end
   
+  -- Run it every frame, and store it in case we need to cancel it early
   self:repeatFunction(fadeEffectFunc, 1)
   self._currentRoom._fadeEffectFunc = fadeEffectFunc
   
-  -- Clear repeated function when fade is done.
+  -- Set up delayed function to clear fade-effect function when fade is done
   local fadeDoneFunc = function()
+    -- Clear fade-effect function
     self:clearFunction(fadeEffectFunc)
-    if fadeType == "fadeIn" then
+    
+    -- Ensure fade overlay is either completely hidden or completely shown
+    if (fadeType == "fadeIn") then
       self._currentRoom._fadeLevel = 100
+    else
+      self._currentRoom._fadeLevel = 0
     end
   end
   
+  -- Run it when fade's done, and store it in case we need to cancel it early
   self:delayFunction(fadeDoneFunc, fadeConf.fadeFrames + fadeConf.pauseFrames)
   self._currentRoom._fadeDoneFunc = fadeDoneFunc
   
-  -- Fade music (if specified).
-  if (fadeMusic) then self:stopMusic(musicFadeDuration) end
+  -- Calculate how long until we need to wait until we execute the callback
+  -- This value changes if we're in the midst of a fade-in
+  local totalDuration = fadeConf.fadeFrames
+  totalDuration       = totalDuration * (self._currentRoom._fadeLevel / 100)
+  totalDuration       = math.max(totalDuration, 0)
   
-  -- Set delayed function to execute the callback
-  if finishedCallback then
+  -- Fade music (if specified)
+  if (fadeMusic) then
+    self:stopMusic(totalDuration)
+  end
+  
+  -- Set delayed function to execute when fade is finished
+  -- This is currently only for fade-outs: leaving the room or quitting the game
+  if (finishedCallback) then
+    -- Include the pause frames so we don't run the function early
+    totalDuration = totalDuration + fadeConf.pauseFrames
+    
+    -- Execute callback
     self:delayFunction(finishedCallback, totalDuration)
   end
 end
@@ -1415,53 +1441,60 @@ end
 -- @param {Room} room The room to load.
 -- @param {boolean} persistAudio Prevents the audio from stopping.
 function Engine:_changeRoom(room, persistAudio)
-  -- Wipe all current entity instances, including draw order tables.
+  -- Wipe current entity instances
   for key, _ in pairs(self._instances) do
     self._instances[key] = {}
   end
   
+  -- Wipe draw-order tables
   for key, _ in pairs(self._drawOrders) do
     self._drawOrders[key] = {}
   end
   
-  -- Stop all audio.
+  -- Stop all audio
   if (not persistAudio) then
     self:stopAllSounds()
     self:stopMusic()
   end
   
-  -- Reset camera.
-  self._camera = {x = 0, y = 0}
-  self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
+  -- Reset camera
+  self._camera        = {x = 0, y = 0}
+  self._cameraBounds  = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
   self._cameraIsBound = false
   
-  -- Remove tilemap from scene.
+  -- Remove tilemap from scene
   self._tilemapFullName = nil
-  self._tilemapName = nil
-  self._layoutName = nil
+  self._tilemapName     = nil
+  self._layoutName      = nil
   
-  -- Clear out delayed/repeated functions.
+  -- Mark delayed/repeated functions to be cleared out
   for _, item in ipairs(self._queuedFunctions) do
     item.cancelled = true
   end
   
-  -- Create new room.
+  -- Create new room
   self._currentRoom = room:new()
   
-  -- Trigger fade in for fresh room (if configured).
-  if self._currentRoom._fadeConf.fadeIn.enabled then
+  -- Trigger fade in for fresh room (if configured)
+  if (self._currentRoom._fadeConf.fadeIn.enabled) then
     self:_triggerRoomFade('fadeIn')
   end
   
-  -- Throw warning message to console is room is smaller than game resolution.
-  if self._currentRoom._roomWidth < self._baseWidth then
-    print("WARNING: Room width is smaller than game resolution")
-  end
-  if self._currentRoom._roomHeight < self._baseHeight then
-    print("WARNING: Room height is smaller than game resolution")
+  -- Validation: room width
+  if (self._currentRoom._roomWidth < self._baseWidth) then
+    MintCrate.Error(nil,
+      "Width of room '" .. self._currentRoom:getRoomName() .. " " ..
+      "is smaller than the game's base width resolution. This is not allowed.")
   end
   
-  -- Indicate we're done changing rooms.
+  -- Validation: room height
+  if (self._currentRoom._roomHeight < self._baseHeight) then
+    MintCrate.Error(nil,
+      "Height of room '" .. self._currentRoom:getRoomName() .. " " ..
+      "is smaller than the game's base height resolution. This is not allowed.")
+  end
+  
+  -- Indicate we're done changing rooms
   self._isChangingRooms = false
 end
 
@@ -3258,7 +3291,6 @@ function Engine:playMusic(trackName, fadeLength)
   MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
   MintCrate.Assert.condition(f, 'fadeLength', (fadeLength >= 0),
     'cannot be a negative value')
-
   
   -- Use previously-played track if one wasn't specified.
   if (trackName == "" and self._currentMusic) then

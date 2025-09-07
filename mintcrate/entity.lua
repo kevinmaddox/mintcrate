@@ -183,7 +183,7 @@ end
 
 -- Returns whether the entity is visible or not.
 -- @returns {boolean} Whether the entity is visible or not.
-function Entity:getVisibility()
+function Entity:isVisible()
   local f = 'isVisible'
   MintCrate.Assert.self(f, self)
   
@@ -192,11 +192,14 @@ end
 
 -- Sets the visibility of the entity.
 -- @param {boolean} Whether to show or hide the entity.
-function Entity:setVisibility(isVisible)
-  local f = 'setVisibility'
+function Entity:setVisible(isVisible)
+  local f = 'setVisible'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: isVisible
   MintCrate.Assert.type(f, 'isVisible', isVisible, 'boolean')
   
+  -- Set visible state
   self._isVisible = isVisible
 end
 
@@ -216,9 +219,17 @@ function Entity:setOpacity(opacity)
   MintCrate.Assert.self(f, self)
   MintCrate.Assert.type(f, 'opacity', opacity, 'number')
   
-  opacity = MintCrate.MathX.clamp(opacity, 0, 1)
+  self._opacity = MintCrate.MathX.clamp(opacity, 0, 1)
+end
+
+-- Adds/subtracts from the entity's current opacity level.
+-- @param {number} opacity The opacity value to adjust by.
+function Entity:adjustOpacity(opacity)
+  local f = 'setOpacity'
+  MintCrate.Assert.self(f, self)
+  MintCrate.Assert.type(f, 'opacity', opacity, 'number')
   
-  self._opacity = opacity
+  self._opacity = MintCrate.MathX.clamp(self._opacity + opacity, 0, 1)
 end
 
 -- -----------------------------------------------------------------------------

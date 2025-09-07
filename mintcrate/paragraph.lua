@@ -65,7 +65,8 @@ end
 function Paragraph:setTextContent(textContent)
   local f = 'setTextContent'
   MintCrate.Assert.self(f, self)
-  MintCrate.Assert.type(f, 'textContent', textContent, 'string')
+  
+  textContent = tostring(textContent)
   
   self._textContent = textContent
   
