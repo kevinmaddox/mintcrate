@@ -30,6 +30,7 @@ function MintCrate:new(
   startingRoom,
   options
 )
+  -- Create MintCrate instance
   local engine = MintCrate.Engine:new(
     baseWidth,
     baseHeight,
@@ -43,6 +44,7 @@ function MintCrate:new(
   -- Store libs into engine instance so that user can access them easily.
   engine.util   = MintCrate.Util
   engine.math   = MintCrate.MathX
-  
+
+  -- Return MintCrate instance
   return engine
 end

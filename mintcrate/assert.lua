@@ -11,17 +11,24 @@ local Assert = {ERROR_LEVEL = 3}
 -- @param {*} val The value of the argument to check.
 -- @param {string} expectedType The expected variable type.
 function Assert.type(funcName, argName, val, expectedType)
-  -- Get argument type, including pseudo-types from classes.
+  -- Get argument type, including pseudo-types from classes
   local argType = type(val)
-  if (argType == 'table' and val.type) then argType = val.type end
   
-  -- Check for errors.
+  if (argType == 'table' and val.type) then
+    argType = val.type
+  end
+  
+  -- Check for errors
   local faultCode = 0
   
-  -- Check that an argument was supplied.
-  if (argType == 'nil') then faultCode = 1
-  -- Check type.
-  elseif (argType ~= expectedType) then faultCode = 2 end
+  -- Check that an argument was supplied
+  if (argType == 'nil') then
+    faultCode = 1
+  
+  -- Check type
+  elseif (argType ~= expectedType) then
+    faultCode = 2
+  end
   
   -- Throw error based on fault code.
   if     (faultCode == 1) then

@@ -69,7 +69,7 @@ function Paragraph:setTextContent(textContent)
   -- Convert any input to a string
   textContent = tostring(textContent)
   
-  -- Store text content so engine core can draw it
+  -- Store unformatted text content
   self._textContent = textContent
   
   -- Normalize line breaks
@@ -81,10 +81,11 @@ function Paragraph:setTextContent(textContent)
   local wordWrap        = self._wordWrap
   local maxCharsPerLine = self._maxCharsPerLine
   
-  -- Split words
+  -- Split words into table
   local initialSplit = MintCrate.Util.string.split(textContent, " ")
   
-  -- Split linebreaks into their own "words"
+  -- Split linebreaks into their own "words" so they'll be parsed too
+  -- i.e. "Apple\nBanana Carrot" -> {"Apple", "\n", "Banana", "Carrot"}
   local words = {}
   for _, fullWord in ipairs(initialSplit) do
     local splitWords = MintCrate.Util.string.split(fullWord, "\n")
@@ -94,46 +95,59 @@ function Paragraph:setTextContent(textContent)
     end
   end
   
+  -- Construct formatted lines
+  -- Text in paragraph objects is stored as pre-formatted lines
+  -- Basically, we're trying to fit as many words as possible into each line
   local strLines = {""}
+  
   for i, word in ipairs(words) do
-    -- Make a new line if we've hit a line break
-    if word == "\n" then
+    -- Force a new line if we've hit a line break
+    if (word == "\n") then
       table.insert(strLines, "")
-    -- If we're not going to exceed the max chars allowed, then simply concat the word
-    elseif string.len(strLines[#strLines] .. word) <= maxCharsPerLine then
+    
+    -- If we're not going to exceed the max chars allowed, then concat the word
+    elseif (string.len(strLines[#strLines] .. word) <= maxCharsPerLine) then
       strLines[#strLines] = strLines[#strLines] .. word
-    -- If we are going to exceed, and either the word is too long, or wordwrap is not enabled, then break the word
-    elseif string.len(word) > maxCharsPerLine or not wordWrap then
+    
+    -- If we are going to exceed, and either the word is too long
+    -- or wordwrap is not enabled, then break the word
+    elseif (string.len(word) > maxCharsPerLine or not wordWrap) then
       local spaceAvailable = maxCharsPerLine - string.len(strLines[#strLines])
-      local wordLeft = string.sub(word, 1, spaceAvailable)
-      local wordRight = string.sub(word, spaceAvailable + 1, #word)
+      local wordLeft       = string.sub(word, 1, spaceAvailable)
+      local wordRight      = string.sub(word, spaceAvailable + 1, #word)
+      
       strLines[#strLines] = strLines[#strLines] .. wordLeft
+      
       table.insert(strLines, wordRight)
+    
     -- Otherwise, move the entire word to the next line
     else
       table.insert(strLines, word)
     end
     
     -- Add space after word that was inserted
-    if
-      word ~= "\n" and
-      words[i+1] and
-      string.len(strLines[#strLines] .. words[i+1]) <= maxCharsPerLine and
-      words[i+1] ~= "\n"
-    then
-    strLines[#strLines] = strLines[#strLines] .. " "
+    if (
+          word ~= "\n"
+      and words[i+1]
+      and string.len(strLines[#strLines] .. words[i+1]) <= maxCharsPerLine
+      and words[i+1] ~= "\n"
+    ) then
+      strLines[#strLines] = strLines[#strLines] .. " "
     end
     
     -- keep breaking remainder onto new lines
-    while string.len(strLines[#strLines]) > maxCharsPerLine do
-      local line = strLines[#strLines]
-      local lineLeft = string.sub(line, 1, maxCharsPerLine)
+    while (string.len(strLines[#strLines]) > maxCharsPerLine) do
+      local line      = strLines[#strLines]
+      local lineLeft  = string.sub(line, 1, maxCharsPerLine)
       local lineRight = string.sub(line, maxCharsPerLine + 1, #line)
+      
       strLines[#strLines] = lineLeft
+      
       table.insert(strLines, lineRight)
     end
   end
   
+  -- Store formatted lines
   self._textLines = strLines
 end
 

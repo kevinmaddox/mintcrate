@@ -4,6 +4,7 @@
 -- -----------------------------------------------------------------------------
 
 -- Throws an error, pushed up in the stack (convenience function).
+-- @param {string|nil} funcName The name of the housing function.
 -- @param {string} msg The error message.
 return function(funcName, msg)
   if (funcName ~= nil) then

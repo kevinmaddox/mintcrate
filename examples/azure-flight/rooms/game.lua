@@ -115,7 +115,7 @@ function Game:update()
       self.score = 0
       self.scoreDisplay = mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 12, '0', {alignment='center'})
       self.scoreDisplayHigh = mint:addParagraph('ui-gold-numbers', mint:getScreenWidth() / 2, 12, '', {alignment='center'})
-      self.scoreDisplayHigh:setVisible(false)
+      self.scoreDisplayHigh:setVisibility(false)
       
       -- Drop starting platform into river
       for _, pole in ipairs(self.poles) do
@@ -297,8 +297,8 @@ function Game:update()
     self.scoreDisplay:setTextContent(self.score)
     self.scoreDisplayHigh:setTextContent(self.score)
     if (self.score > globals.highScore) then
-      self.scoreDisplay:setVisible(false)
-      self.scoreDisplayHigh:setVisible(true)
+      self.scoreDisplay:setVisibility(false)
+      self.scoreDisplayHigh:setVisibility(true)
     end
     
     -- Rearrange draw orders

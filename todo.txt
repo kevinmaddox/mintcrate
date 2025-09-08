@@ -54,9 +54,9 @@ MintCrate To-do List
     [x] Main stuff
     [x] JSON encoder/decoder
   [x] Change Assert.Cond to Assert.Condition
-  [ ] Formatting
+  [x] Formatting
 [ ] Think really hard about function/class names
-  [ ] Get rid of toggles, make sure it's all where you have to set it to true/false
+  [x] Get rid of toggles, make sure it's all where you have to set it to true/false
   [ ] setTextContent should just be setText
   [ ] Paragraph probably should just be Text
   [ ] engine.lua should be core.lua
@@ -67,6 +67,7 @@ MintCrate To-do List
   [x] Collisions still work on x,y point even if active lacks a collider; this should not happen
   [ ] Custom error handler not working in example files
 [ ] Debug collision mask rectangle looks jumpy when moving
+[x] Make everything nice and clean
 [ ] Reconsider fonts/text, and how it affects localizations
 [ ] Testing
   [ ] Ensure that you can't break camera bounds... maybe add some extra conditional validation?
@@ -80,7 +81,6 @@ MintCrate To-do List
     [ ] Paragraph
     [ ] MathX
     [ ] Util
-[ ] Make everything nice and clean
 [ ] Long-term: Make the JSON parser handle more bad-JSON errors
 
 Decisions

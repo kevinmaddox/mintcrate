@@ -13,14 +13,18 @@ local Util = {}
 -- @param {*} ... Any number of items to pick a random entry from.
 -- @returns {*} A randomly-selected entry from the provided list of items.
 function Util.randomChoice(...)
-  local values = {...}
   local f = 'randomChoice'
+  
+  -- Store arguments in table
+  local values = {...}
+  
+  -- Validate: arguments
   MintCrate.Assert.condition(f,
     '...',
     (#values > 0),
-    'expects at least one argument'
-  )
+    'expects at least one argument')
   
+  -- Return random item
   return values[love.math.random(1, #values)]
 end
 
@@ -35,8 +39,11 @@ Util.boolean = {}
 -- @returns {number} Numeric representation of a boolean value.
 function Util.boolean.toNumber(b)
   local f = 'boolean.toNumber'
+  
+  -- Validate: b
   MintCrate.Assert.type(f, 'b', b, 'boolean')
   
+  -- Return result
   return b and 1 or 0
 end
 
@@ -51,8 +58,11 @@ Util.number = {}
 -- @returns {boolean} Boolean representation of a numeric value.
 function Util.number.toBoolean(n)
   local f = 'number.toBoolean'
+  
+  -- Validate: n
   MintCrate.Assert.type(f, 'n', n, 'number')
   
+  -- Return result
   return n > 0 and true or false
 end
 
@@ -69,23 +79,28 @@ Util.table = {}
 function Util.table.toString(tbl, indent)
   local f = 'table.toString'
   
+  -- Default params
+  if (indent == nil) then indent = 1 end
+  
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
-  if (indent == nil) then indent = 1 end
+  -- Validate: indent
   MintCrate.Assert.type(f, 'indent', indent, 'number')
   
+  -- Recursive function for building the table string
   function printTbl(o, indent)
-    if type(o) == "table" then
+    if (type(o) == "table") then
       local s = "{"
         for k, v in pairs(o) do
-          if type(k) ~= "number" then k = "\""..k.."\"" end
+          if (type(k) ~= "number") then k = "\""..k.."\"" end
           s = s .. "\n" .. string.rep("  ", indent) .. "["..k.."] = " ..
             printTbl(v, indent + 1) .. ","
         end
-      if s:sub(-1) == "," then s = s:sub(1, -2) end
+      if (s:sub(-1) == ",") then s = s:sub(1, -2) end
       return s .. "\n" .. string.rep("  ", indent - 1) .. "}"
     else
-      if type(o) == "string" then
+      if (type(o) == "string") then
         return "\""..o.."\""
       else
         return tostring(o)
@@ -93,6 +108,7 @@ function Util.table.toString(tbl, indent)
     end
   end
   
+  -- Return result
   return printTbl(tbl, indent)
 end
 
@@ -100,8 +116,11 @@ end
 -- @param {table} tbl The table to be printed.
 function Util.table.print(tbl)
   local f = 'table.print'
+  
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
+  -- Print table
   if (Util.table.matchesArrayPattern(tbl)) then
     for i,v in ipairs(tbl) do print(i,v) end
   else
@@ -115,23 +134,24 @@ end
 function Util.table.moveItemDown(tbl, index)
   local f = 'table.moveItemDown'
   
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
   MintCrate.Assert.condition(f,
     'tbl',
     Util.table.matchesArrayPattern(tbl),
-    'must have numerically-indexed, sequential keys'
-  )
+    'must have numerically-indexed, sequential keys')
   
+  -- Validate: index
   MintCrate.Assert.type(f, 'index', index, 'number')
   
   MintCrate.Assert.condition(f,
     'index',
     (index > 0),
-    'must be a value greater than zero'
-  )
+    'must be a value greater than zero')
   
-  if index > 1 and index <= #tbl then
+  -- Rearrange item
+  if (index > 1 and index <= #tbl) then
     local val = tbl[index]
     table.remove(tbl, index)
     table.insert(tbl, index-1, val)
@@ -144,23 +164,24 @@ end
 function Util.table.moveItemUp(tbl, index)
   local f = 'table.moveItemUp'
   
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
   MintCrate.Assert.condition(f,
     'tbl',
     Util.table.matchesArrayPattern(tbl),
-    'must have numerically-indexed, sequential keys'
-  )
+    'must have numerically-indexed, sequential keys')
   
+  -- Validate: index
   MintCrate.Assert.type(f, 'index', index, 'number')
   
   MintCrate.Assert.condition(f,
     'index',
     (index > 0),
-    'must be a value greater than zero'
-  )
+    'must be a value greater than zero')
   
-  if index >= 1 and index < #tbl then
+  -- Rearrange item
+  if (index >= 1 and index < #tbl) then
     local val = tbl[index]
     table.remove(tbl, index)
     table.insert(tbl, index+1, val)
@@ -173,23 +194,24 @@ end
 function Util.table.moveItemToStart(tbl, index)
   local f = 'table.moveItemToStart'
   
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
   MintCrate.Assert.condition(f,
     'tbl',
     Util.table.matchesArrayPattern(tbl),
-    'must have numerically-indexed, sequential keys'
-  )
+    'must have numerically-indexed, sequential keys')
   
+  -- Validate: index
   MintCrate.Assert.type(f, 'index', index, 'number')
   
   MintCrate.Assert.condition(f,
     'index',
     (index > 0),
-    'must be a value greater than zero'
-  )
+    'must be a value greater than zero')
   
-  if index > 1 and index <= #tbl then
+  -- Rearrange item
+  if (index > 1 and index <= #tbl) then
     local val = tbl[index]
     table.remove(tbl, index)
     table.insert(tbl, 1, val)
@@ -202,23 +224,24 @@ end
 function Util.table.moveItemToEnd(tbl, index)
   local f = 'table.moveItemToEnd'
   
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
   MintCrate.Assert.condition(f,
     'tbl',
     Util.table.matchesArrayPattern(tbl),
-    'must have numerically-indexed, sequential keys'
-  )
+    'must have numerically-indexed, sequential keys')
   
+  -- Validate: index
   MintCrate.Assert.type(f, 'index', index, 'number')
   
   MintCrate.Assert.condition(f,
     'index',
     (index > 0),
-    'must be a value greater than zero'
-  )
+    'must be a value greater than zero')
   
-  if index >= 1 and index < #tbl then
+  -- Rearrange item
+  if (index >= 1 and index < #tbl) then
     local val = tbl[index]
     table.remove(tbl, index)
     table.insert(tbl, #tbl+1, val)
@@ -230,17 +253,18 @@ end
 function Util.table.reverse(tbl)
   local f = 'table.reverse'
   
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
   MintCrate.Assert.condition(f,
     'tbl',
     Util.table.matchesArrayPattern(tbl),
-    'must have numerically-indexed, sequential keys'
-  )
+    'must have numerically-indexed, sequential keys')
   
+  -- Reverse table
   local i, j = 1, #tbl
   
-  while i < j do
+  while (i < j) do
     tbl[i], tbl[j] = tbl[j], tbl[i]
     i = i + 1
     j = j - 1
@@ -252,10 +276,17 @@ end
 -- @returns {number} The total number of table elements.
 function Util.table.count(tbl)
   local f = 'table.count'
+  
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
+  -- Tally table
   local c = 0
-  for k,v in pairs(tbl) do c = c + 1 end
+  for k,v in pairs(tbl) do
+    c = c + 1
+  end
+  
+  -- Return result
   return c
 end
 
@@ -265,12 +296,20 @@ end
 -- @returns {boolean} Whether the item was found in the table.
 function Util.table.contains(tbl, item)
   local f = 'table.contains'
+  
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
+  -- Search for item in table
   local found = false
+  
   for _,v in pairs(tbl) do
-    if (v == item) then found = true end
+    if (v == item) then
+      found = true
+    end
   end
+  
+  -- Return result
   return found
 end
 
@@ -278,17 +317,23 @@ end
 -- @param {table} tbl The table to check.
 function Util.table.matchesArrayPattern(tbl)
   local f = 'table.matchesArrayPattern'
+  
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
-  local i = 0
+  -- Determine if table matches array pattern
   local isArray = true
-  for _,__ in pairs(tbl) do
+  local i       = 0
+  
+  for _, __ in pairs(tbl) do
     i = i + 1
-    if tbl[i] == nil then
+    if (tbl[i] == nil) then
       isArray = false
       break
     end
   end
+  
+  -- Return result
   return isArray
 end
 
@@ -298,36 +343,46 @@ end
 
 Util.string = {}
 
--- Splits a string into an array (only works with a single-character delimiter).
+-- Splits a string into a table (only works with a single-character delimiter).
 -- @param {string} str The string to be split.
 -- @param {string} delimiter The character to split on (omit to split all).
 -- @returns {table} The split-up parts of a string.
 function Util.string.split(str, delimiter)
   local f = 'string.split'
+  
+  -- Default params
+  if (delimiter == nil) then delimiter = '' end
+  
+  -- Validate: str
   MintCrate.Assert.type(f, 'str', str, 'string')
   
-  if (delimiter == nil) then delimiter = '' end
+  -- Validate: delimiter
   MintCrate.Assert.type(f, 'delimiter', delimiter, 'string')
   
-  str = tostring(str)
+  -- Split string into table
+  str       = tostring(str)
   delimiter = tostring(delimiter)
+  
   local split = {}
   local start = 1
-  local i = 1
+  local i     = 1
+  
   for chr in string.gmatch(str, ".") do
-    if delimiter == '' then
+    if (delimiter == '') then
       table.insert(split, chr)
-    elseif chr == delimiter then
+    elseif (chr == delimiter) then
       table.insert(split, str:sub(start, i - 1))
       start = i + 1
     end
+    
     i = i + 1
   end
   
-  if delimiter ~= '' then
+  if (delimiter ~= '') then
     table.insert(split, str:sub(start, i))
   end
   
+  -- Return result
   return split
 end
 
@@ -336,15 +391,23 @@ end
 -- @returns {boolean} A boolean representation of a string.
 function Util.string.toBoolean(str)
   local f = 'string.toBoolean'
+  
+  -- Validate: str
   MintCrate.Assert.type(f, 'str', str, 'string')
+  
   MintCrate.Assert.condition(f,
     'str',
     (str == 'true' or str == 'false'),
-    'must be a string that\'s either "true" or "false"'
-  )
+    'must be a string that\'s either "true" or "false"')
   
+  -- Convert string to boolean
   local bool = false
-  if str == 'true' then bool = true end
+  
+  if (str == 'true') then
+    bool = true
+  end
+  
+  -- Return result
   return bool
 end
 
@@ -353,8 +416,11 @@ end
 -- @returns {string} A string with its leading/trailing whitespace removed.
 function Util.string.trim(str)
   local f = 'string.trim'
+  
+  -- Validate: str
   MintCrate.Assert.type(f, 'str', str, 'string')
   
+  -- Return result
   return str:gsub("^%s*(.-)%s*$", "%1")
 end
 
@@ -365,16 +431,27 @@ end
 -- @returns {string} A left-padded string.
 function Util.string.padLeft(str, length, padChar)
   local f = 'string.padLeft'
+  
+  -- Validate: str
   MintCrate.Assert.type(f, 'str', str, 'string')
+  
+  -- Validate: length
   MintCrate.Assert.type(f, 'length', length, 'number')
+  
   MintCrate.Assert.condition(f,
     'length',
     (length >= 0),
-    'cannot be a negative value'
-  )
+    'cannot be a negative value')
+  
+  -- Validate: padChar
   MintCrate.Assert.type(f, 'padChar', padChar, 'string')
   
-  while string.len(str) < length do str = padChar .. str end
+  -- Pad string
+  while (string.len(str) < length) do
+    str = padChar .. str
+  end
+  
+  -- Return result
   return str
 end
 
@@ -385,16 +462,27 @@ end
 -- @returns {string} A right-padded string.
 function Util.string.padRight(str, length, padChar)
   local f = 'string.padRight'
+  
+  -- Validate: str
   MintCrate.Assert.type(f, 'str', str, 'string')
+  
+  -- Validate: length
   MintCrate.Assert.type(f, 'length', length, 'number')
+  
   MintCrate.Assert.condition(f,
     'length',
     (length >= 0),
-    'cannot be a negative value'
-  )
+    'cannot be a negative value')
+  
+  -- Validate: padChar
   MintCrate.Assert.type(f, 'padChar', padChar, 'string')
   
-  while string.len(str) < length do str = str .. padChar end
+  -- Pad string
+  while (string.len(str) < length) do
+    str = str .. padChar
+  end
+  
+  -- Return result
   return str
 end
 
@@ -411,22 +499,28 @@ Util.json = {}
 -- @returns {string} A JSON string representing the table.
 function Util.json.encode(tbl, prettyPrint, numSpaces)
   local f = 'json.encode'
+  
+  -- Default params
+  if (prettyPrint == nil) then prettyPrint = false end
+  if (numSpaces == nil) then numSpaces = 2 end
+  
+  -- Validate: tbl
   MintCrate.Assert.type(f, 'tbl', tbl, 'table')
   
-  if (prettyPrint == nil) then prettyPrint = false end
+  -- Validate: prettyPrint
   MintCrate.Assert.type(f, 'prettyPrint', prettyPrint, 'boolean')
   
-  if (numSpaces == nil) then numSpaces = 2 end
+  -- Validate: numSpaces
   MintCrate.Assert.type(f, 'numSpaces', numSpaces, 'number')
+  
   MintCrate.Assert.condition(f,
     'numSpaces',
     (numSpaces >= 0),
-    'cannot be a negative value'
-  )
+    'cannot be a negative value')
   
   -- This sub-function attempts to serialize a value
   function serializeValue(val, key, indent, tab, newline)
-    local str = ''
+    local str      = ''
     local errorMsg = ''
     
     -- Add formatting
@@ -474,7 +568,7 @@ function Util.json.encode(tbl, prettyPrint, numSpaces)
   -- This sub-function attempts to serialize a table
   function serializeTable(tbl, indent, tab, newline)
     -- Prepare for serialization
-    local str = ''
+    local str      = ''
     local errorMsg = ''
     
     -- Determine whether table matches the pattern of a JS array or object
@@ -527,16 +621,19 @@ function Util.json.encode(tbl, prettyPrint, numSpaces)
     return str, errorMsg
   end
   
-  local indent = 0
-  local tab = ''
+  local indent  = 0
+  local tab     = ''
   local newline = ''
   if (prettyPrint) then
     tab = string.rep(' ', numSpaces)
-    -- tab = '\t'
+    -- tab = '\t' -- TODO: Remove me?
     newline = '\n'
   end
   
+  -- Convert table to JSON string
   local result, errorMsg = serializeTable(tbl, indent, tab, newline)
+  
+  -- Return result
   return result, errorMsg
 end
 
@@ -544,7 +641,9 @@ end
 -- @param {string} json The JSON string to deserialize.
 -- @returns {string} A table parsed from the JSON string.
 function Util.json.decode(json)
-  local f = 'json.encode'
+  local f = 'json.decode'
+  
+  -- Validate: json
   MintCrate.Assert.type(f, 'json', json, 'string')
   
   -- This sub-function attempts to un-escape an escaped character
@@ -562,9 +661,9 @@ function Util.json.decode(json)
   
   -- This sub-function attempts to parse a JSON-encoded value
   function parseValue(json, index)
-    local val = ''
+    local val        = ''
     local ignoreChar = false -- Used to ignore second part of escape chars
-    local isString = false   -- Used to handle quoted strings
+    local isString   = false -- Used to handle quoted strings
     
     -- Check if value-to-be-parsed is a string (quotes must be accounted for)
     if (json:sub(index, index) == '"') then
@@ -585,12 +684,15 @@ function Util.json.decode(json)
       
       -- Terminate parsing if we've hit a JSON-structure character
       if (
-        (isString and c == '"')
+           (isString and c == '"')
         or (not isString and (c == ' ' or c == ','))
       ) then
         break
       -- Terminate parsing if we've hit the end of an array or object
-      elseif (not isString and (c == ']' or c == '}')) then
+      elseif (
+        not isString
+        and (c == ']' or c == '}')
+      ) then
         index = index - 1
         break
       -- Parse next 2 characters if an escape character was found
@@ -617,11 +719,11 @@ function Util.json.decode(json)
   
   -- This sub-function attempts to parse a JSON array/object
   function deserializeJson(json, index)
-    local state = ''         -- Used to branch parsing of keys vs values
-    local tableType = ''     -- Used to handle parsing objects (keyed) vs arrays
-    local index = index or 1 -- The current parsing position of the JSON string
-    local data = {}          -- Stores the parsed data
-    local errorMsg = ''
+    local state     = ''         -- Used to branch parsing of keys vs values
+    local tableType = ''         -- Used to handle parsing objects vs arrays
+    local index     = index or 1 -- The current parsing position of the string
+    local data      = {}         -- Stores the parsed data
+    local errorMsg  = ''
     
     -- Get rid of formatting-related line breaks and tabs
     json = json:gsub('\n', '')
@@ -700,12 +802,14 @@ function Util.json.decode(json)
     return data, index, errorMsg
   end
   
+  -- Convert JSON string to table
   local result, index, errorMsg = deserializeJson(json)
   
   if (errorMsg ~= '') then
     errorMsg = 'JSON parsing error: ' .. errorMsg
   end
   
+  -- Return result
   return result, errorMsg
 end
 

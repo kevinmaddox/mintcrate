@@ -2203,16 +2203,7 @@ function Engine:sys_update()
     end
   end
   
-  -- Process animations for active objects
-  for _, active in ipairs(self._instances.actives) do
-    -- Get active's animation data
-    local animation =
-      self._data.actives[active:_getName()]
-      .animations[active:getAnimationName()]
-      
-    -- Process active's animation
-    active:_animate(animation)
-  end
+  
   
   -- Handle music looping and fading
   for _, track in pairs(self._data.music) do
@@ -2281,11 +2272,23 @@ function Engine:sys_update()
     self._currentRoom:update()
   end
   
+  -- Process animations for active objects
+  for _, active in ipairs(self._instances.actives) do
+    -- Get active's animation data
+    local animation =
+      self._data.actives[active:_getName()]
+      .animations[active:getAnimationName()]
+      
+    -- Process active's animation
+    active:_animate(animation)
+  end
+  
   -- Reset keyboard states
   for _, key in pairs(self._keystates) do
     key.pressed = false
     key.released = false
   end
+  
 end
 
 -- Renders the current room (entities and debug visuals).

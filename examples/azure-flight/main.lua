@@ -60,7 +60,7 @@ function love.load()
     
     -- Harpy
     {name = 'harpy'},
-    {name = 'harpy_collider', circle=true, radius=4},
+    {name = 'harpy_collider', radius=4},
     {name = 'harpy_default', offset = {-10, -8}},
     {name = 'harpy_fall', offset = {-10, -8}},
     {name = 'harpy_flap', frameCount = 6, frameDuration = 2, offset = {-11, -9}},
@@ -78,7 +78,7 @@ function love.load()
     
     -- Boulders
     {name = 'boulder'},
-    {name = 'boulder_collider', circle=true, radius=12},
+    {name = 'boulder_collider', radius=12},
     {name = 'boulder_default', offset={-12,-12}},
     
     -- Water line

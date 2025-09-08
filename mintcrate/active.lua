@@ -36,42 +36,47 @@ function Active:new(instances, drawOrder, name, x, y, colliderShape,
   setmetatable(o, self)
   self.__index = self
   
+  -- Initialize properties
   o._entityType = 'active'
-  
   o._instances = instances
   o._drawOrder = drawOrder
-  o._name = name
-  o._x = x
-  o._y = y
+  o._name      = name
+  o._x         = x
+  o._y         = y
   
-  o._angle = 0
-  o._rotatedWidth = 0
+  -- Initialize rotation vaues
+  o._angle         = 0
+  o._rotatedWidth  = 0
   o._rotatedHeight = 0
   
-  o._scaleX = 1
-  o._scaleY = 1
+  -- Initialize scaling/mirroring values
+  o._scaleX              = 1
+  o._scaleY              = 1
   o._flippedHorizontally = false
-  o._flippedVertically = false
+  o._flippedVertically   = false
+  
+  -- Initialize collider structure
   o._collider = {
-    s = colliderShape,
-    x = x + colliderOffsetX,
-    y = y + colliderOffsetY,
-    w = colliderWidth,
-    h = colliderHeight,
-    r = colliderRadius,
+    s         = colliderShape,
+    x         = x + colliderOffsetX,
+    y         = y + colliderOffsetY,
+    w         = colliderWidth,
+    h         = colliderHeight,
+    r         = colliderRadius,
     collision = false,
     mouseOver = false
   }
   o._colliderOffsetX = colliderOffsetX
   o._colliderOffsetY = colliderOffsetY
   
-  o._animationList = animationList
-  o._animationName = initialAnimationName
-  o._currentAnimation = initialAnimation
+  -- Initialize animation data
+  o._animationList        = animationList
+  o._animationName        = initialAnimationName
+  o._currentAnimation     = initialAnimation
   o._animationFrameNumber = 1
-  o._animationFrameTimer = 0
+  o._animationFrameTimer  = 0
   
-  -- The current global position of the current animation frame's action point.
+  -- Initialize action point coordinates
   o._actionPointX = 0
   o._actionPointY = 0
   
@@ -96,8 +101,11 @@ end
 function Active:setAngle(degrees)
   local f = 'setAngle'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: degrees
   MintCrate.Assert.type(f, 'degrees', degrees, 'number')
   
+  -- Rotate graphic
   self._angle = degrees
 end
 
@@ -106,8 +114,11 @@ end
 function Active:rotate(degrees)
   local f = 'rotate'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: degrees
   MintCrate.Assert.type(f, 'degrees', degrees, 'number')
   
+  -- Rotate graphic
   self._angle = self._angle + degrees
 end
 
@@ -117,9 +128,14 @@ end
 function Active:angleLookAtPoint(x, y)
   local f = 'angleLookAtPoint'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: x
   MintCrate.Assert.type(f, 'x', x, 'number')
+  
+  -- Validate: y
   MintCrate.Assert.type(f, 'y', y, 'number')
   
+  -- Determine correct angle which faces the point
   local ax = self:getX()
   local ay = self:getY()
   
@@ -128,6 +144,8 @@ function Active:angleLookAtPoint(x, y)
   
   local radians = math.atan2(vy, vx)
   local degrees = radians * (180 / math.pi)
+  
+  -- Make active look at point
   self:setAngle(degrees)
 end
 
@@ -154,8 +172,11 @@ end
 function Active:setScaleX(scaleX)
   local f = 'setScaleX'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: scaleX
   MintCrate.Assert.type(f, 'scaleX', scaleX, 'number')
   
+  -- Scale graphic
   self._scaleX = scaleX
 end
 
@@ -164,8 +185,11 @@ end
 function Active:setScaleY(scaleY)
   local f = 'setScaleY'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: scaleY
   MintCrate.Assert.type(f, 'scaleY', scaleY, 'number')
   
+  -- Scale graphic
   self._scaleY = scaleY
 end
 
@@ -174,8 +198,11 @@ end
 function Active:scaleX(scaleX)
   local f = 'scaleX'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: scaleX
   MintCrate.Assert.type(f, 'scaleX', scaleX, 'number')
   
+  -- Scale graphic
   self._scaleX = self._scaleX + scaleX
 end
 
@@ -184,8 +211,11 @@ end
 function Active:scaleY(scaleY)
   local f = 'scaleY'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: scaleY
   MintCrate.Assert.type(f, 'scaleY', scaleY, 'number')
   
+  -- Scale graphic
   self._scaleY = self._scaleY + scaleY
 end
 
@@ -213,9 +243,13 @@ function Active:flipHorizontally(isFlipped)
   local f = 'flipHorizontally'
   MintCrate.Assert.self(f, self)
   
+  -- Default params
   if (isFlipped == nil) then isFlipped = (not self._flippedHorizontally) end
+  
+  -- Validate: isFlipped
   MintCrate.Assert.type(f, 'isFlipped', isFlipped, 'boolean')
   
+  -- Return flipped state
   self._flippedHorizontally = isFlipped
 end
 
@@ -225,9 +259,13 @@ function Active:flipVertically(isFlipped)
   local f = 'flipVertically'
   MintCrate.Assert.self(f, self)
   
+  -- Default params
   if (isFlipped == nil) then isFlipped = (not self._flippedVertically) end
+  
+  -- Validate: isFlipped
   MintCrate.Assert.type(f, 'isFlipped', isFlipped, 'boolean')
   
+  -- Return flipped state
   self._flippedVertically = isFlipped
 end
 
@@ -260,6 +298,10 @@ function Active:playAnimation(animationName, forceRestart)
   local f = 'playAnimation'
   MintCrate.Assert.self(f, self)
   
+  -- Default params
+  if (forceRestart == nil) then forceRestart = false end
+  
+  -- Validate: animationName
   MintCrate.Assert.type(f, 'animationName', animationName, 'string')
   
   MintCrate.Assert.condition(f,
@@ -268,80 +310,106 @@ function Active:playAnimation(animationName, forceRestart)
     'does not refer to a valid animation'
   )
   
-  if (forceRestart == nil) then forceRestart = false end
-  
+  -- Validate: forceRestart
   MintCrate.Assert.type(f, 'forceRestart', forceRestart, 'boolean')
   
+  -- Set animation name so engine core can draw it
   self._animationName = animationName
-  if forceRestart then
+  
+  -- Restart animation frame values if necessary
+  if (forceRestart) then
     self._animationFrameNumber = 1
-    self._animationFrameTimer = 0
+    self._animationFrameTimer  = 0
   end
 end
 
 -- Updates the animation.
 function Active:_animate(animation)
-  if self._animationName then
+  if (self._animationName) then
+    -- Tick animation timer (time that each frame lasts)
     self._animationFrameTimer = self._animationFrameTimer + 1
     
-    if self._animationFrameTimer > animation.frameDuration then
+    -- Advance frame
+    if (self._animationFrameTimer > animation.frameDuration) then
       self._animationFrameNumber = self._animationFrameNumber + 1
       self._animationFrameTimer = 0
     end
     
-    if self._animationFrameNumber > animation.frameCount then
+    -- Restart animation if we've gone past the last frame
+    if (self._animationFrameNumber > animation.frameCount) then
       self._animationFrameNumber = 1
     end
     
+    -- Store current animation name so engine core can draw it
     self._currentAnimation = animation
   end
 end
 
--- Returns the width of the current animation frame.
--- @returns {number} Current frame width.
+-- Returns the width of the current, untransformed animation frame.
+-- @returns {number} Current frame width, without transformations.
 function Active:getImageWidth()
   local f = 'getImageWidth'
   MintCrate.Assert.self(f, self)
   
+  -- Get animation frame width
   local val = 0
-  if self._currentAnimation then val = self._currentAnimation.frameWidth end
+  
+  if (self._currentAnimation) then
+    val = self._currentAnimation.frameWidth
+  end
+  
+  -- Return animation frame width
   return val
 end
 
--- Returns the height of the current animation frame.
--- @returns {number} Current frame height.
+-- Returns the height of the current, untransformed animation frame.
+-- @returns {number} Current frame height, without transformations.
 function Active:getImageHeight()
   local f = 'getImageHeight'
   MintCrate.Assert.self(f, self)
   
+  -- Get animation frame height
   local val = 0
-  if self._currentAnimation then val = self._currentAnimation.frameHeight end
+  
+  if (self._currentAnimation) then
+    val = self._currentAnimation.frameHeight
+  end
+  
+  -- Return animation frame height
   return val
 end
 
+-- Returns the width of the current, transformed animation frame.
+-- @returns {number} Current frame width, with transformations.
 function Active:getTransformedImageWidth()
   local f = 'getTransformedImageWidth'
   MintCrate.Assert.self(f, self)
   
-  local width  = self:getImageWidth()  * self._scaleX
-  local height = self:getImageHeight() * self._scaleY
+  -- Calculate transformed width
+  local width    = self:getImageWidth()  * self._scaleX
+  local height   = self:getImageHeight() * self._scaleY
   local rotation = math.rad(math.abs(self._angle))
   
   local tWidth = (width  * math.cos(rotation)) + (height * math.sin(rotation))
   
+  -- Return transformed width
   return MintCrate.MathX.round(tWidth)
 end
 
+-- Returns the height of the current, transformed animation frame.
+-- @returns {number} Current frame height, with transformations.
 function Active:getTransformedImageHeight()
   local f = 'getTransformedImageHeight'
   MintCrate.Assert.self(f, self)
   
-  local width  = self:getImageWidth()  * self._scaleX
-  local height = self:getImageHeight() * self._scaleY
+  -- Calculate transformed width
+  local width    = self:getImageWidth()  * self._scaleX
+  local height   = self:getImageHeight() * self._scaleY
   local rotation = math.rad(math.abs(self._angle))
   
   local tHeight = (width  * math.cos(rotation)) + (height * math.sin(rotation))
   
+  -- Return transformed width
   return MintCrate.MathX.round(tHeight)
 end
 
@@ -428,7 +496,10 @@ function Active:getActionPointX()
   local f = 'getActionPointX'
   MintCrate.Assert.self(f, self)
   
+  -- Update action point positions
   self:_updateActionPoints()
+  
+  -- Return action point's X coordinate
   return self._actionPointX
 end
 
@@ -438,7 +509,10 @@ function Active:getActionPointY()
   local f = 'getActionPointY'
   MintCrate.Assert.self(f, self)
   
+  -- Update action point positions
   self:_updateActionPoints()
+  
+  -- Return action point's Y coordinate
   return self._actionPointY
 end
 
@@ -447,7 +521,10 @@ function Active:_updateActionPoints()
   -- Get un-transformed action points for current animation frame
   local ax = 0
   local ay = 0
-  if self._currentAnimation then
+  
+  -- Get action points based on animation frame
+  if (self._currentAnimation) then
+    -- TODO: Remove me?
     -- ax = self._currentAnimation.actionX + self._currentAnimation.offsetX
     -- ay = self._currentAnimation.actionY + self._currentAnimation.offsetY
     
@@ -460,20 +537,20 @@ function Active:_updateActionPoints()
   
   -- Get flipped states
   local flippedX = 1
-  if self._flippedHorizontally then flippedX = -1 end
   local flippedY = 1
-  if self._flippedVertically then flippedY = -1 end
+  if (self._flippedHorizontally) then flippedX = -1 end
+  if (self._flippedVertically  ) then flippedY = -1 end
   
   -- Scale
   ax = ax * self._scaleX * flippedX
   ay = ay * self._scaleY * flippedY
   
   -- Rotate
-  local r = self._angle * math.pi / 180
+  local r  = self._angle * math.pi / 180
   local rx = ax * math.cos(r) - ay * math.sin(r)
   local ry = ax * math.sin(r) + ay * math.cos(r)
-  ax = rx
-  ay = ry
+  ax       = rx
+  ay       = ry
   
   -- Update action points
   self._actionPointX = self:getX() + ax
