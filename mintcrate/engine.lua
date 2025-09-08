@@ -626,12 +626,12 @@ function Engine:defineActives(data)
       MintCrate.Assert.condition(f,
         'data.table.name',
         (activeName ~= ""),
-        'cannot be blank, expected format is "active_animation"')
+        'cannot be blank on either side, expected format is "active_animation"')
       
       MintCrate.Assert.condition(f,
         'data.table.name',
         (animationName ~= ""),
-        'cannot be blank, expected format is "active_animation"')
+        'cannot be blank on either side, expected format is "active_animation"')
       
       -- Validate: item.offset
       MintCrate.Assert.type(f,
@@ -1132,9 +1132,10 @@ function Engine:defineTilemaps(data)
     
     -- Tilemap's actual map data files
     else
-      -- Validate: item.name (for map layout data)
+      -- Split name to get Tilemap's name and layout
       local nameParts = self.util.string.split(item.name, '_')
       
+      -- Validate: item.name (for map layout data)
       MintCrate.Assert.condition(f,
         "data.table.name (entry: '"..item.name.."')",
         (#nameParts == 2),
@@ -1147,12 +1148,12 @@ function Engine:defineTilemaps(data)
       MintCrate.Assert.condition(f,
         'data.table.name',
         (tilemapName ~= ""),
-        'cannot be blank, expected format is "tilemap_layout"')
+        'cannot be blank on either side, expected format is "tilemap_layout"')
       
       MintCrate.Assert.condition(f,
         'data.table.name',
         (layoutName ~= ""),
-        'cannot be blank, expected format is "tilemap_layout"')
+        'cannot be blank on either side, expected format is "tilemap_layout"')
       
       MintCrate.Assert.condition(f,
         "data.table.name (entry: '"..item.name.."')",
@@ -1756,66 +1757,96 @@ end
 function Engine:addParagraph(name, x, y, startingTextContent, options)
   local f = 'addParagraph'
   MintCrate.Assert.self(f, self)
+  
+  -- Default params
+  if (x                       == nil) then x = 0                          end
+  if (y                       == nil) then y = 0                          end
+  if (startingTextContent     == nil) then startingTextContent = ""       end
+  if (options                 == nil) then options = {}                   end
+  if (options.maxCharsPerLine == nil) then options.maxCharsPerLine = 9999 end
+  if (options.lineSpacing     == nil) then options.lineSpacing = 0        end
+  if (options.wordWrap        == nil) then options.wordWrap = false       end
+  if (options.alignment       == nil) then options.alignment = "left"     end
+  
+  -- Validate: name
   MintCrate.Assert.type(f, 'name', name, 'string')
-  MintCrate.Assert.condition(f, 'name', (self._data.fonts[name] ~= nil),
+  MintCrate.Assert.condition(f,
+    'name',
+    (self._data.fonts[name] ~= nil),
     'does not refer to a valid Font object')
   
-  if (x == nil) then x = 0 end
+  -- Validate: x
   MintCrate.Assert.type(f, 'x', x, 'number')
   
-  if (y == nil) then y = 0 end
+  -- Validate: y
   MintCrate.Assert.type(f, 'y', y, 'number')
   
-  if (startingTextContent == nil) then startingTextContent = "" end
+  -- Validate: startingTextContent
   MintCrate.Assert.type(f, 'startingTextContent', startingTextContent, 'string')
   
-  if (options == nil) then options = {} end
+  -- Validate: options
   MintCrate.Assert.type(f, 'options', options, 'table')
   
-  if (options.maxCharsPerLine == nil) then options.maxCharsPerLine = 9999 end
-  MintCrate.Assert.type(
-    f, 'options.maxCharsPerLine', options.maxCharsPerLine, 'number')
-  MintCrate.Assert.condition(f, 'options.maxCharsPerLine',
-    (options.maxCharsPerLine > 0), 'must be a value greater than zero')
+  -- Validate: options.maxCharsPerLine
+  MintCrate.Assert.type(f,
+    'options.maxCharsPerLine',
+    options.maxCharsPerLine,
+    'number')
   
-  if (options.lineSpacing == nil) then options.lineSpacing = 0 end
+  MintCrate.Assert.condition(f,
+    'options.maxCharsPerLine',
+    (options.maxCharsPerLine > 0),
+    'must be a value greater than zero')
+  
+  -- Validate: options.lineSpacing
   MintCrate.Assert.type(f, 'options.lineSpacing', options.lineSpacing, 'number')
-  MintCrate.Assert.condition(f, 'options.lineSpacing', (options.lineSpacing >= 0),
+  
+  MintCrate.Assert.condition(f,
+    'options.lineSpacing',
+    (options.lineSpacing >= 0),
     'cannot be a negative value')
   
-  if (options.wordWrap == nil) then options.wordWrap = false end
+  -- Validate: options.wordWrap
   MintCrate.Assert.type(f, 'options.wordWrap', options.wordWrap, 'boolean')
   
-  if (options.alignment == nil) then options.alignment = "left" end
+  -- Validate: options.alignment
   MintCrate.Assert.type(f, 'options.alignment', options.alignment, 'string')
-  MintCrate.Assert.condition(f, 'numFrames', (options.alignment == 'left' or
-    options.alignment == 'right' or options.alignment == 'center'),
+  
+  MintCrate.Assert.condition(f,
+    'numFrames',
+    (
+      options.alignment == 'left'
+      or options.alignment == 'right'
+      or options.alignment == 'center'
+    ),
     'must be either "left", "right", or "center"')
   
-  -- Add text to scene.
-  local maxCharsPerLine = options.maxCharsPerLine
-  local lineSpacing = options.lineSpacing
-  local wordWrap = options.wordWrap
-  local alignment = options.alignment
-  
+  -- Retrieve font's glyph width/height
   local font = self._data.fonts[name]
   local glyphWidth = font.charWidth
   local glyphHeight = font.charHeight
   
+  -- Create new paragraph
   local paragraph = MintCrate.Paragraph:new(
     self._instances.paragraphs,
     self._drawOrders.main,
     name,
     x, y,
     glyphWidth, glyphHeight,
-    maxCharsPerLine, lineSpacing, wordWrap, alignment
+    options.maxCharsPerLine,
+    options.lineSpacing,
+    options.wordWrap,
+    options.alignment
   )
   
+  -- Set initial text content
   paragraph:setTextContent(startingTextContent)
   
+  -- Store entry for paragraph in instance and draw-order lists
   table.insert(self._instances.paragraphs, paragraph)
   table.insert(self._drawOrders.main, paragraph)
   
+  -- Return paragraph
   return paragraph
 end
 
@@ -1847,9 +1878,14 @@ end
 function Engine:setCamera(x, y)
   local f = 'setCamera'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: x
   MintCrate.Assert.type(f, 'x', x, 'number')
+  
+  -- Validate: y
   MintCrate.Assert.type(f, 'y', y, 'number')
   
+  -- Figure out camera bounds
   local x1
   local y1
   local x2
@@ -1875,10 +1911,12 @@ function Engine:setCamera(x, y)
   boundY = math.max(boundY, y1)
   boundY = math.min(boundY, y2 - self._baseHeight)
   
-  -- Force camera to fit room if room size is smaller than window size
-  if self._currentRoom._roomWidth  <= self._baseWidth  then boundX = 0 end
-  if self._currentRoom._roomHeight <= self._baseHeight then boundY = 0 end
+  -- Force camera to fit room if room size is smaller than game size
+  -- TODO: Remove me, since this isn't allowed in the first place?
+  -- if self._currentRoom._roomWidth  <= self._baseWidth  then boundX = 0 end
+  -- if self._currentRoom._roomHeight <= self._baseHeight then boundY = 0 end
   
+  -- Reposition camera
   self._camera.x = boundX
   self._camera.y = boundY
 end
@@ -1891,17 +1929,27 @@ end
 function Engine:bindCamera(x1, y1, x2, y2)
   local f = 'bindCamera'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: x1
   MintCrate.Assert.type(f, 'x1', x1, 'number')
+  
+  -- Validate: x2
   MintCrate.Assert.type(f, 'x2', x2, 'number')
+  
+  -- Validate: y1
   MintCrate.Assert.type(f, 'y1', y1, 'number')
+  
+  -- Validate: y2
   MintCrate.Assert.type(f, 'y2', y2, 'number')
   
+  -- Set bounds and indicate that the camera is currently bound
   self._bounds = {x1 = x1, y1 = y1, x2 = x2, y2 = y2}
   self._cameraIsBound = true
 end
 
 -- Unbinds the camera if previously bound.
 function Engine:unbindCamera()
+  -- Unset bounds and indicate that the camera is currently unbound
   self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
   self._cameraIsBound = false
 end
@@ -1912,9 +1960,14 @@ end
 function Engine:centerCamera(x, y)
   local f = 'centerCamera'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: x
   MintCrate.Assert.type(f, 'x', x, 'number')
+  
+  -- Validate: y
   MintCrate.Assert.type(f, 'y', y, 'number')
   
+  -- Center camera on point
   self:setCamera(
     x - (self._baseWidth / 2),
     y - (self._baseHeight / 2)
@@ -1932,18 +1985,42 @@ end
 function Engine:setTilemap(tilemapLayoutName)
   local f = 'setTilemap'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: tilemapLayoutName
   MintCrate.Assert.type(f, 'tilemapLayoutName', tilemapLayoutName, 'string')
   
-  -- Parse tilemap and layout names from full tilemap_layout name.
-  self._tilemapFullName = tilemapLayoutName
-  self._tilemapName = MintCrate.Util.string.split(tilemapLayoutName, '_')[1]
-  self._layoutName = MintCrate.Util.string.split(tilemapLayoutName, '_')[2]
+  -- Split name to get Tilemap's name and layout
+  local nameParts = MintCrate.Util.string.split(tilemapLayoutName, '_')
   
-  -- Ensure tilemap exists.
-  MintCrate.Assert.condition(f, 'tilemapLayoutName', (
-    self._data.tilemaps[self._tilemapName] and
-    self._data.tilemaps[self._tilemapName].layouts[self._layoutName]
-  ), 'does not refer to a valid Tilemap layout')
+  -- Validate: tilemapLayoutName
+  MintCrate.Assert.condition(f,
+    "tilemapLayoutName",
+    (#nameParts == 2),
+    'must be formatted as "tilemap_layout"')
+  
+  -- Store tilemap and tilemap layout names
+  self._tilemapFullName = tilemapLayoutName
+  self._tilemapName = nameParts[1]
+  self._layoutName = nameParts[2]
+  
+  -- Validate: tilemapLayoutName
+  MintCrate.Assert.condition(f,
+    'tilemapLayoutName',
+    (self._tilemapName ~= ""),
+    'cannot be blank on either side, expected format is "tilemap_layout"')
+  
+  MintCrate.Assert.condition(f,
+    'tilemapLayoutName',
+    (self._layoutName ~= ""),
+    'cannot be blank on either side, expected format is "tilemap_layout"')
+  
+  MintCrate.Assert.condition(f,
+    'tilemapLayoutName',
+    (
+      self._data.tilemaps[self._tilemapName]
+      and self._data.tilemaps[self._tilemapName].layouts[self._layoutName]
+    ),
+    'does not refer to a valid Tilemap layout')
 end
 
 -- -----------------------------------------------------------------------------
@@ -1960,31 +2037,37 @@ function Engine:saveData(filename, data)
   
   MintCrate.Assert.self(f, self)
   
+  -- Validate: filename
   MintCrate.Assert.type(f,
     'filename',
     filename,
     'string'
   )
   
+  -- Validate: data
   MintCrate.Assert.type(f,
     'data',
     data,
     'table'
   )
   
+  -- Prepare to attempt to save the data
   local success = true
   local msg = ''
   
-  -- Convert table data to JSON string
+  -- Attempt to convert table data to JSON string
   local json, msg = self.util.json.encode(data)
+  
+  -- If conversion failed, flag that the process failed
   if (json == nil) then
     success = false
-  -- Save JSON data to file
+  -- Otherwise, attempt to save JSON data to file
   elseif (not love.filesystem.write(filename..'.json', json)) then
     success = false
     msg = "Could not write data to filesystem."
   end
   
+  -- Return success flag and potential error message
   return success, msg
 end
 
@@ -1997,26 +2080,30 @@ function Engine:loadData(filename)
   
   MintCrate.Assert.self(f, self)
   
+  -- Validate: filename
   MintCrate.Assert.type(f,
     'filename',
     filename,
     'string'
   )
   
+  -- Prepare to attempt to load the data
   local data = nil
   local msg = ''
   
-  -- Load JSON data from file
+  -- Attempt to load JSON data from file
   local json, msg = love.filesystem.read(filename..'.json')
   
+  -- If loading succeeded, then attempt to parse JSON string into table data
   if (json ~= nil) then
-    -- love.filesystem.read returns number of bytes on success, so wipe this
+    -- love.filesystem.read returns number of bytes on success, so reset this
     msg = ''
     
-    -- Parse JSON data if loading was successful
+    -- Attempt to parse JSON string
     data, msg = self.util.json.decode(json)
   end
   
+  -- Return success flag and potential error message
   return data, msg
 end
 
@@ -2028,18 +2115,21 @@ function Engine:savedDataExists(filename)
   
   MintCrate.Assert.self(f, self)
   
+  -- Validate: filename
   MintCrate.Assert.type(f,
     'filename',
     filename,
     'string'
   )
   
+  -- Check to see if the file exists
   local exists = false
   
   if (love.filesystem.read(filename..'.json')) then
     exists = true
   end
   
+  -- Return flag indicating existence of file
   return exists
 end
 
@@ -2054,10 +2144,10 @@ function Engine:sys_update()
   
   -- Cap FPS
   self._fpsCurrentTime = love.timer.getTime()
-  if self._fpsNextTime <= self._fpsCurrentTime then
-      self._fpsNextTime = self._fpsCurrentTime
+  if (self._fpsNextTime <= self._fpsCurrentTime) then
+    self._fpsNextTime = self._fpsCurrentTime
   else
-      love.timer.sleep(self._fpsNextTime - self._fpsCurrentTime)
+    love.timer.sleep(self._fpsNextTime - self._fpsCurrentTime)
   end
   
   -- Prepare FPS limiting
@@ -2068,36 +2158,43 @@ function Engine:sys_update()
     handler:_update(self._keystates, self._joystates)
   end
   
-  -- Update mouse
-  -- Global mouse position.
+  -- Update global mouse position
   self._mousePositions.globalX = self._mousePositions.localX + self._camera.x
   self._mousePositions.globalY = self._mousePositions.localY + self._camera.y
   
-  -- Update mouse buttons.
+  -- Update mouse buttons states
   for btnNumber, btn in ipairs(self._mouseButtons) do
+    -- Reset states
     btn.pressed = false
     btn.released = false
     
-    -- Get raw mouse state.
+    -- Get raw mouse state
     local down = false
     if (self._mouseStates[btnNumber]) then down = true end
     
-    -- Handle setting held/pressed/released values.
-    if down then
-      if not btn.held then btn.pressed = true end
+    -- Handle setting held/pressed/released states
+    if (down) then
+      if (not btn.held) then
+        btn.pressed = true
+      end
+      
       btn.held = true
     else
-      if btn.held then btn.released = true end
+      if (btn.held) then
+        btn.released = true
+      end
+      
       btn.held = false
     end
   end
   
-  -- Reset collision states
+  -- Reset collision states for actives
   for _, active in ipairs(self._instances.actives) do
     active:_getCollider().collision = false
     active:_getCollider().mouseOver = false
   end
   
+  -- Reset collision states for tilemap masks
   if self._tilemapFullName then
     for _, maskCollection in pairs(self:_getTilemapCollisionMasks()) do
       for __, mask in ipairs(maskCollection) do
@@ -2106,8 +2203,18 @@ function Engine:sys_update()
     end
   end
   
-  -- Loop music
-  -- Handle music
+  -- Process animations for active objects
+  for _, active in ipairs(self._instances.actives) do
+    -- Get active's animation data
+    local animation =
+      self._data.actives[active:_getName()]
+      .animations[active:getAnimationName()]
+      
+    -- Process active's animation
+    active:_animate(animation)
+  end
+  
+  -- Handle music looping and fading
   for _, track in pairs(self._data.music) do
     -- Handle looping for non-tracker-module music formats
     if (
@@ -2122,19 +2229,21 @@ function Engine:sys_update()
     
     -- Handle fade-ins
     if (track.fadeInLength and track.source:isPlaying()) then
-      -- Fade audio
+      -- Fade audio in
       track.volume = math.min(1, track.volume + (1 / track.fadeInLength))
       track.source:setVolume(track.volume * self.masterBgmVolume)
-      -- Complete fade
+      
+      -- Finish fade when volume is maxed
       if (track.volume >= 1) then
         track.fadeInLength = nil
       end
     -- Handle fade-outs
     elseif (track.fadeOutLength and track.source:isPlaying()) then
-      -- Fade audio
+      -- Fade audio out
       track.volume = math.max(0, track.volume - (1 / track.fadeOutLength))
       track.source:setVolume(track.volume * self.masterBgmVolume)
-      -- Complete fade
+      
+      -- Finish fade when volume is silenced
       if (track.volume <= 0.0001) then
         track.fadeOutLength = nil
         love.audio.stop(track.source)
@@ -2144,14 +2253,23 @@ function Engine:sys_update()
   
   -- Handle delayed functions
   for i = #self._queuedFunctions, 1, -1 do
-    local item = self._queuedFunctions[i]
-    item.remainingFrames = item.remainingFrames - 1
-    if item.cancelled then
+    local func = self._queuedFunctions[i]
+    
+    -- Tick function's wait timer
+    func.remainingFrames = func.remainingFrames - 1
+    
+    -- Remove function if it's been cancelled
+    if (func.cancelled) then
       table.remove(self._queuedFunctions, i)
-    elseif item.remainingFrames <= 0 then
-      item.callback()
-      if item.repeatValue then
-        item.remainingFrames = item.repeatValue
+    -- Or, fire it if its timer has run out
+    elseif func.remainingFrames <= 0 then
+      -- Run the function
+      func.callback()
+      
+      -- If function is set to repeat, then reset its timer
+      if (func.repeatValue) then
+        func.remainingFrames = func.repeatValue
+      -- Otherwise, remove it
       else
         table.remove(self._queuedFunctions, i)
       end
@@ -2159,7 +2277,7 @@ function Engine:sys_update()
   end
   
   -- Run room update code
-  if self._currentRoom and self._currentRoom.update then
+  if (self._currentRoom) and self._currentRoom.update then
     self._currentRoom:update()
   end
   
@@ -2175,25 +2293,28 @@ function Engine:sys_draw()
   local f = 'sys_draw'
   MintCrate.Assert.self(f, self)
   
-  -- Clear out-of-bounds areas to black.
+  -- Clear out-of-bounds areas to black
   love.graphics.clear(0, 0, 0)
   
-  -- Clip game area view.
+  -- Clip game area view
   love.graphics.setScissor(
     self._gfxOffsetX * self._gfxScale,
     self._gfxOffsetY * self._gfxScale,
-    self._baseWidth * self._gfxScale,
+    self._baseWidth  * self._gfxScale,
     self._baseHeight * self._gfxScale
   )
   
-  -- Clear only the game area with the room color.
+  -- Clear the game area with the current room's clear color
   local r, g, b = self._currentRoom:_getBackgroundColor()
   love.graphics.clear(r, g, b)
   
+  -- Take snapshot of untransformed graphics state
   love.graphics.push()
   
+  -- Scale all graphics to window scale
   love.graphics.scale(self._gfxScale, self._gfxScale)
   
+  -- Center the game view in the window (to account for letterboxing)
   love.graphics.translate(
     math.floor(-self._camera.x + self._gfxOffsetX),
     math.floor(-self._camera.y + self._gfxOffsetY)
@@ -2201,21 +2322,38 @@ function Engine:sys_draw()
   
   -- Draw Backdrops
   for _, backdrop in ipairs(self._drawOrders.backdrops) do
+    -- If backdrop isn't visible, then skip drawing it
     if (not backdrop._isVisible or backdrop:getOpacity() == 0) then
       goto DrawBackdropDone
     end
     
+    -- Get backdrop image and tiling property
     local image = self._data.backdrops[backdrop._name].image
-    local mosaic = self._data.backdrops[backdrop._name].mosaic
+    local isMosaic = self._data.backdrops[backdrop._name].mosaic
     
+    -- Set alpha rendering value
     love.graphics.setColor(1, 1, 1, backdrop:getOpacity())
-    if not mosaic then
-      love.graphics.draw(image, backdrop._x, backdrop._y, 0,
-        backdrop._scaleX, backdrop._scaleY)
+    
+    -- Draw backdrop normally if it's not set to tile
+    if (not isMosaic) then
+      love.graphics.draw(
+        image,
+        backdrop._x, backdrop._y,
+        0,
+        backdrop._scaleX, backdrop._scaleY
+      )
+    -- Otherwise, draw it tiled
     else
-      love.graphics.draw(image, backdrop._quad, backdrop._x, backdrop._y, 0,
-        backdrop._scaleX, backdrop._scaleY)
+      love.graphics.draw(
+        image,
+        backdrop._quad,
+        backdrop._x, backdrop._y,
+        0,
+        backdrop._scaleX, backdrop._scaleY
+      )
     end
+    
+    -- Reset alpha rendering value
     love.graphics.setColor(1, 1, 1, 1)
     
     ::DrawBackdropDone::
@@ -2223,17 +2361,23 @@ function Engine:sys_draw()
   
   -- Draw Tilemap
   if self._tilemapFullName then
-    local fullName = self._tilemapFullName
-    local tilemapName = self.util.string.split(fullName, '_')[1]
-    local layoutName = self.util.string.split(fullName, '_')[2]
+    -- Parse out tilemap name and layout name
+    local nameParts = self.util.string.split(self._tilemapFullName, '_')
+    local tilemapName = nameParts[1]
+    local layoutName = nameParts[2]
     
+    -- Retieve tilemap and tilemap layout data
     local tilemap = self._data.tilemaps[tilemapName]
     local layout = self._data.tilemaps[tilemapName].layouts[layoutName]
     
+    -- Iterate through tilemap layout, drawing tiles as appropriate
     for row = 1, #layout.tiles do
       for col = 1, #layout.tiles[row] do
+        -- Get tile graphic index
         local tileNumber = layout.tiles[row][col]
-        if tileNumber > 0 then
+        
+        -- Only draw it if it's not 0 (0 represents the lack of a tile)
+        if (tileNumber > 0) then
           love.graphics.draw(
             tilemap.image,
             tilemap.quads[tileNumber],
@@ -2250,25 +2394,35 @@ function Engine:sys_draw()
     -- Draw Actives
     if (entity._entityType == 'active') then
       local active = entity
-      if (not active._isVisible) then goto DrawActiveDone end
       
-      local animation = self._data.actives[active:_getName()]
-        .animations[active:getAnimationName()]
-      if not animation then goto DrawActiveDone end
-      local animationFrameNumber = active:getAnimationFrameNumber()
-      
-      active:_animate(animation)
-      
-      if (active:getOpacity() == 0) then
+      -- If active isn't visible, then skip drawing it
+      if (not active._isVisible or active:getOpacity() == 0) then
         goto DrawActiveDone
       end
       
-      local flippedX = 1
-      if active:isFlippedHorizontally() then flippedX = -1 end
-      local flippedY = 1
-      if active:isFlippedVertically() then flippedY = -1 end
+      -- Get active's animation data
+      local animation =
+        self._data.actives[active:_getName()]
+        .animations[active:getAnimationName()]
       
+      -- If active doesn't have any animation graphics, then skip drawing it
+      if (not animation) then
+        goto DrawActiveDone
+      end
+      
+      -- Get current animation frame index
+      local animationFrameNumber = active:getAnimationFrameNumber()
+      
+      -- Get graphics-mirroring states
+      local flippedX = 1
+      local flippedY = 1
+      if (active:isFlippedHorizontally()) then flippedX = -1 end
+      if (active:isFlippedVertically()  ) then flippedY = -1 end
+      
+      -- Set alpha rendering value
       love.graphics.setColor(1, 1, 1, active:getOpacity())
+      
+      -- Draw active
       love.graphics.draw(
         animation.image,
         animation.quads[active:getAnimationFrameNumber()],
@@ -2277,18 +2431,25 @@ function Engine:sys_draw()
         (active:getScaleX() * flippedX), (active:getScaleY() * flippedY),
         -animation.offsetX, -animation.offsetY
       )
+      
+      -- Reset alpha rendering value
       love.graphics.setColor(1, 1, 1, 1)
       
       ::DrawActiveDone::
-    
+      
     -- Draw Paragraphs
     elseif (entity._entityType == 'paragraph') then
       local paragraph = entity
+      
+      -- If paragraph isn't visible, then skip drawing it
       if (not paragraph._isVisible or paragraph:getOpacity() == 0) then
         goto DrawParagraphDone
       end
       
+      -- Set alpha rendering value
       love.graphics.setColor(1, 1, 1, paragraph:getOpacity())
+      
+      -- Draw text
       self:_drawText(
         paragraph:_getTextLines(),
         self._data.fonts[paragraph:_getName()],
@@ -2298,22 +2459,25 @@ function Engine:sys_draw()
         paragraph:_getWordWrap(),
         paragraph:_getAlignment()
       )
+      
+      -- Reset alpha rendering value
       love.graphics.setColor(1, 1, 1, 1)
       
       ::DrawParagraphDone::
     end
   end
   
-  -- Draw debug graphics for Tilemap
+  -- Draw debug graphics for tilemap
   if (
-    (self._showTilemapColliisonMasks or self._showTilemapBehaviorValues) and
-    self._tilemapFullName
+    (self._showTilemapColliisonMasks or self._showTilemapBehaviorValues)
+    and self._tilemapFullName
   ) then
     for tileType, maskCollection in pairs(self:_getTilemapCollisionMasks()) do
       for _, mask in ipairs(maskCollection) do
         -- Draw collision masks
-        if self._showTilemapCollisionMasks then
-          if mask.collision then
+        if (self._showTilemapCollisionMasks) then
+          -- Draw color overlay
+          if (mask.collision) then
             love.graphics.setColor(love.math.colorFromBytes(0, 255, 0, 127))
           else
             love.graphics.setColor(love.math.colorFromBytes(255, 0, 0, 127))
@@ -2325,6 +2489,7 @@ function Engine:sys_draw()
             math.floor(mask.w) - 1.0, math.floor(mask.h) - 1.0
           )
           
+          -- Draw border
           love.graphics.setColor(love.math.colorFromBytes(0, 0, 255))
           
           love.graphics.rectangle(
@@ -2334,14 +2499,18 @@ function Engine:sys_draw()
           )
         end
         
+        -- Reset draw color
         love.graphics.setColor(1, 1, 1, 1)
         
         -- Draw collison mask behavior numbers
-        if self._showTilemapBehaviorValues then
+        if (self._showTilemapBehaviorValues) then
           self:_drawText(
-            {tostring(tileType)}, self._data.fonts["system_counter"],
+            {tostring(tileType)},
+            self._data.fonts["system_counter"],
             mask.x + 2, mask.y + 2,
-            3, 0, false
+            3,
+            0,
+            false
           )
         end
       end
@@ -2350,36 +2519,49 @@ function Engine:sys_draw()
   
   -- Draw debug graphics for Actives
   if (
-    self._showActiveCollisionMasks or
-    self._showActiveInfo or
-    self._showActiveOriginPoints or
-    self._showActiveActionPoints
+    self._showActiveCollisionMasks
+    or self._showActiveInfo
+    or self._showActiveOriginPoints
+    or self._showActiveActionPoints
   ) then
     for _, entity in ipairs(self._drawOrders.main) do
-      if entity._entityType ~= 'active' then goto DrawActiveDebugGfxDone end
+      -- Skip if entity isn't an active
+      if (entity._entityType ~= 'active') then
+        goto DrawActiveDebugGfxDone
+      end
       
       local active = entity
       
       -- Draw collision masks
-      if self._showActiveCollisionMasks then
+      if (self._showActiveCollisionMasks) then
+        -- Retrieve collider data
         local collider = active:_getCollider()
+        
+        -- Set draw color based on type of collision taking place, if any
+        -- Active is colliding with another object, and mouse is over it
         if (collider.collision and collider.mouseOver) then
           love.graphics.setColor(love.math.colorFromBytes(0, 0, 255, 127))
+        -- Active is colliding with another object
         elseif (collider.collision) then
           love.graphics.setColor(love.math.colorFromBytes(0, 255, 0, 127))
+        -- Mouse is over the active
         elseif (collider.mouseOver) then
           love.graphics.setColor(love.math.colorFromBytes(0, 255, 255, 127))
+        -- Active is not colliding with another object, nor is the mouse over it
         else
           love.graphics.setColor(love.math.colorFromBytes(255, 255, 0, 127))
         end
         
+        -- Draw rectangular collision mask
         if (collider.s == self._COLLIDER_SHAPES.RECTANGLE) then
+          -- Draw mask
           love.graphics.rectangle(
             "fill",
             math.floor(collider.x) + 0.5, math.floor(collider.y) + 0.5,
             math.floor(collider.w) - 1.0, math.floor(collider.h) - 1.0
           )
           
+          -- Draw border
           love.graphics.setColor(love.math.colorFromBytes(255, 0, 255))
           
           love.graphics.rectangle(
@@ -2387,23 +2569,32 @@ function Engine:sys_draw()
             math.floor(collider.x) + 0.5, math.floor(collider.y) + 0.5,
             math.floor(collider.w) - 1.0, math.floor(collider.h) - 1.0
           )
+        -- Otherwise, draw circular collision mask
         else
+          -- Draw mask
           love.graphics.circle("fill", collider.x, collider.y, collider.r)
+          
+          -- Draw border
           love.graphics.setColor(love.math.colorFromBytes(255, 0, 255))
+          
           love.graphics.circle("line", collider.x, collider.y, collider.r)
         end
         
+        -- Reset draw color
         love.graphics.setColor(1, 1, 1, 1)
       end
       
       -- Draw action points
-      if self._showActiveActionPoints then
+      if (self._showActiveActionPoints) then
+        -- Get action point system image
         local img = self._systemImages["point_action"]
         
+        -- Draw action point
         love.graphics.draw(img,
           active:getActionPointX() - math.floor(img:getWidth()/2),
           active:getActionPointY() - math.floor(img:getHeight()/2))
         
+        -- TODO: Remove me?
         -- self:_drawText(
           -- "A", self._data.fonts["system_counter"],
           -- active:getActionPointX() - 8 - 4,
@@ -2415,12 +2606,15 @@ function Engine:sys_draw()
       
       -- Draw origin points
       if self._showActiveOriginPoints then
+        -- Get origin point system image
         local img = self._systemImages["point_origin"]
         
+        -- Draw origin point
         love.graphics.draw(img,
           active:getX() - math.floor(img:getWidth()/2),
           active:getY() - math.floor(img:getHeight()/2))
         
+        -- TODO: Remove me?
         -- self:_drawText(
           -- "O", self._data.fonts["system_counter"],
           -- active:getX() + 8 - 4,
@@ -2431,15 +2625,18 @@ function Engine:sys_draw()
       end
       
       -- Draw X,Y position values & animation name
-      if self._showActiveInfo then
+      if (self._showActiveInfo) then
+        -- Get zero-padding size
         local pad = math.max(
           string.len(tostring(self._currentRoom:getRoomWidth())),
           string.len(tostring(self._currentRoom:getRoomHeight()))
         )
         
+        -- Get x and y coordinates
         local x = self.math.round(active:getX(), 2)
         local y = self.math.round(active:getY(), 2)
         
+        -- Split coordinates, and pad with zeroes for consistency
         local xParts = self.util.string.split(tostring(x), ".")
         local yParts = self.util.string.split(tostring(y), ".")
         
@@ -2450,15 +2647,19 @@ function Engine:sys_draw()
           self.util.string.padLeft(yParts[1], pad, " ") .. "." ..
           self.util.string.padRight((yParts[2] or ''), 2, "0")
         
+        -- Draw information overlay
         self:_drawText(
           {
             "X:" .. x,
             "Y:" .. y,
             active:getAnimationName()
-          }, self._data.fonts["system_counter"],
+          },
+          self._data.fonts["system_counter"],
           active:getX(), active:getY() + 8,
           self._baseWidth / self._data.fonts["system_counter"].charWidth,
-          0, false, "center"
+          0,
+          false,
+          "center"
         )
       end
       
@@ -2466,10 +2667,12 @@ function Engine:sys_draw()
     end
   end
   
-  -- Draw fade in/out screen overlay.
-  if self._currentRoom._fadeLevel < 100 then
+  -- Draw fade in/out effect
+  if (self._currentRoom._fadeLevel < 100) then
+    -- Get fade configuration data
     local fadeConf = self._currentRoom._fadeConf[self._currentRoom._currentFade]
     
+    -- Set color of fade, including alpha
     love.graphics.setColor(
       fadeConf.fadeColor.r,
       fadeConf.fadeColor.g,
@@ -2477,6 +2680,7 @@ function Engine:sys_draw()
       1 - (self._currentRoom._fadeLevel / 100)
     )
     
+    -- Draw fade
     love.graphics.rectangle(
       "fill",
       self._camera.x, self._camera.y,
@@ -2484,23 +2688,28 @@ function Engine:sys_draw()
     )
   end
   
+  -- Reset draw color
   love.graphics.setColor(1, 1, 1, 1)
   
   -- Draw camera debug overlay
-  if self._showCameraInfo then
+  if (self._showCameraInfo) then
+    -- Get zero-padding size
     local pad = math.max(
       string.len(tostring(self._currentRoom:getRoomWidth())),
       string.len(tostring(self._currentRoom:getRoomHeight()))
     )
     
+    -- Prepare text for information overlay
     local strLines = {
       "Camera",
       "X:" .. self.util.string.padLeft(tostring(self._camera.x), pad, " "),
       "Y:" .. self.util.string.padLeft(tostring(self._camera.y), pad, " ")
     }
     
-    if not self._cameraIsBound then
+    -- Show that camera is unbound
+    if (not self._cameraIsBound) then
       table.insert(strLines, "UNBOUND")
+    -- Otherwise, provide information on its current boundaries
     else
       table.insert(strLines,
         "BND1: (" ..
@@ -2516,28 +2725,32 @@ function Engine:sys_draw()
         ")")
     end
     
+    -- Draw information overlay
     self:_drawText(
       strLines,
       self._data.fonts["system_counter"],
       self._camera.x + self._baseWidth, self._camera.y,
       self._baseWidth / self._data.fonts["system_counter"].charWidth,
-      0, false, "right"
+      0,
+      false,
+      "right"
     )
   end
   
   -- Draw FPS debug overlay
-  if self._showFps then
+  if (self._showFps) then
     self:_drawText(
       {tostring(love.timer.getFPS())},
       self._data.fonts["system_counter"],
       self._camera.x, self._camera.y,
       self._baseWidth / self._data.fonts["system_counter"].charWidth,
-      0, false
+      0,
+      false
     )
   end
   
   -- Draw debug info for current room
-  if self._showRoomInfo then
+  if (self._showRoomInfo) then
     self:_drawText(
       {
         self._currentRoom:getRoomName(),
@@ -2552,12 +2765,15 @@ function Engine:sys_draw()
       self._camera.y + self._baseHeight -
         (5 * self._data.fonts["system_counter"].charHeight),
       self._baseWidth / self._data.fonts["system_counter"].charWidth,
-      0, false
+      0,
+      false
     )
   end
   
+  -- Restore graphics state to previously-taken untransformed snapshot
   love.graphics.pop()
   
+  -- Reset the clipping boundary
   love.graphics.setScissor()
 end
 
@@ -2576,13 +2792,16 @@ function Engine:_drawText(
   x, y,
   maxCharsPerLine, lineSpacing, wordWrap, alignment
 )
+  -- Default params
+  -- TODO: maxCharsPerLine and wordWrap no longer used?
   if (maxCharsPerLine == nil) then maxCharsPerLine = 9999 end
-  if (lineSpacing == nil) then lineSpacing = 0 end
-  if (wordWrap == nil) then wordWrap = false end
-  if (alignment == nil) then alignment = "left" end
+  if (lineSpacing     == nil) then lineSpacing = 0        end
+  if (wordWrap        == nil) then wordWrap = false       end
+  if (alignment       == nil) then alignment = "left"     end
   
   -- Draw lines of text, character-by-character
   for lineNum, line in ipairs(textLines) do
+    -- Figure out base offset for text alignment
     local xOffset = 0
     
     if alignment == "right" then
@@ -2591,6 +2810,7 @@ function Engine:_drawText(
       xOffset = math.floor(string.len(line) * font.charWidth / 2)
     end
     
+    -- 
     for charPosition, character in ipairs(self.util.string.split(line)) do
       love.graphics.draw(
         font.image,
@@ -2681,23 +2901,40 @@ end
 function Engine:setWindowScale(scale, forceResize)
   local f = 'setWindowScale'
   MintCrate.Assert.self(f, self)
+  
+  -- Default params
+  if (forceResize == nil) then forceResize = false end
+  
+  -- Validate: scale
   MintCrate.Assert.type(f, 'scale', scale, 'number')
-  MintCrate.Assert.condition(f, 'scale', (scale > 0),
+  
+  MintCrate.Assert.condition(f,
+    'scale',
+    (scale > 0),
     'must be a value greater than 0')
-  MintCrate.Assert.condition(f, 'scale', (self.math.isIntegral(scale)),
+  
+  MintCrate.Assert.condition(f,
+    'scale',
+    (self.math.isIntegral(scale)),
     'must be an integer')
   
-  if (forceResize == nil) then forceResize = false end
+  -- Validate: forceResize
   MintCrate.Assert.type(f, 'forceResize', forceResize, 'boolean')
   
-  if self._windowScale ~= scale or forceResize then
+  -- Resize window
+  if (self._windowScale ~= scale or forceResize) then
+    -- Store new window scale
     self._windowScale = scale
     
-    if not self._fullscreen then
+    -- Only resize if game isn't in fullscreen mode
+    if (not self._fullscreen) then
       -- Resize the application window
       love.window.setMode(self._baseWidth * scale, self._baseHeight * scale)
+      
       -- Force a resize event so that GFX offsets are recalculated correctly
       love.resize(self._baseWidth * scale, self._baseHeight * scale)
+    
+    -- Otherwise, make a note to resize the window when fullscreen mode is left
     else
       self._fullscreenDirty = true
     end
@@ -2736,12 +2973,24 @@ end
 function Engine:setFullscreen(fullscreen)
   local f = 'setFullscreen'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: fullscreen
   MintCrate.Assert.type(f, 'fullscreen', fullscreen, 'boolean')
   
+  -- Store new fullscreen state
   self._fullscreen = fullscreen
-  if not fullscreen and self._fullscreenDirty then
+  
+  -- Force a window resize if we're leaving fullscreen but a graphics-scale
+  -- change was previously performed while in fullscreen mode
+  if (not fullscreen and self._fullscreenDirty) then
+    -- Set window scale, of which will call love.window.setMode and will
+    -- disable fullscreen mode
     self:setWindowScale(self._windowScale, true)
+    
+    -- Reset flag
     self._fullscreenDirty = false
+  
+  -- Otherwise, just enable/disable fullscreen
   else
     love.window.setFullscreen(fullscreen)
   end
@@ -2762,39 +3011,44 @@ end
 function Engine:sys_resize(w, h)
   local f = 'sys_resize'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: w
   MintCrate.Assert.type(f, 'w', w, 'number')
+  
+  -- Validate: h
   MintCrate.Assert.type(f, 'h', h, 'number')
   
-  -- Calculate scale dynamically, but only if fullscreen mode is enabled.
+  -- Calculate scale dynamically, but only if fullscreen mode is enabled
   if self._fullscreen then
     local sx = w / self._baseWidth
     local sy = h / self._baseHeight
     
     local scale = 1
-    if sx < sy then
+    if (sx < sy) then
       scale = sx
     else
       scale = sy
     end
     
     self._gfxScale = scale
-  -- Otherwise, just set it to be what the user has specified.
+  
+  -- Otherwise, just set it to be what the user has previously specified
   else
     self._gfxScale = self._windowScale
   end
   
-  -- Floor scale so it's integral. Non-integral scaling will result in graphical
-  -- artifacts on textures.
+  -- Floor scale so it's integral, as non-integral scaling will result in
+  -- graphical artifacts on textures
   self._gfxScale = math.floor(self._gfxScale)
   
-  -- Determine the offsets to center the game in the window.
+  -- Figure out and store the offsets to center the game in the window
   local ox = ((w / self._gfxScale) - self._baseWidth) / 2
-  ox = self.math.round(ox)
-  ox = math.max(0, ox)
+  ox       = self.math.round(ox)
+  ox       = math.max(0, ox)
   
   local oy = ((h / self._gfxScale) - self._baseHeight) / 2
-  oy = self.math.round(oy)
-  oy = math.max(0, oy)
+  oy       = self.math.round(oy)
+  oy       = math.max(0, oy)
   
   self._gfxOffsetX = ox
   self._gfxOffsetY = oy
@@ -2811,9 +3065,14 @@ end
 function Engine:testCollision(activeA, activeB)
   local f = 'testCollision'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: activeA
   MintCrate.Assert.type(f, 'activeA', activeA, 'Active')
+  
+  -- Validate: activeB
   MintCrate.Assert.type(f, 'activeB', activeB, 'Active')
   
+  -- Return result of collision test
   return self:_testCollision(activeA:_getCollider(), activeB:_getCollider())
 end
 
@@ -2824,16 +3083,24 @@ end
 function Engine:testMapCollision(active, tileType)
   local f = 'testMapCollision'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate active
   MintCrate.Assert.type(f, 'active', active, 'Active')
+  
+  -- Validate tileType
   MintCrate.Assert.type(f, 'tileType', tileType, 'number')
   
+  -- Test active against all tilemap collision masks
   local collisions = {}
   
-  if self._tilemapFullName then
+  if (self._tilemapFullName) then
+    -- Get all collision masks
     local mapColliders = self:_getTilemapCollisionMasks()[tileType]
     
     for _, collider in ipairs(mapColliders) do
-      if self:_testCollision(active:_getCollider(), collider) then
+      -- See if active is intersecting with collision mask
+      if (self:_testCollision(active:_getCollider(), collider)) then
+        -- Store data regarding the collision
         table.insert(collisions, {
           leftEdgeX   = collider.x,
           rightEdgeX  = collider.x + collider.w,
@@ -2844,9 +3111,14 @@ function Engine:testMapCollision(active, tileType)
     end
   end
   
-  if #collisions == 0 then collisions = false end
+  -- Return false if no collisions took place
+  if (#collisions == 0) then
+    return false
   
-  return collisions
+  -- Otherwise, return collisions
+  else
+    return collisions
+  end
 end
 
 -- Returns whether to collider objects are intersecting.
@@ -2854,50 +3126,56 @@ end
 -- @param {table} colliderB The second collider to test.
 -- @returns {boolean} Whether a collision occurred.
 function Engine:_testCollision(colliderA, colliderB)
-  local collision = false
-  
+  -- Don't test for collision if one or more colliders haven't been defined
   if (
-    colliderA.s == self._COLLIDER_SHAPES.NONE or
-    colliderB.s == self._COLLIDER_SHAPES.NONE
+       colliderA.s == self._COLLIDER_SHAPES.NONE
+    or colliderB.s == self._COLLIDER_SHAPES.NONE
   ) then
     return false
   end
   
-  -- Both colliders are rectangles.
+  -- Prepare data for checking collisions
+  local collision = false
+  
+  -- Collision test: both colliders are rectangles
   if (
-    colliderA.s == self._COLLIDER_SHAPES.RECTANGLE and
-    colliderB.s == self._COLLIDER_SHAPES.RECTANGLE
+        colliderA.s == self._COLLIDER_SHAPES.RECTANGLE
+    and colliderB.s == self._COLLIDER_SHAPES.RECTANGLE
   ) then
     if (
-      colliderA.x < (colliderB.x + colliderB.w) and
-      (colliderA.x + colliderA.w) > colliderB.x and
-      colliderA.y < (colliderB.y + colliderB.h) and
-      (colliderA.y + colliderA.h) > colliderB.y
+      colliderA.x < (colliderB.x + colliderB.w)
+      and (colliderA.x + colliderA.w) > colliderB.x
+      and colliderA.y < (colliderB.y + colliderB.h)
+      and (colliderA.y + colliderA.h) > colliderB.y
     ) then
       collision = true
     end
-  -- Both colliders are circles.
+  
+  -- Collision test: both colliders are circles
   elseif (
-    colliderA.s == self._COLLIDER_SHAPES.CIRCLE and
-    colliderB.s == self._COLLIDER_SHAPES.CIRCLE
+        colliderA.s == self._COLLIDER_SHAPES.CIRCLE
+    and colliderB.s == self._COLLIDER_SHAPES.CIRCLE
   ) then
-    local dx = colliderA.x - colliderB.x
-    local dy = colliderA.y - colliderB.y
+    local dx  = colliderA.x - colliderB.x
+    local dy  = colliderA.y - colliderB.y
     collision = (math.sqrt(dx * dx + dy * dy) < (colliderA.r + colliderB.r))
-  -- One collider is a rectangle and the other is a circle.
+  
+  -- Collision test: one collider is a rectangle and the other is a circle
   else
-    -- Make things consistent.
+    -- Make things consistent: collider A should always be rectangular, and
+    -- collider B should always be circular, so flip them around if necessary
     if (colliderA.s == self._COLLIDER_SHAPES.CIRCLE) then
       colliderA, colliderB = colliderB, colliderA
     end
     
-    local rect = colliderA
+    -- Prepare to test for intersection
+    local rect   = colliderA
     local circle = colliderB
     
     local testX = circle.x
     local testY = circle.y
     
-    -- Find closest edge.
+    -- Find closest edge
     if (circle.x < rect.x) then
       testX = rect.x
     elseif (circle.x > (rect.x + rect.w)) then
@@ -2910,20 +3188,22 @@ function Engine:_testCollision(colliderA, colliderB)
       testY = rect.y + rect.h
     end
     
-    -- Calculate distances based on closest edges.
-    local distX = circle.x - testX
-    local distY = circle.y - testY
+    -- Calculate distances based on closest edges
+    local distX    = circle.x - testX
+    local distY    = circle.y - testY
     local distance = math.sqrt((distX * distX) + (distY * distY))
     
-    -- Collision check.
+    -- Check for collision
     collision = (distance <= circle.r)
   end
   
+  -- If a collision occurred, mark flag in both colliders
   if (collision) then
     colliderA.collision = true
     colliderB.collision = true
   end
   
+  -- Return result of collision test
   return collision
 end
 
@@ -2933,30 +3213,42 @@ end
 function Engine:mouseOverActive(active)
   local f = 'mouseOverActive'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: active
   MintCrate.Assert.type(f, 'active', active, 'Active')
   
+  -- Prepare to perform check
   local collider = active:_getCollider()
-  local mouseX = self._mousePositions.globalX
-  local mouseY = self._mousePositions.globalY
+  local mouseX   = self._mousePositions.globalX
+  local mouseY   = self._mousePositions.globalY
+  local over     = false
   
-  local over = false
+  -- Don't test for collision if collider hasn't been defined
+  if (collider.s == self._COLLIDER_SHAPES.NONE) then
+    return false
+  end
   
+  -- Hover check: collider is a rectangle
   if (collider.s == self._COLLIDER_SHAPES.RECTANGLE) then
     over = (
-      mouseX >= collider.x and
-      mouseY >= collider.y and
-      mouseX < (collider.x + collider.w) and
-      mouseY < (collider.y + collider.h)
+          mouseX >= collider.x
+      and mouseY >= collider.y
+      and mouseX < (collider.x + collider.w)
+      and mouseY < (collider.y + collider.h)
     )
+  
+  -- Hover check: collider is a circle
   else
     local dx = mouseX - collider.x
     local dy = mouseY - collider.y
-    local d = math.sqrt((dx * dx) + (dy * dy))
-    over = (d <= collider.r)
+    local d  = math.sqrt((dx * dx) + (dy * dy))
+    over     = (d <= collider.r)
   end
   
+  -- If mouse is hovering over active, then mark flag in collider
   collider.mouseOver = over
   
+  -- Return result of hover test
   return over
 end
 
@@ -2966,10 +3258,18 @@ end
 function Engine:clickedOnActive(mouseButton, active)
   local f = 'clickedOnActive'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: mouseButton
   MintCrate.Assert.type(f, 'mouseButton', mouseButton, 'number')
+  
+  -- Validate: active
   MintCrate.Assert.type(f, 'active', active, 'Active')
   
-  return (self:mousePressed(mouseButton) and self:mouseOverActive(active))
+  -- Return result of click test
+  return (
+        self:mousePressed(mouseButton)
+    and self:mouseOverActive(active)
+  )
 end
 
 -- -----------------------------------------------------------------------------
@@ -3018,6 +3318,8 @@ end
 function Engine:mousePressed(mouseButton)
   local f = 'mousePressed'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: mouseButton
   MintCrate.Assert.type(f, 'mouseButton', mouseButton, 'number')
   
   return self._mouseButtons[mouseButton].pressed
@@ -3029,6 +3331,8 @@ end
 function Engine:mouseReleased(mouseButton)
   local f = 'mouseReleased'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: mouseButton
   MintCrate.Assert.type(f, 'mouseButton', mouseButton, 'number')
   
   return self._mouseButtons[mouseButton].released
@@ -3040,6 +3344,8 @@ end
 function Engine:mouseHeld(mouseButton)
   local f = 'mouseHeld'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: mouseButton
   MintCrate.Assert.type(f, 'mouseButton', mouseButton, 'number')
   
   return self._mouseButtons[mouseButton].held
@@ -3051,9 +3357,14 @@ end
 function Engine:sys_mousemoved(x, y)
   local f = 'sys_mousemoved'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: x
   MintCrate.Assert.type(f, 'x', x, 'number')
+  
+  -- Validate: y
   MintCrate.Assert.type(f, 'y', y, 'number')
   
+  -- Update mouse position values
   self._mousePositions.localX = math.floor(x / self._gfxScale)
   self._mousePositions.localY = math.floor(y / self._gfxScale)
 end
@@ -3063,8 +3374,11 @@ end
 function Engine:sys_mousepressed(button)
   local f = 'sys_mousepressed'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: button
   MintCrate.Assert.type(f, 'button', button, 'number')
   
+  -- Mark state
   self._mouseStates[button] = true
 end
 
@@ -3073,8 +3387,11 @@ end
 function Engine:sys_mousereleased(button)
   local f = 'sys_mousereleased'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: button
   MintCrate.Assert.type(f, 'button', button, 'number')
   
+  -- Mark state
   self._mouseStates[button] = false
 end
 
@@ -3088,8 +3405,13 @@ function Engine:addInputHandler()
   local f = 'addInputHandler'
   MintCrate.Assert.self(f, self)
   
+  -- Create new input handler
   local handler = MintCrate.InputHandler:new()
+  
+  -- Add input handler to list to be managed
   table.insert(self._inputHandlers, handler)
+  
+  -- Return input handler
   return handler
 end
 
@@ -3099,12 +3421,20 @@ end
 function Engine:keyPressed(scancode)
   local f = 'keyPressed'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: scancode
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
   
+  -- Check if key was pressed
   local pressed = false
-  if (self._keystates[scancode] and self._keystates[scancode].pressed) then
-    pressed = true end
+  if (
+        self._keystates[scancode]
+    and self._keystates[scancode].pressed
+  ) then
+    pressed = true
+  end
   
+  -- Return key-pressed state
   return pressed
 end
 
@@ -3114,12 +3444,20 @@ end
 function Engine:keyReleased(scancode)
   local f = 'keyReleased'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: scancode
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
   
+  -- Check if key was released
   local released = false
-  if (self._keystates[scancode] and self._keystates[scancode].released) then
-    released = true end
+  if (
+        self._keystates[scancode]
+    and self._keystates[scancode].released
+  ) then
+    released = true
+  end
   
+  -- Return key-released state
   return released
 end
 
@@ -3129,12 +3467,20 @@ end
 function Engine:keyHeld(scancode)
   local f = 'keyHeld'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: scancode
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
   
+  -- CHeck if key is being held
   local held = false
-  if (self._keystates[scancode] and self._keystates[scancode].held) then
-    held = true end
+  if (
+        self._keystates[scancode]
+    and self._keystates[scancode].held
+  ) then
+    held = true
+  end
   
+  -- Return key-held state
   return held
 end
 
@@ -3143,11 +3489,16 @@ end
 function Engine:sys_keypressed(scancode)
   local f = 'sys_keypressed'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: scancode
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
   
-  if not self._keystates[scancode] then
+  -- Create new entry in keystate list if key hasn't been pressed previously
+  if (not self._keystates[scancode]) then
     self._keystates[scancode] = {pressed=false, released=false, held=false}
   end
+  
+  -- Indicate that key was just pressed and is being held
   self._keystates[scancode].pressed = true
   self._keystates[scancode].held = true
 end
@@ -3157,11 +3508,16 @@ end
 function Engine:sys_keyreleased(scancode)
   local f = 'sys_keyreleased'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: scancode
   MintCrate.Assert.type(f, 'scancode', scancode, 'string')
   
-  if not self._keystates[scancode] then
+  -- Create new entry in keystate list if key hasn't been released previously
+  if (not self._keystates[scancode]) then
     self._keystates[scancode] = {pressed=false, released=false, held=false}
   end
+  
+  -- Indicate that key was just released and is not being held
   self._keystates[scancode].released = true
   self._keystates[scancode].held = false
 end
@@ -3172,11 +3528,22 @@ end
 function Engine:sys_gamepadpressed(joystick, button)
   local f = 'sys_gamepadpressed'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: joystick
   MintCrate.Assert.type(f, 'joystick', joystick, 'Joystick')
+  
+  -- Validate: button
   MintCrate.Assert.type(f, 'button', button, 'number')
   
+  -- Retrieve ID of joystick
   local joystickId = joystick:getID()
-  if not self._joystates[joystickId] then self._joystates[joystickId] = {} end
+  
+  -- Create new entry in joystick list if it hasn't sent an input previously
+  if (not self._joystates[joystickId]) then
+    self._joystates[joystickId] = {}
+  end
+  
+  -- Indicate that the joystick button is being held
   self._joystates[joystickId][button] = true
 end
 
@@ -3186,11 +3553,22 @@ end
 function Engine:sys_gamepadreleased(joystick, button)
   local f = 'sys_gamepadreleased'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: joystick
   MintCrate.Assert.type(f, 'joystick', joystick, 'Joystick')
+  
+  -- Validate: button
   MintCrate.Assert.type(f, 'button', button, 'number')
   
+  -- Retrieve ID of joystick
   local joystickId = joystick:getID()
-  if not self._joystates[joystickId] then self._joystates[joystickId] = {} end
+  
+  -- Create new entry in joystick list if it hasn't sent an input previously
+  if (not self._joystates[joystickId]) then
+    self._joystates[joystickId] = {}
+  end
+  
+  -- Indicate that joystick button is not being held
   self._joystates[joystickId][button] = false
 end
 
@@ -3206,30 +3584,47 @@ end
 function Engine:playSound(soundName, options)
   local f = 'playSound'
   MintCrate.Assert.self(f, self)
+  
+  -- Default params
+  if (options == nil) then options = {} end
+  if (options.volume == nil) then options.volume = 1 end
+  if (options.pitch == nil) then options.pitch = 1 end
+  
+  -- Validate: soundName
   MintCrate.Assert.type(f, 'soundName', soundName, 'string')
-  MintCrate.Assert.condition(f, 'soundName', (self._data.sounds[soundName] ~= nil),
+  
+  MintCrate.Assert.condition(f,
+    'soundName',
+    (self._data.sounds[soundName] ~= nil),
     'does not refer to a valid sound file')
   
-  if (options == nil) then options = {} end
+  -- Validate: options
   MintCrate.Assert.type(f, 'options', options, 'table')
   
-  if (options.volume == nil) then options.volume = 1 end
+  -- Validate: options.volume
   MintCrate.Assert.type(f, 'options.volume', options.volume, 'number')
   
-  if (options.pitch == nil) then options.pitch = 1 end
+  -- Validate: options.pitch
   MintCrate.Assert.type(f, 'options.pitch', options.pitch, 'number')
   
+  -- Constrain volume/pitch values
   local volume = self.math.clamp(options.volume, 0, 1)
   local pitch = self.math.clamp(options.pitch, 0.1, 30)
   
+  -- Retrieve sound data
   local sound = self._data.sounds[soundName]
   
+  -- Set sound's local volume
   sound.volume = volume
   sound.source:setVolume(sound.volume * self.masterSfxVolume)
   
+  -- Set sound source pitch
   sound.source:setPitch(pitch)
   
+  -- Stop sound in case it's currently already playing
   love.audio.stop(sound.source)
+  
+  -- Play sound
   love.audio.play(sound.source)
 end
 
@@ -3238,6 +3633,7 @@ function Engine:stopAllSounds()
   local f = 'stopAllSounds'
   MintCrate.Assert.self(f, self)
   
+  -- Stop all sounds
   for _, sound in pairs(self._data.sounds) do
     love.audio.stop(sound.source)
   end
@@ -3247,25 +3643,31 @@ end
 -- @param {string} trackName The name of the song to play (from defineMusic).
 -- @param {number} fadeLength How much to fade in the song, in frames.
 function Engine:_playMusic(trackName, fadeLength)
-  local track = self._data.music[trackName]
+  -- Default params
   if (fadeLength == nil) then fadeLength = 0 end
+  
+  -- Get music track data
+  local track = self._data.music[trackName]
   
   -- Stop current track and reset fade lengths
   love.audio.stop(track.source)
   track.fadeInLength = nil
   track.fadeOutLength = nil
   
+  -- Set local volume: no fade specified
   if (fadeLength == 0) then
-    -- No fade specified
     track.volume = 1
-    track.source:setVolume(track.volume * self.masterBgmVolume)
+  
+  -- Set local volume: fade specified
   else
-    -- Fade specified
     track.volume = 0
-    track.source:setVolume(track.volume * self.masterBgmVolume)
     track.fadeInLength = fadeLength
   end
   
+  -- Set music source volume
+  track.source:setVolume(track.volume * self.masterBgmVolume)
+  
+  -- Play music track
   love.audio.play(track.source)
 end
 
@@ -3273,14 +3675,18 @@ end
 -- @param {string} trackName The name of the song to play (from defineMusic).
 -- @param {number} fadeLength How much to fade out the song, in frames.
 function Engine:_stopMusic(trackName, fadeLength)
+  -- Get music track data
   local track = self._data.music[trackName]
   
   -- Reset fade lengths
   track.fadeInLength = nil
   track.fadeOutLength = nil
   
+  -- Stop audio immediately if it doesn't need to fade out
   if (fadeLength == 0) then
     love.audio.stop(track.source)
+  
+  -- Otherwise, set its fade value so it'll get faded out in the update function
   else
     track.fadeOutLength = fadeLength
   end
@@ -3309,9 +3715,14 @@ end
 function Engine:setMasterMusicVolume(newVolume)
   local f = 'setMasterMusicVolume'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: newVolume
   MintCrate.Assert.type(f, 'newVolume', newVolume, 'number')
   
+  -- Constrain volume value
   self.masterBgmVolume = self.math.clamp(newVolume, 0, 1)
+  
+  -- Set all music track source volumes
   for _, track in pairs(self._data.music) do
     track.source:setVolume(track.volume * self.masterBgmVolume)
   end
@@ -3322,9 +3733,14 @@ end
 function Engine:setMasterSoundVolume(newVolume)
   local f = 'setMasterSoundVolume'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: newVolume
   MintCrate.Assert.type(f, 'newVolume', newVolume, 'number')
   
+  -- Constrain volume value
   self.masterSfxVolume = self.math.clamp(newVolume, 0, 1)
+  
+  -- Set all sound source volumes
   for _, sound in pairs(self._data.sounds) do
     sound.source:setVolume(sound.volume * self.masterSfxVolume)
   end
@@ -3344,9 +3760,14 @@ end
 function Engine:setMasterMusicPitch(newPitch)
   local f = 'setMasterMusicPitch'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: newPitch
   MintCrate.Assert.type(f, 'newPitch', newPitch, 'number')
   
+  -- Constrain pitch value
   self.masterBgmPitch = self.math.clamp(newPitch, 0.1, 30)
+  
+  -- Set music track source source pitches
   for _, track in pairs(self._data.music) do
     track.source:setPitch(self.masterBgmPitch)
   end
@@ -3359,37 +3780,49 @@ function Engine:playMusic(trackName, fadeLength)
   local f = 'playMusic'
   MintCrate.Assert.self(f, self)
   
-  if (trackName == nil) then trackName = "" end
+  -- Default params
+  if (trackName  == nil) then trackName = "" end
+  if (fadeLength == nil) then fadeLength = 0 end
+  
+  -- Validate: trackName
   MintCrate.Assert.type(f, 'trackName', trackName, 'string')
   
-  if (fadeLength == nil) then fadeLength = 0 end
-  MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
-  MintCrate.Assert.condition(f, 'fadeLength', (fadeLength >= 0),
-    'cannot be a negative value')
-  
-  -- Use previously-played track if one wasn't specified.
+  -- Use previously-played track if one wasn't specified
   if (trackName == "" and self._currentMusic) then
     trackName = self._currentMusic
   end
   
-  MintCrate.Assert.condition(f, 'trackName', (self._data.music[trackName] ~= nil),
+  -- Validate: trackName
+  MintCrate.Assert.condition(f,
+    'trackName',
+    (self._data.music[trackName] ~= nil),
     'does not refer to a valid music file')
   
-  -- Play track.
+  -- Validate: fadeLength
+  MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
+  
+  MintCrate.Assert.condition(f,
+    'fadeLength',
+    (fadeLength >= 0),
+    'cannot be a negative value')
+  
+  -- Play track (if it's not already playing)
   if (trackName ~= "") then
+    -- Get currently-playing and to-be-switched-to music tracks
     local oldTrack = self._data.music[self._currentMusic]
     local newTrack = self._data.music[trackName]
     
-    -- Play new track and stop old one if one's already playing.
+    -- Play new track and stop old one if one's already playing
     if (self._currentMusic ~= trackName) then
       self:_playMusic(trackName, fadeLength)
       self:_stopMusic(self._currentMusic, fadeLength)
-    -- Otherwise, just play the new track.
+    
+    -- Otherwise, just play the new track
     elseif (oldTrack.fadeOutLength or not oldTrack.source:isPlaying()) then
       self:_playMusic(trackName, fadeLength)
     end
     
-    -- Keep record of what track has been played.
+    -- Keep record of what track is being played
     self._currentMusic = trackName
   end
 end
@@ -3399,7 +3832,10 @@ function Engine:pauseMusic()
   local f = 'pauseMusic'
   MintCrate.Assert.self(f, self)
   
+  -- Get current track
   local track = self._data.music[self._currentMusic]
+  
+  -- Pause track
   love.audio.pause(track.source)
 end
 
@@ -3408,7 +3844,10 @@ function Engine:resumeMusic()
   local f = 'resumeMusic'
   MintCrate.Assert.self(f, self)
   
+  -- Get current track
   local track = self._data.music[self._currentMusic]
+  
+  -- Resume track playback if it's not already playing
   if (not track.source:isPlaying()) then
     love.audio.play(self._data.music[self._currentMusic].source)
   end
@@ -3420,11 +3859,18 @@ function Engine:stopMusic(fadeLength)
   local f = 'stopMusic'
   MintCrate.Assert.self(f, self)
   
+  -- Default params
   if (fadeLength == nil) then fadeLength = 0 end
+  
+  -- Validate: fadeLength
   MintCrate.Assert.type(f, 'fadeLength', fadeLength, 'number')
-  MintCrate.Assert.condition(f, 'fadeLength', (fadeLength >= 0),
+  
+  MintCrate.Assert.condition(f,
+    'fadeLength',
+    (fadeLength >= 0),
     'cannot be a negative value')
   
+  -- Stop music track
   self:_stopMusic(self._currentMusic, fadeLength)
 end
 
@@ -3437,8 +3883,11 @@ end
 function Engine:setFpsVisibility(enabled)
   local f = 'setFpsVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self._showFps = enabled
 end
 
@@ -3447,8 +3896,11 @@ end
 function Engine:setRoomInfoVisibility(enabled)
   local f = 'setRoomInfoVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self._showRoomInfo = enabled
 end
 
@@ -3457,8 +3909,11 @@ end
 function Engine:setCameraInfoVisibility(enabled)
   local f = 'setCameraInfoVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self._showCameraInfo = enabled
 end
 
@@ -3467,8 +3922,11 @@ end
 function Engine:setTilemapCollisionMaskVisibility(enabled)
   local f = 'setTilemapCollisionMaskVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self._showTilemapCollisionMasks = enabled
 end
 
@@ -3477,8 +3935,11 @@ end
 function Engine:setTilemapBehaviorValueVisibility(enabled)
   local f = 'setTilemapBehaviorValueVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self._showTilemapBehaviorValues = enabled
 end
 
@@ -3487,8 +3948,11 @@ end
 function Engine:setActiveCollisionMaskVisibility(enabled)
   local f = 'setActiveCollisionMaskVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self._showActiveCollisionMasks = enabled
 end
 
@@ -3497,8 +3961,11 @@ end
 function Engine:setActiveInfoVisibility(enabled)
   local f = 'setActiveInfoVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self._showActiveInfo = enabled
 end
 
@@ -3507,8 +3974,11 @@ end
 function Engine:setOriginPointVisibility(enabled)
   local f = 'setOriginPointVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self._showActiveOriginPoints = enabled
 end
 
@@ -3517,8 +3987,11 @@ end
 function Engine:setActionPointVisibility(enabled)
   local f = 'setActionPointVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self._showActiveActionPoints = enabled
 end
 
@@ -3527,8 +4000,11 @@ end
 function Engine:setAllDebugOverlayVisibility(enabled)
   local f = 'setAllDebugOverlayVisibility'
   MintCrate.Assert.self(f, self)
+  
+  -- Validate: enabled
   MintCrate.Assert.type(f, 'enabled', enabled, 'boolean')
   
+  -- Set overlay visibility
   self:setFpsVisibility(enabled)
   self:setRoomInfoVisibility(enabled)
   self:setCameraInfoVisibility(enabled)

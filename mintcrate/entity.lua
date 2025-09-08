@@ -192,8 +192,8 @@ end
 
 -- Sets the visibility of the entity.
 -- @param {boolean} Whether to show or hide the entity.
-function Entity:setVisible(isVisible)
-  local f = 'setVisible'
+function Entity:setVisibility(isVisible)
+  local f = 'setVisibility'
   MintCrate.Assert.self(f, self)
   
   -- Validate: isVisible
