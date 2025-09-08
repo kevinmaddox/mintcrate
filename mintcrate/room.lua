@@ -24,8 +24,10 @@ function Room:new(roomName, roomWidth, roomHeight)
   
   local f = 'new'
   
+  -- Validate: roomName
   MintCrate.Assert.type(f, 'roomName', roomName, 'string')
   
+  -- Validate: roomWidth
   MintCrate.Assert.type(f, 'roomWidth', roomWidth, 'number')
   
   MintCrate.Assert.condition(f,
@@ -34,6 +36,7 @@ function Room:new(roomName, roomWidth, roomHeight)
     'must be a value greater than 0'
   )
   
+  -- Validate: roomHeight
   MintCrate.Assert.type(f, 'roomHeight', roomHeight, 'number')
   
   MintCrate.Assert.condition(f,
@@ -46,17 +49,17 @@ function Room:new(roomName, roomWidth, roomHeight)
   self._roomName = roomName
   
   -- Set room dimensions
-  self._roomWidth = roomWidth
+  self._roomWidth  = roomWidth
   self._roomHeight = roomHeight
   
-  -- Background color (clear color)
+  -- Initialize background color (clear color)
   self._backgroundColor = {r = 0, g = 0, b = 0}
   
-  -- Fade in/out settings
-  self._fadeLevel = 100
+  -- Initialize fade in/out settings
+  self._fadeLevel   = 100
   self._currentFade = "fadeIn"
-  self._fadeConf = {
-    fadeIn = {enabled = false},
+  self._fadeConf    = {
+    fadeIn  = {enabled = false},
     fadeOut = {enabled = false}
   }
   
@@ -109,6 +112,14 @@ function Room:configureFadeIn(fadeDuration, pauseDuration, color)
   local f = 'configureFadeIn'
   MintCrate.Assert.self(f, self)
   
+  -- Default params
+  if (pauseDuration == nil) then pauseDuration = 0 end
+  if (color         == nil) then color = {}        end
+  if (color.r       == nil) then color.r = 0       end
+  if (color.g       == nil) then color.g = 0       end
+  if (color.b       == nil) then color.b = 0       end
+  
+  -- Validate: fadeDuration
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
   
   MintCrate.Assert.condition(f,
@@ -117,8 +128,7 @@ function Room:configureFadeIn(fadeDuration, pauseDuration, color)
     'cannot be a negative value'
   )
   
-  if (pauseDuration == nil) then pauseDuration = 0 end
-  
+  -- Validate: pauseDuration
   MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
   
   MintCrate.Assert.condition(f,
@@ -127,32 +137,36 @@ function Room:configureFadeIn(fadeDuration, pauseDuration, color)
     'cannot be a negative value'
   )
   
-  if (color == nil) then color = {} end
-  
+  -- Validate: color
   MintCrate.Assert.type(f, 'color', color, 'table')
   
-  if (color.r == nil) then color.r = 0 end
-  if (color.g == nil) then color.g = 0 end
-  if (color.b == nil) then color.b = 0 end
-  
+  -- Validate: color.r
   MintCrate.Assert.type(f, 'color.r', color.r, 'number' )
+  
+  -- Validate: color.g
   MintCrate.Assert.type(f, 'color.g', color.g, 'number')
+  
+  -- Validate: color.b
   MintCrate.Assert.type(f, 'color.b', color.b, 'number')
   
+  -- Constrain color values
   color.r = MintCrate.MathX.clamp(color.r, 0, 255)
   color.g = MintCrate.MathX.clamp(color.g, 0, 255)
   color.b = MintCrate.MathX.clamp(color.b, 0, 255)
   
+  -- Convert 8-bit 0-255 values to floating point 0.0-1.0 values
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
   
+  -- Save fade-in configuration
   self._fadeConf.fadeIn = {
-    enabled = true,
-    fadeFrames = fadeDuration,
+    enabled     = true,
+    fadeFrames  = fadeDuration,
     pauseFrames = pauseDuration,
-    fadeValue = 100 / fadeDuration,
-    fadeColor = {r=r, g=g, b=b}
+    fadeValue   = 100 / fadeDuration,
+    fadeColor   = {r = r, g = g, b = b}
   }
   
+  -- Set initial fade level to fully opaque since the room will be fading in
   self._fadeLevel = 0 - (self._fadeConf.fadeIn.fadeValue * pauseDuration)
 end
 
@@ -161,9 +175,17 @@ end
 -- @param {number} pauseDuration How long to pause after fade, in frames.
 -- @param {table} color The color of the fade, as a keyed RGB table, 0-255.
 function Room:configureFadeOut(fadeDuration, pauseDuration, color)
-  local f = 'configureFadeIn'
+  local f = 'configureFadeOut'
   MintCrate.Assert.self(f, self)
   
+  -- Default params
+  if (pauseDuration == nil) then pauseDuration = 0 end
+  if (color         == nil) then color = {}        end
+  if (color.r       == nil) then color.r = 0       end
+  if (color.g       == nil) then color.g = 0       end
+  if (color.b       == nil) then color.b = 0       end
+  
+  -- Validate: fadeDuration
   MintCrate.Assert.type(f, 'fadeDuration', fadeDuration, 'number')
   
   MintCrate.Assert.condition(f,
@@ -172,8 +194,7 @@ function Room:configureFadeOut(fadeDuration, pauseDuration, color)
     'cannot be a negative value'
   )
   
-  if (pauseDuration == nil) then pauseDuration = 0 end
-  
+  -- Validation: pauseDuration
   MintCrate.Assert.type(f, 'pauseDuration', pauseDuration, 'number')
   
   MintCrate.Assert.condition(f,
@@ -182,30 +203,34 @@ function Room:configureFadeOut(fadeDuration, pauseDuration, color)
     'cannot be a negative value'
   )
   
-  if (color == nil) then color = {} end
-  
+  -- Validation: color
   MintCrate.Assert.type(f, 'color', color, 'table')
   
-  if (color.r == nil) then color.r = 0 end
-  if (color.g == nil) then color.g = 0 end
-  if (color.b == nil) then color.b = 0 end
   
+  -- Validation: color.r
   MintCrate.Assert.type(f, 'color.r', color.r, 'number')
+  
+  -- Validation: color.g
   MintCrate.Assert.type(f, 'color.g', color.g, 'number')
+  
+  -- Validation: color.b
   MintCrate.Assert.type(f, 'color.b', color.b, 'number')
   
+  -- Constrain color values
   color.r = MintCrate.MathX.clamp(color.r, 0, 255)
   color.g = MintCrate.MathX.clamp(color.g, 0, 255)
   color.b = MintCrate.MathX.clamp(color.b, 0, 255)
   
+  -- Convert 8-bit 0-255 values to floating point 0.0-1.0 values
   local r, g, b = love.math.colorFromBytes(color.r, color.g, color.b)
   
+  -- Save fade-out configuration
   self._fadeConf.fadeOut = {
-    enabled = true,
-    fadeFrames = fadeDuration,
+    enabled     = true,
+    fadeFrames  = fadeDuration,
     pauseFrames = pauseDuration,
-    fadeValue = -100 / fadeDuration,
-    fadeColor = {r=r, g=g, b=b}
+    fadeValue   = -100 / fadeDuration,
+    fadeColor   = {r = r, g = g, b = b}
   }
 end
 
@@ -221,15 +246,24 @@ function Room:setBackgroundColor(r, g, b)
   local f = 'setBackgroundColor'
   MintCrate.Assert.self(f, self)
   
+  -- Validate: r
   MintCrate.Assert.type(f, 'r', r, 'number')
+  
+  -- Validate: g
   MintCrate.Assert.type(f, 'g', g, 'number')
+  
+  -- Validate: b
   MintCrate.Assert.type(f, 'b', b, 'number')
   
+  -- Constrain color values
   r = MintCrate.MathX.clamp(r, 0, 255)
   g = MintCrate.MathX.clamp(g, 0, 255)
   b = MintCrate.MathX.clamp(b, 0, 255)
   
+  -- Convert 8-bit 0-255 values to floating point 0.0-1.0 values
   r, g, b = love.math.colorFromBytes(r, g, b)
+  
+  -- Set background clear color
   self._backgroundColor = {r = r, g = g, b = b}
 end
 
