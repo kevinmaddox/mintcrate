@@ -31,19 +31,19 @@ function Backdrop:new(instances, drawOrder, name, x, y, width, height, quad,
   setmetatable(o, self)
   self.__index = self
   
-  o._entityType = 'backdrop'
-  
-  o._instances = instances
-  o._drawOrder = drawOrder
-  o._name = name
-  o._x = x
-  o._y = y
-  o._width = width
-  o._height = height
-  o._quad = quad
-  o._scaleX = scaleX
-  o._scaleY = scaleY
-  o._textureWidth = textureWidth
+  -- Initialize properties
+  o._entityType    = 'backdrop'
+  o._instances     = instances
+  o._drawOrder     = drawOrder
+  o._name          = name
+  o._x             = x
+  o._y             = y
+  o._width         = width
+  o._height        = height
+  o._quad          = quad
+  o._scaleX        = scaleX
+  o._scaleY        = scaleY
+  o._textureWidth  = textureWidth
   o._textureHeight = textureHeight
   
   return o

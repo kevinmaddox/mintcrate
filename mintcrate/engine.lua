@@ -2454,9 +2454,7 @@ function Engine:sys_draw()
         paragraph:_getTextLines(),
         self._data.fonts[paragraph:_getName()],
         paragraph:getX(), paragraph:getY(),
-        paragraph:_getMaxCharsPerLine(),
         paragraph:_getLineSpacing(),
-        paragraph:_getWordWrap(),
         paragraph:_getAlignment()
       )
       
@@ -2507,10 +2505,7 @@ function Engine:sys_draw()
           self:_drawText(
             {tostring(tileType)},
             self._data.fonts["system_counter"],
-            mask.x + 2, mask.y + 2,
-            3,
-            0,
-            false
+            mask.x + 2, mask.y + 2
           )
         end
       end
@@ -2656,9 +2651,7 @@ function Engine:sys_draw()
           },
           self._data.fonts["system_counter"],
           active:getX(), active:getY() + 8,
-          self._baseWidth / self._data.fonts["system_counter"].charWidth,
           0,
-          false,
           "center"
         )
       end
@@ -2730,9 +2723,7 @@ function Engine:sys_draw()
       strLines,
       self._data.fonts["system_counter"],
       self._camera.x + self._baseWidth, self._camera.y,
-      self._baseWidth / self._data.fonts["system_counter"].charWidth,
       0,
-      false,
       "right"
     )
   end
@@ -2742,10 +2733,7 @@ function Engine:sys_draw()
     self:_drawText(
       {tostring(love.timer.getFPS())},
       self._data.fonts["system_counter"],
-      self._camera.x, self._camera.y,
-      self._baseWidth / self._data.fonts["system_counter"].charWidth,
-      0,
-      false
+      self._camera.x, self._camera.y
     )
   end
   
@@ -2763,10 +2751,7 @@ function Engine:sys_draw()
       self._data.fonts["system_counter"],
       self._camera.x,
       self._camera.y + self._baseHeight -
-        (5 * self._data.fonts["system_counter"].charHeight),
-      self._baseWidth / self._data.fonts["system_counter"].charWidth,
-      0,
-      false
+        (5 * self._data.fonts["system_counter"].charHeight)
     )
   end
   
@@ -2782,21 +2767,17 @@ end
 -- @param {table} font The bitmap font to write the text with.
 -- @param {number} x The X position to write the text at.
 -- @param {number} y The Y position to write the text at.
--- @param {number} maxCharsPerLine How many characters written before wrapping.
 -- @param {number} lineSpacing How much space there is between lines.
--- @param {boolean} wordWrap Whether entire words should wrap or break mid-word.
 -- @param {string} alignment How the text should be aligned.
 function Engine:_drawText(
   textLines,
   font,
   x, y,
-  maxCharsPerLine, lineSpacing, wordWrap, alignment
+  lineSpacing,
+  alignment
 )
   -- Default params
-  -- TODO: maxCharsPerLine and wordWrap no longer used?
-  if (maxCharsPerLine == nil) then maxCharsPerLine = 9999 end
   if (lineSpacing     == nil) then lineSpacing = 0        end
-  if (wordWrap        == nil) then wordWrap = false       end
   if (alignment       == nil) then alignment = "left"     end
   
   -- Draw lines of text, character-by-character

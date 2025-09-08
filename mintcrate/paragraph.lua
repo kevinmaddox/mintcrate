@@ -30,21 +30,21 @@ function Paragraph:new(instances, drawOrder, name, x, y,
   setmetatable(o, self)
   self.__index = self
   
-  o._entityType = 'paragraph'
-  
-  o._instances = instances
-  o._drawOrder = drawOrder
-  o._name = name
-  o._x = x
-  o._y = y
-  o._glyphWidth = glyphWidth
-  o._glyphHeight = glyphHeight
+  -- Initialize properties
+  o._entityType      = 'paragraph'
+  o._instances       = instances
+  o._drawOrder       = drawOrder
+  o._name            = name
+  o._x               = x
+  o._y               = y
+  o._glyphWidth      = glyphWidth
+  o._glyphHeight     = glyphHeight
   o._maxCharsPerLine = maxCharsPerLine
-  o._lineSpacing = lineSpacing
-  o._wordWrap = wordWrap
-  o._alignment = alignment
-  o._textContent = ""
-  o._textLines = {}
+  o._lineSpacing     = lineSpacing
+  o._wordWrap        = wordWrap
+  o._alignment       = alignment
+  o._textContent     = ""
+  o._textLines       = {}
   
   return o
 end
@@ -66,19 +66,24 @@ function Paragraph:setTextContent(textContent)
   local f = 'setTextContent'
   MintCrate.Assert.self(f, self)
   
+  -- Convert any input to a string
   textContent = tostring(textContent)
   
+  -- Store text content so engine core can draw it
   self._textContent = textContent
   
+  -- Normalize line breaks
   textContent = string.gsub(textContent, "\r\n", "\n")
   textContent = string.gsub(textContent, "\n\r", "\n")
   textContent = string.gsub(textContent, "\r", "\n")
   
-  local wordWrap = self._wordWrap
+  -- Prepare to parse text into lines
+  local wordWrap        = self._wordWrap
   local maxCharsPerLine = self._maxCharsPerLine
   
   -- Split words
   local initialSplit = MintCrate.Util.string.split(textContent, " ")
+  
   -- Split linebreaks into their own "words"
   local words = {}
   for _, fullWord in ipairs(initialSplit) do
