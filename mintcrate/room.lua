@@ -108,8 +108,8 @@ end
 -- @param {number} fadeDuration The length of the fade, in frames.
 -- @param {number} pauseDuration How long until the fade starts, in frames.
 -- @param {table} color The color of the fade, as a keyed RGB table, 0-255.
-function Room:configureFadeIn(fadeDuration, pauseDuration, color)
-  local f = 'configureFadeIn'
+function Room:configureRoomFadeIn(fadeDuration, pauseDuration, color)
+  local f = 'configureRoomFadeIn'
   MintCrate.Assert.self(f, self)
   
   -- Default params
@@ -174,8 +174,8 @@ end
 -- @param {number} fadeDuration The length of the fade, in frames.
 -- @param {number} pauseDuration How long to pause after fade, in frames.
 -- @param {table} color The color of the fade, as a keyed RGB table, 0-255.
-function Room:configureFadeOut(fadeDuration, pauseDuration, color)
-  local f = 'configureFadeOut'
+function Room:configureRoomFadeOut(fadeDuration, pauseDuration, color)
+  local f = 'configureRoomFadeOut'
   MintCrate.Assert.self(f, self)
   
   -- Default params
@@ -242,7 +242,7 @@ end
 -- @param {number} r The color's red value (0 - 255).
 -- @param {number} g The color's green value (0 - 255).
 -- @param {number} b The color's blue value (0 - 255).
-function Room:setBackgroundColor(r, g, b)
+function Room:setRoomBackgroundColor(r, g, b)
   local f = 'setBackgroundColor'
   MintCrate.Assert.self(f, self)
   
@@ -267,7 +267,7 @@ function Room:setBackgroundColor(r, g, b)
   self._backgroundColor = {r = r, g = g, b = b}
 end
 
-function Room:_getBackgroundColor()
+function Room:_getRoomBackgroundColor()
   return
     self._backgroundColor.r,
     self._backgroundColor.g,

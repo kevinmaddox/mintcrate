@@ -55,17 +55,16 @@ MintCrate To-do List
     [x] JSON encoder/decoder
   [x] Change Assert.Cond to Assert.Condition
   [x] Formatting
-[ ] Think really hard about function/class names
+[x] Think really hard about function/class names
   [x] Get rid of toggles, make sure it's all where you have to set it to true/false
-  [ ] setTextContent should just be setText
-  [ ] Paragraph probably should just be Text
-  [ ] engine.lua should be core.lua
+  [x] Paragraph probably should just be Text
+  [x] engine.lua should be core.lua
 [ ] Dump/log utility
-[ ] Findings/issues
+[ ] Flesh out clicking on Actives
+[x] Findings/issues
   [x] Remove pathPrefix from engine core constructor
   [x] Alter it so that tilemap calls aren't in Room but are instead in Engine core
   [x] Collisions still work on x,y point even if active lacks a collider; this should not happen
-  [ ] Custom error handler not working in example files
 [ ] Debug collision mask rectangle looks jumpy when moving
 [x] Make everything nice and clean
 [ ] Reconsider fonts/text, and how it affects localizations

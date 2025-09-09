@@ -14,9 +14,9 @@ require("objects.watersplash")
 function love.load()
   mint = MintCrate:new(
     240, 160,
-    -- Splash,
+    Splash,
     -- Title,
-    Game,
+    -- Game,
     {
       windowScale = 2,
       windowTitle = "MintCrate Example - Azure Flight",

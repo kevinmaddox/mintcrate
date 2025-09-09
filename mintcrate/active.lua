@@ -347,8 +347,8 @@ end
 
 -- Returns the width of the current, untransformed animation frame.
 -- @returns {number} Current frame width, without transformations.
-function Active:getImageWidth()
-  local f = 'getImageWidth'
+function Active:getSpriteWidth()
+  local f = 'getSpriteWidth'
   MintCrate.Assert.self(f, self)
   
   -- Get animation frame width
@@ -364,8 +364,8 @@ end
 
 -- Returns the height of the current, untransformed animation frame.
 -- @returns {number} Current frame height, without transformations.
-function Active:getImageHeight()
-  local f = 'getImageHeight'
+function Active:getSpriteHeight()
+  local f = 'getSpriteHeight'
   MintCrate.Assert.self(f, self)
   
   -- Get animation frame height
@@ -381,8 +381,8 @@ end
 
 -- Returns the width of the current, transformed animation frame.
 -- @returns {number} Current frame width, with transformations.
-function Active:getTransformedImageWidth()
-  local f = 'getTransformedImageWidth'
+function Active:getTransformedSpriteWidth()
+  local f = 'getTransformedSpriteWidth'
   MintCrate.Assert.self(f, self)
   
   -- Calculate transformed width
@@ -398,8 +398,8 @@ end
 
 -- Returns the height of the current, transformed animation frame.
 -- @returns {number} Current frame height, with transformations.
-function Active:getTransformedImageHeight()
-  local f = 'getTransformedImageHeight'
+function Active:getTransformedSpriteHeight()
+  local f = 'getTransformedSpriteHeight'
   MintCrate.Assert.self(f, self)
   
   -- Calculate transformed width
@@ -441,42 +441,6 @@ function Active:getHeight()
   return self._collider.h
 end
 
--- Returns the X position of the collider's left edge (for rectangular masks).
--- @returns {number} Collider left edge.
-function Active:getLeftEdgeX()
-  local f = 'getLeftEdgeX'
-  MintCrate.Assert.self(f, self)
-  
-  return self._collider.x
-end
-
--- Returns the X position of the collider's right edge (for rectangular masks).
--- @returns {number} Collider right edge.
-function Active:getRightEdgeX()
-  local f = 'getRightEdgeX'
-  MintCrate.Assert.self(f, self)
-  
-  return self._collider.x + self._collider.w
-end
-
--- Returns the Y position of the collider's top edge (for rectangular masks).
--- @returns {number} Collider top edge.
-function Active:getTopEdgeY()
-  local f = 'getTopEdgeY'
-  MintCrate.Assert.self(f, self)
-  
-  return self._collider.y
-end
-
--- Returns the Y position of the collider's bottom edge (for rectangular masks).
--- @returns {number} Collider bottom edge.
-function Active:getBottomEdgeY()
-  local f = 'getBottomEdgeY'
-  MintCrate.Assert.self(f, self)
-  
-  return self._collider.y + self._collider.h
-end
-
 -- Returns the collision mask's radius (for circular masks).
 -- @returns {number} Collider radius.
 function Active:getRadius()
@@ -484,6 +448,66 @@ function Active:getRadius()
   MintCrate.Assert.self(f, self)
   
   return self._collider.r
+end
+
+-- Returns the X position of the collider's left edge.
+-- @returns {number} Collider left edge.
+function Active:getLeftEdgeX()
+  local f = 'getLeftEdgeX'
+  MintCrate.Assert.self(f, self)
+  
+  -- Return edge coordinate based on collider shape
+  if (self._collider.r ~= 0) then
+    return self._collider.x - self._collider.r
+  else
+    return self._collider.x
+  end
+end
+
+-- Returns the X position of the collider's right edge.
+-- @returns {number} Collider right edge.
+function Active:getRightEdgeX()
+  local f = 'getRightEdgeX'
+  MintCrate.Assert.self(f, self)
+  
+  -- Return edge coordinate based on collider shape
+  if     (self._collider.r ~= 0) then
+    return self._collider.x + self._collider.r
+  elseif (self._collider.w ~= 0) then
+    return self._collider.x + self._collider.w
+  else
+    return 0
+  end
+end
+
+-- Returns the Y position of the collider's top edge.
+-- @returns {number} Collider top edge.
+function Active:getTopEdgeY()
+  local f = 'getTopEdgeY'
+  MintCrate.Assert.self(f, self)
+  
+  -- Return edge coordinate based on collider shape
+  if (self._collider.r ~= 0) then
+    return self._collider.y - self._collider.r
+  else
+    return self._collider.y
+  end
+end
+
+-- Returns the Y position of the collider's bottom edge.
+-- @returns {number} Collider bottom edge.
+function Active:getBottomEdgeY()
+  local f = 'getBottomEdgeY'
+  MintCrate.Assert.self(f, self)
+  
+  -- Return edge coordinate based on collider shape
+  if     (self._collider.r ~= 0) then
+    return self._collider.y + self._collider.r
+  elseif (self._collider.w ~= 0) then
+    return self._collider.y + self._collider.h
+  else
+    return 0
+  end
 end
 
 -- -----------------------------------------------------------------------------

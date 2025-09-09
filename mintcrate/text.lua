@@ -1,28 +1,28 @@
 -- -----------------------------------------------------------------------------
--- MintCrate - Paragraph
+-- MintCrate - Text
 -- An entity which is intended for displaying text via bitmap fonts.
 -- -----------------------------------------------------------------------------
 
-local Paragraph = {}
+local Text = {}
 
 -- -----------------------------------------------------------------------------
 -- Constructor
 -- -----------------------------------------------------------------------------
 
 -- Set class's type.
-Paragraph.type = "Paragraph"
+Text.type = "Text"
 
--- Creates an instance of the Paragraph class.
+-- Creates an instance of the Text class.
 -- @param {table} instances List of all Texts being managed by the engine.
--- @param {string} name Name of the Paragraph, for definition & instantiation.
--- @param {number} x Paragraph's starting X position.
--- @param {number} y Paragraph's starting X position.
+-- @param {string} name Name of the Text, for definition & instantiation.
+-- @param {number} x Text's starting X position.
+-- @param {number} y Text's starting X position.
 -- @param {number} maxCharsPerLine How many characters written before wrapping.
 -- @param {number} lineSpacing How much space there is between lines.
 -- @param {boolean} wordWrap Whether entire words should wrap or break mid-word.
 -- @param {string} alignment How the text should be aligned (left|center|right).
--- @returns {Paragraph} A new instance of the Paragraph class.
-function Paragraph:new(instances, drawOrder, name, x, y,
+-- @returns {Text} A new instance of the Text class.
+function Text:new(instances, drawOrder, name, x, y,
   glyphWidth, glyphHeight, maxCharsPerLine, lineSpacing, wordWrap, alignment
 )
   local o = MintCrate.Entity:new()
@@ -31,7 +31,7 @@ function Paragraph:new(instances, drawOrder, name, x, y,
   self.__index = self
   
   -- Initialize properties
-  o._entityType      = 'paragraph'
+  o._entityType      = 'text'
   o._instances       = instances
   o._drawOrder       = drawOrder
   o._name            = name
@@ -53,7 +53,7 @@ end
 
 -- Returns the currently-displayed text.
 -- @returns {string} Current text.
-function Paragraph:getTextContent()
+function Text:getTextContent()
   local f = 'getTextContent'
   MintCrate.Assert.self(f, self)
   
@@ -62,7 +62,7 @@ end
 
 -- Sets the currently-displayed text.
 -- @param {string} textContent The new text to be displayed.
-function Paragraph:setTextContent(textContent)
+function Text:setTextContent(textContent)
   local f = 'setTextContent'
   MintCrate.Assert.self(f, self)
   
@@ -96,7 +96,7 @@ function Paragraph:setTextContent(textContent)
   end
   
   -- Construct formatted lines
-  -- Text in paragraph objects is stored as pre-formatted lines
+  -- Text in Text objects is stored as pre-formatted lines
   -- Basically, we're trying to fit as many words as possible into each line
   local strLines = {""}
   
@@ -153,7 +153,7 @@ end
 
 -- Returns the width of a single glyph (character).
 -- @returns {number} The width of a glyph/character.
-function Paragraph:getGlyphWidth()
+function Text:getGlyphWidth()
   local f = 'getGlyphWidth'
   MintCrate.Assert.self(f, self)
   
@@ -162,7 +162,7 @@ end
 
 -- Returns the height of a single glyph (character).
 -- @returns {number} The height of a glyph/character.
-function Paragraph:getGlyphHeight()
+function Text:getGlyphHeight()
   local f = 'getGlyphHeight'
   MintCrate.Assert.self(f, self)
   
@@ -171,34 +171,34 @@ end
 
 -- Returns the formatted lines to properly write the text with.
 -- @returns {table} Formatted lines of the text element.
-function Paragraph:_getTextLines()
+function Text:_getTextLines()
   return self._textLines
 end
 
 -- Returns the maximum number of characters allowed to be printed per line.
 -- @returns {number} Max characters per line.
-function Paragraph:_getMaxCharsPerLine()
+function Text:_getMaxCharsPerLine()
   return self._maxCharsPerLine
 end
 
 -- Returns the amount of space between each line.
 -- @returns {number} Space between lines, in pixels.
-function Paragraph:_getLineSpacing()
+function Text:_getLineSpacing()
   return self._lineSpacing
 end
 
 -- Returns whether word wrapping is enabled.
 -- @returns {boolean} Word-wrapping mode.
-function Paragraph:_getWordWrap()
+function Text:_getWordWrap()
   return self._wordWrap
 end
 
 -- Returns the text's alignment.
 -- @returns {text} The text's alignment setting.
-function Paragraph:_getAlignment()
+function Text:_getAlignment()
   return self._alignment
 end
 
 -- -----------------------------------------------------------------------------
 
-return Paragraph
+return Text

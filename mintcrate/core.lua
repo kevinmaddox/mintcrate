@@ -1,15 +1,15 @@
 -- -----------------------------------------------------------------------------
--- MintCrate - Engine
--- Engine core.
+-- MintCrate - Core
+-- Framework core.
 -- -----------------------------------------------------------------------------
 
-local Engine = {}
+local Core = {}
 
 -- -----------------------------------------------------------------------------
 -- Constructor
 -- -----------------------------------------------------------------------------
 
--- Creates an instance of the Engine class.
+-- Creates an instance of the framework core class.
 -- @param {number} baseWidth The game's unscaled, base width resolution.
 -- @param {number} baseHeight The game's unscaled, base height resolution.
 -- @param {Room} startingRoom The room to initially load into.
@@ -17,8 +17,8 @@ local Engine = {}
 -- @param {number} options.windowScale Starting graphical scale of the window.
 -- @param {string} options.windowTitle Title shown on the window title bar.
 -- @param {string} options.windowIconPath Icon shown on the window title bar.
--- @returns {Engine} A new instance of the Engine class.
-function Engine:new(
+-- @returns {Core} A new instance of the Core class.
+function Core:new(
   baseWidth,
   baseHeight,
   startingRoom,
@@ -213,7 +213,7 @@ function Engine:new(
   o._instances = {
     actives    = {},
     backdrops  = {},
-    paragraphs = {},
+    text       = {},
     tiles      = {}
   }
   
@@ -231,8 +231,8 @@ end
 -- General system methods
 -- -----------------------------------------------------------------------------
 
--- Prepares the game engine for use after instantiation.
-function Engine:init()
+-- Prepares the framework for use after instantiation.
+function Core:init()
   local f = 'init'
   MintCrate.Assert.self(f, self)
   
@@ -250,7 +250,7 @@ function Engine:init()
 end
 
 -- Signifies that all loading has been completed and the game should run.
-function Engine:ready()
+function Core:ready()
   local f = 'ready'
   MintCrate.Assert.self(f, self)
   
@@ -272,7 +272,7 @@ end
 -- Terminates the application.
 -- @param {boolean} fadeBeforeQuitting Trigger's the Room's fadeout first.
 -- @param {boolean} fadeMusic Fades the music with the visual fade-out.
-function Engine:quit(fadeBeforeQuitting, fadeMusic)
+function Core:quit(fadeBeforeQuitting, fadeMusic)
   local f = 'quit'
   MintCrate.Assert.self(f, self)
   
@@ -306,7 +306,7 @@ end
 -- @param {string} resourcePaths.music Path for Music.
 -- @param {string} resourcePaths.sounds Path for Sounds.
 -- @param {string} resourcePaths.tilemaps Path for Tilemaps.
-function Engine:setResourcePaths(resourcePaths)
+function Core:setResourcePaths(resourcePaths)
   local f = 'setResourcePaths'
   MintCrate.Assert.self(f, self)
   
@@ -375,7 +375,7 @@ end
 
 -- Specifies which color(s) should become transparent when loading images.
 -- @param {table} rgbSets Table of {r,g,b} tables, indicating the color keys.
-function Engine:defineColorKeys(rgbSets)
+function Core:defineColorKeys(rgbSets)
   local f = 'defineColorKeys'
   MintCrate.Assert.self(f, self)
   
@@ -394,17 +394,17 @@ end
 
 -- Loads an image resource from a file with color-keying support.
 -- @param {string} imagePath Relative path of the image file.
--- @param {boolean} isEngineResource Whether the file is an engine resource.
+-- @param {boolean} isSystemResource Whether the file is a MintCrate resource.
 -- @returns {Source} Chroma-keyed image resource.
-function Engine:_loadImage(imagePath, isEngineResource)
+function Core:_loadImage(imagePath, isSystemResource)
   -- Default params
-  if (isEngineResource == nil) then isEngineResource = false end
+  if (isSystemResource == nil) then isSystemResource = false end
   
   -- Get ready to load image data
   local imageData
   
   -- Load Base64 image if it's an MintCrate system resource
-  if (isEngineResource) then
+  if (isSystemResource) then
     local imageB64     = require(imagePath)
     local imageDecoded = love.data.decode("data", "base64", imageB64)
     local imageFile    = love.filesystem.newFileData(imageDecoded, 'img.png')
@@ -436,7 +436,7 @@ function Engine:_loadImage(imagePath, isEngineResource)
   -- Store color keys
   local colorKeyColors = self._colorKeyColors
   
-  if (isEngineResource) then
+  if (isSystemResource) then
     colorKeyColors = {
       {r =  82, g = 173, b = 154},
       {r = 140, g = 222, b = 205}
@@ -458,7 +458,7 @@ end
 
 -- Defines the active object entities that can be created during gameplay.
 -- @param {table} data A table of active object definitions (see docs).
-function Engine:defineActives(data)
+function Core:defineActives(data)
   local f = 'defineActives'
   MintCrate.Assert.self(f, self)
   
@@ -764,7 +764,7 @@ end
 
 -- Defines the backdrop object entities that can be created during gameplay.
 -- @param {table} data A table of backdrop object definitions (see docs).
-function Engine:defineBackdrops(data)
+function Core:defineBackdrops(data)
   local f = 'defineBackdrops'
   MintCrate.Assert.self(f, self)
   
@@ -816,9 +816,9 @@ function Engine:defineBackdrops(data)
   end
 end
 
--- Defines the fonts that can be used to create Paragraph objects.
+-- Defines the fonts that can be used to create Text objects.
 -- @param {table} data A table of bitmap font definitions (see docs).
-function Engine:defineFonts(data)
+function Core:defineFonts(data)
   local f = 'defineFonts'
   MintCrate.Assert.self(f, self)
   
@@ -852,20 +852,20 @@ end
 
 -- Loads an bitmap font image into a font data structure.
 -- @param {string} fontName The name of the font image (without extension).
-function Engine:_loadFont(fontName)
+function Core:_loadFont(fontName)
   -- Construct path to font
   local path = self._resPaths.fonts
   
   -- Figure out if font is a MintCrate system font
-  local isEngineResource = false
+  local isSystemResource = false
   if (string.find(fontName, "system_")) then
     path = self._sysImgPath
-    isEngineResource = true
+    isSystemResource = true
   end
   
   -- Construct font data structure
   local font = {
-    image = self:_loadImage(path..fontName, isEngineResource),
+    image = self:_loadImage(path..fontName, isSystemResource),
     quads = {}
   }
   
@@ -920,7 +920,7 @@ end
 
 -- Defines the sounds that can be played during gameplay.
 -- @param {table} data A table of sound resource definitions (see docs).
-function Engine:defineSounds(data)
+function Core:defineSounds(data)
   local f = 'defineSounds'
   MintCrate.Assert.self(f, self)
   
@@ -977,7 +977,7 @@ end
 
 -- Defines the music that can be played during gameplay.
 -- @param {table} data A table of music resource definitions (see docs).
-function Engine:defineMusic(data)
+function Core:defineMusic(data)
   local f = 'defineMusic'
   MintCrate.Assert.self(f, self)
   
@@ -1062,7 +1062,7 @@ end
 
 -- Defines the tilemaps that can be set during gameplay.
 -- @param {table} data A table of tilemap definitions (see docs).
-function Engine:defineTilemaps(data)
+function Core:defineTilemaps(data)
   local f = 'defineTilemaps'
   MintCrate.Assert.self(f, self)
   
@@ -1189,7 +1189,7 @@ end
 -- @param {string} tilemapName The tilemap graphic name.
 -- @param {string} layoutName The tilemap layout name.
 -- @param {table} behaviorMap The associated behavior map for the tilemap.
-function Engine:_generateCollisionMap(tilemapName, layoutName, behaviorMap)
+function Core:_generateCollisionMap(tilemapName, layoutName, behaviorMap)
   --[[
    * Generate collision mask map (red paint)
    * Search through collision data, looking for find non-blank tiles.
@@ -1302,7 +1302,7 @@ end
 
 -- Retrieves the collision masks for the currently-loaded tilemap.
 -- @returns {table} Tilemap collision masks.
-function Engine:_getTilemapCollisionMasks()
+function Core:_getTilemapCollisionMasks()
   return self._data.tilemaps[self._tilemapName]
     .layouts[self._layoutName].collisionMasks
 end
@@ -1316,7 +1316,7 @@ end
 -- @param {table} options Optional room-changing properties
 -- @param {boolean} options.fadeMusic Fades the music with the visual fade-out.
 -- @param {boolean} options.persistAudio Prevents the audio from stopping.
-function Engine:changeRoom(room, options)
+function Core:changeRoom(room, options)
   local f = 'changeRoom'
   MintCrate.Assert.self(f, self)
   
@@ -1374,7 +1374,7 @@ end
 -- @param {string} fadeType The type of fade ("fadeIn", "fadeOut").
 -- @param {function} finishedCallback The function to fire after fading is done.
 -- @param {boolean} fadeMusic Fades the music with the visual fade-out.
-function Engine:_triggerRoomFade(fadeType, finishedCallback, fadeMusic)
+function Core:_triggerRoomFade(fadeType, finishedCallback, fadeMusic)
   -- Cancel any current fades
   if (self._currentRoom._fadeEffectFunc) then
     self:clearFunction(self._currentRoom._fadeEffectFunc)
@@ -1441,7 +1441,7 @@ end
 -- Internal function which actually performs the room change.
 -- @param {Room} room The room to load.
 -- @param {boolean} persistAudio Prevents the audio from stopping.
-function Engine:_changeRoom(room, persistAudio)
+function Core:_changeRoom(room, persistAudio)
   -- Wipe current entity instances
   for key, _ in pairs(self._instances) do
     self._instances[key] = {}
@@ -1506,7 +1506,7 @@ end
 -- Fires off a function after n frames.
 -- @param {function} callback The function to queue.
 -- @param {number} numFrames How many frames should pass before firing.
-function Engine:delayFunction(callback, numFrames)
+function Core:delayFunction(callback, numFrames)
   local f = 'delayFunction'
   MintCrate.Assert.self(f, self)
   
@@ -1521,7 +1521,7 @@ function Engine:delayFunction(callback, numFrames)
     (numFrames >= 0),
     'cannot be a negative value')
   
-  -- Store function to be delay-fired by engine
+  -- Store function to be delay-fired by framework
   table.insert(self._queuedFunctions, {
     callback        = callback,
     remainingFrames = numFrames
@@ -1532,7 +1532,7 @@ end
 -- @param {function} callback The function to queue.
 -- @param {number} numFrames How many frames should pass before firing.
 -- @param {boolean} fireImmediately Whether the function should initially fire.
-function Engine:repeatFunction(callback, numFrames, fireImmediately)
+function Core:repeatFunction(callback, numFrames, fireImmediately)
   local f = 'repeatFunction'
   MintCrate.Assert.self(f, self)
   
@@ -1558,7 +1558,7 @@ function Engine:repeatFunction(callback, numFrames, fireImmediately)
     callback()
   end
   
-  -- Store function to be repeat-fired by engine
+  -- Store function to be repeat-fired by framework
   table.insert(self._queuedFunctions, {
     callback        = callback,
     remainingFrames = numFrames,
@@ -1568,7 +1568,7 @@ end
 
 -- Clears a queued function.
 -- @param {function} callback The queued function to cancel/clear.
-function Engine:clearFunction(callback)
+function Core:clearFunction(callback)
   local f = 'clearFunction'
   MintCrate.Assert.self(f, self)
   
@@ -1592,7 +1592,7 @@ end
 -- @param {number} x The starting X position of the Active.
 -- @param {number} y The ending X position of the Active.
 -- @returns {Active} A new instance of the Active class.
-function Engine:addActive(name, x, y)
+function Core:addActive(name, x, y)
   local f = 'addActive'
   MintCrate.Assert.self(f, self)
   
@@ -1660,7 +1660,7 @@ end
 -- @param {number} options.width The width of the backdrop.
 -- @param {number} options.height The height of the backdrop.
 -- @returns {Backdrop} A new instance of the Backdrop class.
-function Engine:addBackdrop(name, x, y, options)
+function Core:addBackdrop(name, x, y, options)
   local f = 'addBackdrop'
   MintCrate.Assert.self(f, self)
   
@@ -1743,19 +1743,19 @@ function Engine:addBackdrop(name, x, y, options)
   return backdrop
 end
 
--- Creates a Paragraph to be manipulated by the currently-active room.
+-- Creates a Text to be manipulated by the currently-active room.
 -- @param {string} name The name of the Font (from defineFonts()).
--- @param {number} x The starting X position of the Paragraph.
--- @param {number} y The starting Y position of the Paragraph.
+-- @param {number} x The starting X position of the Text.
+-- @param {number} y The starting Y position of the Text.
 -- @param {string} startingTextContent What text to show upon creation.
--- @param {table} options Optional Paragraph properties.
+-- @param {table} options Optional Text properties.
 -- @param {number} options.maxCharsPerLine Characters written before wrapping.
 -- @param {number} options.lineSpacing Space there is between lines, in pixels.
 -- @param {boolean} options.wordWrap Whether entire words should wrap or break.
 -- @param {string} options.alignment Either "left", "right", or "center".
--- @returns {Paragraph} A new instance of the Paragraph class.
-function Engine:addParagraph(name, x, y, startingTextContent, options)
-  local f = 'addParagraph'
+-- @returns {Text} A new instance of the Text class.
+function Core:addText(name, x, y, startingTextContent, options)
+  local f = 'addText'
   MintCrate.Assert.self(f, self)
   
   -- Default params
@@ -1826,9 +1826,9 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   local glyphWidth = font.charWidth
   local glyphHeight = font.charHeight
   
-  -- Create new paragraph
-  local paragraph = MintCrate.Paragraph:new(
-    self._instances.paragraphs,
+  -- Create new text
+  local text = MintCrate.Text:new(
+    self._instances.text,
     self._drawOrders.main,
     name,
     x, y,
@@ -1840,14 +1840,14 @@ function Engine:addParagraph(name, x, y, startingTextContent, options)
   )
   
   -- Set initial text content
-  paragraph:setTextContent(startingTextContent)
+  text:setTextContent(startingTextContent)
   
-  -- Store entry for paragraph in instance and draw-order lists
-  table.insert(self._instances.paragraphs, paragraph)
-  table.insert(self._drawOrders.main, paragraph)
+  -- Store entry for text in instance and draw-order lists
+  table.insert(self._instances.text, text)
+  table.insert(self._drawOrders.main, text)
   
-  -- Return paragraph
-  return paragraph
+  -- Return text
+  return text
 end
 
 -- -----------------------------------------------------------------------------
@@ -1856,7 +1856,7 @@ end
 
 -- Returns the current X position of the camera.
 -- @returns {number} X position of camera.
-function Engine:getCameraX()
+function Core:getCameraX()
   local f = 'getCameraX'
   MintCrate.Assert.self(f, self)
   
@@ -1865,60 +1865,123 @@ end
 
 -- Returns the current Y position of the camera.
 -- @returns {number} Y position of camera.
-function Engine:getCameraY()
+function Core:getCameraY()
   local f = 'getCameraY'
   MintCrate.Assert.self(f, self)
   
   return self._camera.y
 end
 
--- Sets the current position of the camera.
--- @param {number} x New X coordinate to place the camera at.
--- @param {number} y New Y coordinate to place the camera at.
-function Engine:setCamera(x, y)
-  local f = 'setCamera'
+-- Sets the current x position of the camera.
+-- @param {number} x New x coordinate to place the camera at.
+function Core:setCameraX(x)
+  local f = 'setCameraX'
   MintCrate.Assert.self(f, self)
   
   -- Validate: x
   MintCrate.Assert.type(f, 'x', x, 'number')
   
-  -- Validate: y
-  MintCrate.Assert.type(f, 'y', y, 'number')
-  
   -- Figure out camera bounds
   local x1
-  local y1
   local x2
-  local y2
   
-  if not self._cameraIsBound then
+  if (not self._cameraIsBound) then
     x1 = 0
-    y1 = 0
     x2 = self._currentRoom._roomWidth
-    y2 = self._currentRoom._roomHeight
   else
     x1 = self._bounds.x1
-    y1 = self._bounds.y1
     x2 = self._bounds.x2
-    y2 = self._bounds.y2
   end
   
+  -- Bind camera
   boundX = x
   boundX = math.max(boundX, x1)
   boundX = math.min(boundX, x2 - self._baseWidth)
   
+  -- Reposition camera
+  self._camera.x = boundX
+end
+
+-- Sets the current y position of the camera.
+-- @param {number} y New y coordinate to place the camera at.
+function Core:setCameraY(y)
+  local f = 'setCameraY'
+  MintCrate.Assert.self(f, self)
+  
+  -- Validate: y
+  MintCrate.Assert.type(f, 'y', y, 'number')
+  
+  -- Figure out camera bounds
+  local y1
+  local y2
+  
+  if (not self._cameraIsBound) then
+    y1 = 0
+    y2 = self._currentRoom._roomHeight
+  else
+    y1 = self._bounds.y1
+    y2 = self._bounds.y2
+  end
+  
+  -- Bind camera
   boundY = y
   boundY = math.max(boundY, y1)
   boundY = math.min(boundY, y2 - self._baseHeight)
   
-  -- Force camera to fit room if room size is smaller than game size
-  -- TODO: Remove me, since this isn't allowed in the first place?
-  -- if self._currentRoom._roomWidth  <= self._baseWidth  then boundX = 0 end
-  -- if self._currentRoom._roomHeight <= self._baseHeight then boundY = 0 end
-  
   -- Reposition camera
-  self._camera.x = boundX
   self._camera.y = boundY
+end
+
+-- Centers the camera on a specific point.
+-- @param {number} x X coordinate to center the camera at.
+function Core:centerCameraX(x)
+  local f = 'centerCameraX'
+  MintCrate.Assert.self(f, self)
+  
+  -- Validate: x
+  MintCrate.Assert.type(f, 'x', x, 'number')
+  
+  -- Center camera on point
+  self:setCameraX(x - (self._baseWidth / 2))
+end
+
+-- Centers the camera on a specific point.
+-- @param {number} y Y coordinate to center the camera at.
+function Core:centerCameraY(y)
+  local f = 'centerCameraY'
+  MintCrate.Assert.self(f, self)
+  
+  -- Validate: y
+  MintCrate.Assert.type(f, 'y', y, 'number')
+  
+  -- Center camera on point
+  self:setCameraY(y - (self._baseHeight / 2))
+end
+
+-- Moves the camera along the x axis by a specified number of pixels.
+-- @param {number} pixels The number of pixels to move the camera by.
+function Core:moveCameraX(pixels)
+  local f = 'moveCameraX'
+  MintCrate.Assert.self(f, self)
+  
+  -- Validate: pixels
+  MintCrate.Assert.type(f, 'pixels', pixels, 'number')
+  
+  -- Move camera
+  self:setCameraX(self._camera.x + pixels)
+end
+
+-- Moves the camera along the y axis by a specified number of pixels.
+-- @param {number} pixels The number of pixels to move the camera by.
+function Core:moveCameraX(pixels)
+  local f = 'moveCameraY'
+  MintCrate.Assert.self(f, self)
+  
+  -- Validate: pixels
+  MintCrate.Assert.type(f, 'pixels', pixels, 'number')
+  
+  -- Move camera
+  self:setCameraY(self._camera.y + pixels)
 end
 
 -- Binds the camera to a specified rectangular region.
@@ -1926,7 +1989,7 @@ end
 -- @param {number} y1 Region top-left Y.
 -- @param {number} x2 Region bottom-right X.
 -- @param {number} y2 Region bottom-right Y.
-function Engine:bindCamera(x1, y1, x2, y2)
+function Core:bindCamera(x1, y1, x2, y2)
   local f = 'bindCamera'
   MintCrate.Assert.self(f, self)
   
@@ -1948,33 +2011,11 @@ function Engine:bindCamera(x1, y1, x2, y2)
 end
 
 -- Unbinds the camera if previously bound.
-function Engine:unbindCamera()
+function Core:unbindCamera()
   -- Unset bounds and indicate that the camera is currently unbound
   self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
   self._cameraIsBound = false
 end
-
--- Centers the camera on a specific point.
--- @param {number} x X coordinate to center the camera at.
--- @param {number} y Y coordinate to center the camera at.
-function Engine:centerCamera(x, y)
-  local f = 'centerCamera'
-  MintCrate.Assert.self(f, self)
-  
-  -- Validate: x
-  MintCrate.Assert.type(f, 'x', x, 'number')
-  
-  -- Validate: y
-  MintCrate.Assert.type(f, 'y', y, 'number')
-  
-  -- Center camera on point
-  self:setCamera(
-    x - (self._baseWidth / 2),
-    y - (self._baseHeight / 2)
-  )
-end
-
--- TODO: Move camera functions and other stuff; separate x and y as well?
 
 -- -----------------------------------------------------------------------------
 -- Methods for managing Tilemaps
@@ -1982,7 +2023,7 @@ end
 
 -- Sets the tilemap graphic/layout for the room.
 -- @param {string} tilemapLayoutName The full name of the tilemap.
-function Engine:setTilemap(tilemapLayoutName)
+function Core:setTilemap(tilemapLayoutName)
   local f = 'setTilemap'
   MintCrate.Assert.self(f, self)
   
@@ -2032,7 +2073,7 @@ end
 -- @param {data} Table of data to encode and save as JSON data.
 -- @returns {boolean} Whether the data was saved successfully or not.
 -- @returns {string} An error message, if the data failed to save.
-function Engine:saveData(filename, data)
+function Core:saveData(filename, data)
   local f = 'saveData'
   
   MintCrate.Assert.self(f, self)
@@ -2075,7 +2116,7 @@ end
 -- @param {string} filename Name of the JSON file (without file extension).
 -- @returns {table|nil} Decoded JSON data, or nil on read error.
 -- @returns {string} An error message, if the data failed to load.
-function Engine:loadData(filename)
+function Core:loadData(filename)
   local f = 'loadData'
   
   MintCrate.Assert.self(f, self)
@@ -2110,7 +2151,7 @@ end
 -- Checks if game data JSON file exists in user's app data folder.
 -- @param {string} filename Name of the JSON file (without file extension).
 -- @returns {boolean} Wheteher the file exists or not.
-function Engine:savedDataExists(filename)
+function Core:savedDataExists(filename)
   local f = 'savedDataExists'
   
   MintCrate.Assert.self(f, self)
@@ -2138,7 +2179,7 @@ end
 -- -----------------------------------------------------------------------------
 
 -- Performs the main game update code (the game loop).
-function Engine:sys_update()
+function Core:sys_update()
   local f = 'sys_update'
   MintCrate.Assert.self(f, self)
   
@@ -2292,7 +2333,7 @@ function Engine:sys_update()
 end
 
 -- Renders the current room (entities and debug visuals).
-function Engine:sys_draw()
+function Core:sys_draw()
   local f = 'sys_draw'
   MintCrate.Assert.self(f, self)
   
@@ -2308,7 +2349,7 @@ function Engine:sys_draw()
   )
   
   -- Clear the game area with the current room's clear color
-  local r, g, b = self._currentRoom:_getBackgroundColor()
+  local r, g, b = self._currentRoom:_getRoomBackgroundColor()
   love.graphics.clear(r, g, b)
   
   -- Take snapshot of untransformed graphics state
@@ -2440,31 +2481,31 @@ function Engine:sys_draw()
       
       ::DrawActiveDone::
       
-    -- Draw Paragraphs
-    elseif (entity._entityType == 'paragraph') then
-      local paragraph = entity
+    -- Draw Text
+    elseif (entity._entityType == 'text') then
+      local text = entity
       
-      -- If paragraph isn't visible, then skip drawing it
-      if (not paragraph._isVisible or paragraph:getOpacity() == 0) then
-        goto DrawParagraphDone
+      -- If text isn't visible, then skip drawing it
+      if (not text._isVisible or text:getOpacity() == 0) then
+        goto DrawTextDone
       end
       
       -- Set alpha rendering value
-      love.graphics.setColor(1, 1, 1, paragraph:getOpacity())
+      love.graphics.setColor(1, 1, 1, text:getOpacity())
       
       -- Draw text
       self:_drawText(
-        paragraph:_getTextLines(),
-        self._data.fonts[paragraph:_getName()],
-        paragraph:getX(), paragraph:getY(),
-        paragraph:_getLineSpacing(),
-        paragraph:_getAlignment()
+        text:_getTextLines(),
+        self._data.fonts[text:_getName()],
+        text:getX(), text:getY(),
+        text:_getLineSpacing(),
+        text:_getAlignment()
       )
       
       -- Reset alpha rendering value
       love.graphics.setColor(1, 1, 1, 1)
       
-      ::DrawParagraphDone::
+      ::DrawTextDone::
     end
   end
   
@@ -2749,7 +2790,7 @@ function Engine:sys_draw()
           self._currentRoom:getRoomHeight(),
         "ACTS: " .. #self._instances.actives,
         "BAKS: " .. #self._instances.backdrops,
-        "TXTS: " .. #self._instances.paragraphs
+        "TEXT: " .. #self._instances.text
       },
       self._data.fonts["system_counter"],
       self._camera.x,
@@ -2772,7 +2813,7 @@ end
 -- @param {number} y The Y position to write the text at.
 -- @param {number} lineSpacing How much space there is between lines.
 -- @param {string} alignment How the text should be aligned.
-function Engine:_drawText(
+function Core:_drawText(
   textLines,
   font,
   x, y,
@@ -2785,7 +2826,7 @@ function Engine:_drawText(
   
   -- Draw lines of text, character-by-character
   for lineNum, line in ipairs(textLines) do
-    -- Figure out base offset for text alignment
+    -- Figure out base offset based on text alignment
     local xOffset = 0
     
     if alignment == "right" then
@@ -2794,7 +2835,7 @@ function Engine:_drawText(
       xOffset = math.floor(string.len(line) * font.charWidth / 2)
     end
     
-    -- 
+    -- Draw characters
     for charPosition, character in ipairs(self.util.string.split(line)) do
       love.graphics.draw(
         font.image,
@@ -2804,75 +2845,6 @@ function Engine:_drawText(
       )
     end
   end
-  
-  --[[
-  -- Copy each word to canvas, letter-by-letter.
-  for i, word in ipairs(words) do
-    -- Wrap words, but only if they're not longer than the max chars per line.
-    -- If they are, then the word itself needs to break rather than being moved
-    -- to the next line.
-    if
-      wordWrap
-      and string.len(word) <= maxCharsPerLine
-      and (position + string.len(word)) > maxCharsPerLine
-    then
-      position = 0
-      line = line + 1
-    end
-    
-    -- Copy each letter of the word to the canvas.
-    for _, character in ipairs(self.util.string.split(word)) do
-      -- Break line if line break character encountered.
-      if character == "\n" then
-        position = 0
-        line = line + 1
-        goto LetterDrawn
-      end
-      
-      -- Ignore spaces as the first character of the line. This is needed to
-      -- avoid spaces from wrapping when word wrap is enabled.
-      if position == 0 and character == " " and wordWrap then
-        goto LetterDrawn
-      end
-      
-      -- Copy character tile to canvas.
-      love.graphics.draw(
-        font.image,
-        font.quads[character],
-        x + (font.charWidth * position),
-        y + (font.charHeight * line) + (lineSpacing * line)
-      )
-      
-      -- Increment drawing position, wrapping to next line as needed.
-      position = position + 1
-      if position == maxCharsPerLine then
-        position = 0
-        line = line + 1
-      end
-      
-      ::LetterDrawn::
-    end
-    
-    -- Add space after word (except for the last word).
-    if i < #words and position > 0 then
-      -- Copy character tile to canvas.
-      love.graphics.draw(
-        font.image,
-        font.quads[" "],
-        x + (font.charWidth * position),
-        y + (font.charHeight * line) + (lineSpacing * line)
-      )
-      
-      -- Increment drawing position, wrapping to next line as needed.
-      position = position + 1
-      if position == maxCharsPerLine then
-        position = 0
-        line = line + 1
-      end
-    end
-  end
-  --]]
-  
 end
 
 -- -----------------------------------------------------------------------------
@@ -2882,7 +2854,7 @@ end
 -- Sets the scaling value for the window and graphics.
 -- @param {number} scale The factor to scale the window by (1.0 is normal).
 -- @param {boolean} forceResize Forces a resize event to fire.
-function Engine:setWindowScale(scale, forceResize)
+function Core:setWindowScale(scale, forceResize)
   local f = 'setWindowScale'
   MintCrate.Assert.self(f, self)
   
@@ -2927,7 +2899,7 @@ end
 
 -- Returns the current window scale.
 -- @returns {number} Current window scale value.
-function Engine:getWindowScale()
+function Core:getWindowScale()
   local f = 'getWindowScale'
   MintCrate.Assert.self(f, self)
   
@@ -2936,8 +2908,8 @@ end
 
 -- Returns the base resolution width of the game, in pixels.
 -- @returns {number} Base game width.
-function Engine:getScreenWidth()
-  local f = 'getScreenWidth'
+function Core:getBaseWidth()
+  local f = 'getBaseWidth'
   MintCrate.Assert.self(f, self)
   
   return self._baseWidth
@@ -2945,8 +2917,8 @@ end
 
 -- Returns the base resolution height of the game, in pixels.
 -- @returns {number} Base game height.
-function Engine:getScreenHeight()
-  local f = 'getScreenHeight'
+function Core:getBaseHeight()
+  local f = 'getBaseHeight'
   MintCrate.Assert.self(f, self)
   
   return self._baseHeight
@@ -2954,8 +2926,8 @@ end
 
 -- Tells the application to enter or exit fullscreen mode.
 -- @param {boolean} fullscreen Whether the application should be fullscreen.
-function Engine:setFullscreen(fullscreen)
-  local f = 'setFullscreen'
+function Core:setFullscreenMode(fullscreen)
+  local f = 'setFullscreenMode'
   MintCrate.Assert.self(f, self)
   
   -- Validate: fullscreen
@@ -2982,8 +2954,8 @@ end
 
 -- Returns whether the application is currently in fullscreen mode.
 -- @returns {boolean} Whether fullscreen mode is enabled.
-function Engine:getFullscreen()
-  local f = 'getFullscreen'
+function Core:isFullscreenEnabled()
+  local f = 'isFullscreenEnabled'
   MintCrate.Assert.self(f, self)
   
   return self._fullscreen
@@ -2992,7 +2964,7 @@ end
 -- Updates graphics values (for rendering use) when the application is resized.
 -- @param {number} w The new application window width.
 -- @param {number} h The new application window height.
-function Engine:sys_resize(w, h)
+function Core:sys_resize(w, h)
   local f = 'sys_resize'
   MintCrate.Assert.self(f, self)
   
@@ -3046,8 +3018,8 @@ end
 -- @param {Active} activeA The first Active to test.
 -- @param {Active} activeB The second Active to test.
 -- @returns {boolean} Whether a collission occurred.
-function Engine:testCollision(activeA, activeB)
-  local f = 'testCollision'
+function Core:testActiveCollision(activeA, activeB)
+  local f = 'testActiveCollision'
   MintCrate.Assert.self(f, self)
   
   -- Validate: activeA
@@ -3064,7 +3036,7 @@ end
 -- @param {Active} active The active to test.
 -- @param {number} tileType The tile's behavior value to filter for.
 -- @returns {table|boolean} Data about collisions that occurred, or false.
-function Engine:testMapCollision(active, tileType)
+function Core:testMapCollision(active, tileType)
   local f = 'testMapCollision'
   MintCrate.Assert.self(f, self)
   
@@ -3109,7 +3081,7 @@ end
 -- @param {table} colliderA The first collider to test.
 -- @param {table} colliderB The second collider to test.
 -- @returns {boolean} Whether a collision occurred.
-function Engine:_testCollision(colliderA, colliderB)
+function Core:_testCollision(colliderA, colliderB)
   -- Don't test for collision if one or more colliders haven't been defined
   if (
        colliderA.s == self._COLLIDER_SHAPES.NONE
@@ -3194,7 +3166,7 @@ end
 -- Returns whether the mouse cursor is hovering over an Active object.
 -- @param {Active} active The Active to test.
 -- @returns {boolean} Whether the mouse cursor is over the Active.
-function Engine:mouseOverActive(active)
+function Core:mouseOverActive(active)
   local f = 'mouseOverActive'
   MintCrate.Assert.self(f, self)
   
@@ -3239,8 +3211,8 @@ end
 -- Returns whether an Active object was clicked.
 -- @param {number} mouseButton Which mouse button was used to click.
 -- @param {Active} active The active to check for being clicked upon.
-function Engine:clickedOnActive(mouseButton, active)
-  local f = 'clickedOnActive'
+function Core:wasActiveClicked(mouseButton, active)
+  local f = 'wasActiveClicked'
   MintCrate.Assert.self(f, self)
   
   -- Validate: mouseButton
@@ -3262,7 +3234,7 @@ end
 
 -- Returns the X position of the mouse cursor relative to the entire room size.
 -- @returns {number} The room-relative mouse cursor X position.
-function Engine:getMouseX()
+function Core:getMouseX()
   local f = 'getMouseX'
   MintCrate.Assert.self(f, self)
   
@@ -3271,7 +3243,7 @@ end
 
 -- Returns the Y position of the mouse cursor relative to the entire room size.
 -- @returns {number} The room-relative mouse cursor Y position.
-function Engine:getMouseY()
+function Core:getMouseY()
   local f = 'getMouseY'
   MintCrate.Assert.self(f, self)
   
@@ -3280,8 +3252,8 @@ end
 
 -- Returns the X position of the mouse cursor relative to the game window.
 -- @returns {number} The screen-relative mouse cursor X position.
-function Engine:getRelativeMouseX()
-  local f = 'getRelativeMouseX'
+function Core:getWindowMouseX()
+  local f = 'getWindowMouseX'
   MintCrate.Assert.self(f, self)
   
   return self._mousePositions.localX
@@ -3289,8 +3261,8 @@ end
 
 -- Returns the Y position of the mouse cursor relative to the game window.
 -- @returns {number} The screen-relative mouse cursor Y position.
-function Engine:getRelativeMouseY()
-  local f = 'getRelativeMouseY'
+function Core:getWindowMouseY()
+  local f = 'getWindowMouseY'
   MintCrate.Assert.self(f, self)
   
   return self._mousePositions.localY
@@ -3299,7 +3271,7 @@ end
 -- Returns whether a mouse button was pressed on the current frame.
 -- @param {number} mouseButton The numeric button to test (see Love docs).
 -- @returns {boolean} Whether the mouse button was pressed.
-function Engine:mousePressed(mouseButton)
+function Core:mousePressed(mouseButton)
   local f = 'mousePressed'
   MintCrate.Assert.self(f, self)
   
@@ -3312,7 +3284,7 @@ end
 -- Returns whether a mouse button was released on the current frame.
 -- @param {number} mouseButton The numeric button to test (see Love docs).
 -- @returns {boolean} Whether the mouse button was released.
-function Engine:mouseReleased(mouseButton)
+function Core:mouseReleased(mouseButton)
   local f = 'mouseReleased'
   MintCrate.Assert.self(f, self)
   
@@ -3325,7 +3297,7 @@ end
 -- Returns whether a mouse button is being held down.
 -- @param {number} mouseButton The numeric button to test (see Love docs).
 -- @returns {boolean} Whether the mouse button is beind held.
-function Engine:mouseHeld(mouseButton)
+function Core:mouseHeld(mouseButton)
   local f = 'mouseHeld'
   MintCrate.Assert.self(f, self)
   
@@ -3338,7 +3310,7 @@ end
 -- Updates internal mouse values for correctly mapping mouse positions.
 -- @param {number} x The X coordinate of the mouse cursor.
 -- @param {number} y The Y coordinate of the mouse cursor.
-function Engine:sys_mousemoved(x, y)
+function Core:sys_mousemoved(x, y)
   local f = 'sys_mousemoved'
   MintCrate.Assert.self(f, self)
   
@@ -3355,7 +3327,7 @@ end
 
 -- Sets raw mouse states for button presses.
 -- @param {number} button The numeric mouse button (see Love docs).
-function Engine:sys_mousepressed(button)
+function Core:sys_mousepressed(button)
   local f = 'sys_mousepressed'
   MintCrate.Assert.self(f, self)
   
@@ -3368,7 +3340,7 @@ end
 
 -- Sets raw mouse states for button releases.
 -- @param {number} button The numeric mouse button (see Love docs).
-function Engine:sys_mousereleased(button)
+function Core:sys_mousereleased(button)
   local f = 'sys_mousereleased'
   MintCrate.Assert.self(f, self)
   
@@ -3385,7 +3357,7 @@ end
 
 -- Creates an Input Handler object to let a player interact with the game.
 -- @returns {InputHandler} A new instance of the InputHandler class.
-function Engine:addInputHandler()
+function Core:addInputHandler()
   local f = 'addInputHandler'
   MintCrate.Assert.self(f, self)
   
@@ -3402,7 +3374,7 @@ end
 -- Returns whether a keybaord key was pressed on the current frame.
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 -- @returns {boolean} Whether the key was pressed.
-function Engine:keyPressed(scancode)
+function Core:keyPressed(scancode)
   local f = 'keyPressed'
   MintCrate.Assert.self(f, self)
   
@@ -3425,7 +3397,7 @@ end
 -- Returns whether a keybaord key was released on the current frame.
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 -- @returns {boolean} Whether the key was released.
-function Engine:keyReleased(scancode)
+function Core:keyReleased(scancode)
   local f = 'keyReleased'
   MintCrate.Assert.self(f, self)
   
@@ -3448,7 +3420,7 @@ end
 -- Returns whether a keybaord key is being held down.
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
 -- @returns {boolean} Whether the key is being held.
-function Engine:keyHeld(scancode)
+function Core:keyHeld(scancode)
   local f = 'keyHeld'
   MintCrate.Assert.self(f, self)
   
@@ -3470,7 +3442,7 @@ end
 
 -- Sets raw keyboard states for key presses.
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
-function Engine:sys_keypressed(scancode)
+function Core:sys_keypressed(scancode)
   local f = 'sys_keypressed'
   MintCrate.Assert.self(f, self)
   
@@ -3489,7 +3461,7 @@ end
 
 -- Sets raw keyboard states for key releases.
 -- @param {string} scancode The scancode of the keyboard input (see Love docs).
-function Engine:sys_keyreleased(scancode)
+function Core:sys_keyreleased(scancode)
   local f = 'sys_keyreleased'
   MintCrate.Assert.self(f, self)
   
@@ -3509,7 +3481,7 @@ end
 -- Sets raw gamepad states for gamepad button presses.
 -- @param {Joystick} joystick The physical device on which a button was pressed.
 -- @param {number} button The joystick button that was pressed (see Love docs).
-function Engine:sys_gamepadpressed(joystick, button)
+function Core:sys_gamepadpressed(joystick, button)
   local f = 'sys_gamepadpressed'
   MintCrate.Assert.self(f, self)
   
@@ -3534,7 +3506,7 @@ end
 -- Sets raw gamepad states for gamepad button releases.
 -- @param {Joystick} joystick The physical device on which a button was pressed.
 -- @param {number} button The joystick button that was pressed (see Love docs).
-function Engine:sys_gamepadreleased(joystick, button)
+function Core:sys_gamepadreleased(joystick, button)
   local f = 'sys_gamepadreleased'
   MintCrate.Assert.self(f, self)
   
@@ -3565,7 +3537,7 @@ end
 -- @param {table} options Optional sound properties.
 -- @param {number} options.volume Volume level, between 0 and 1.
 -- @param {number} options.pitch Pitch rate, between 0.1 and 30.
-function Engine:playSound(soundName, options)
+function Core:playSound(soundName, options)
   local f = 'playSound'
   MintCrate.Assert.self(f, self)
   
@@ -3613,7 +3585,7 @@ function Engine:playSound(soundName, options)
 end
 
 -- Stops any currently-playing sounds.
-function Engine:stopAllSounds()
+function Core:stopAllSounds()
   local f = 'stopAllSounds'
   MintCrate.Assert.self(f, self)
   
@@ -3623,144 +3595,10 @@ function Engine:stopAllSounds()
   end
 end
 
--- Internal function for playing music.
--- @param {string} trackName The name of the song to play (from defineMusic).
--- @param {number} fadeLength How much to fade in the song, in frames.
-function Engine:_playMusic(trackName, fadeLength)
-  -- Default params
-  if (fadeLength == nil) then fadeLength = 0 end
-  
-  -- Get music track data
-  local track = self._data.music[trackName]
-  
-  -- Stop current track and reset fade lengths
-  love.audio.stop(track.source)
-  track.fadeInLength = nil
-  track.fadeOutLength = nil
-  
-  -- Set local volume: no fade specified
-  if (fadeLength == 0) then
-    track.volume = 1
-  
-  -- Set local volume: fade specified
-  else
-    track.volume = 0
-    track.fadeInLength = fadeLength
-  end
-  
-  -- Set music source volume
-  track.source:setVolume(track.volume * self.masterBgmVolume)
-  
-  -- Play music track
-  love.audio.play(track.source)
-end
-
--- Internal function for stopping music.
--- @param {string} trackName The name of the song to play (from defineMusic).
--- @param {number} fadeLength How much to fade out the song, in frames.
-function Engine:_stopMusic(trackName, fadeLength)
-  -- Get music track data
-  local track = self._data.music[trackName]
-  
-  -- Reset fade lengths
-  track.fadeInLength = nil
-  track.fadeOutLength = nil
-  
-  -- Stop audio immediately if it doesn't need to fade out
-  if (fadeLength == 0) then
-    love.audio.stop(track.source)
-  
-  -- Otherwise, set its fade value so it'll get faded out in the update function
-  else
-    track.fadeOutLength = fadeLength
-  end
-end
-
--- Gets the current master/global music volume.
--- @returns {number} The current master/global music volume.
-function Engine:getMasterMusicVolume()
-  local f = 'getMasterMusicVolume'
-  MintCrate.Assert.self(f, self)
-  
-  return self.masterBgmVolume
-end
-
--- Gets the current master/global sound effect volume.
--- @returns {number} The current master/global sound effect volume.
-function Engine:getMasterSoundVolume()
-  local f = 'getMasterSoundVolume'
-  MintCrate.Assert.self(f, self)
-  
-  return self.masterSfxVolume
-end
-
--- Sets the current master/global music volume.
--- @param {number} newVolume New volume level, between 0 and 1.
-function Engine:setMasterMusicVolume(newVolume)
-  local f = 'setMasterMusicVolume'
-  MintCrate.Assert.self(f, self)
-  
-  -- Validate: newVolume
-  MintCrate.Assert.type(f, 'newVolume', newVolume, 'number')
-  
-  -- Constrain volume value
-  self.masterBgmVolume = self.math.clamp(newVolume, 0, 1)
-  
-  -- Set all music track source volumes
-  for _, track in pairs(self._data.music) do
-    track.source:setVolume(track.volume * self.masterBgmVolume)
-  end
-end
-
--- Sets the current master/global sound effect volume.
--- @param {number} newVolume New volume level, between 0 and 1.
-function Engine:setMasterSoundVolume(newVolume)
-  local f = 'setMasterSoundVolume'
-  MintCrate.Assert.self(f, self)
-  
-  -- Validate: newVolume
-  MintCrate.Assert.type(f, 'newVolume', newVolume, 'number')
-  
-  -- Constrain volume value
-  self.masterSfxVolume = self.math.clamp(newVolume, 0, 1)
-  
-  -- Set all sound source volumes
-  for _, sound in pairs(self._data.sounds) do
-    sound.source:setVolume(sound.volume * self.masterSfxVolume)
-  end
-end
-
--- Gets the current master/global music pitch rate.
--- @returns {number} The current master/global music pitch rate.
-function Engine:getMasterMusicPitch()
-  local f = 'getMasterMusicPitch'
-  MintCrate.Assert.self(f, self)
-  
-  return self.masterBgmPitch
-end
-
--- Sets the current master/global music pitch rate.
--- @param {number} newVolume New pitch rate, between 0.1 and 30.
-function Engine:setMasterMusicPitch(newPitch)
-  local f = 'setMasterMusicPitch'
-  MintCrate.Assert.self(f, self)
-  
-  -- Validate: newPitch
-  MintCrate.Assert.type(f, 'newPitch', newPitch, 'number')
-  
-  -- Constrain pitch value
-  self.masterBgmPitch = self.math.clamp(newPitch, 0.1, 30)
-  
-  -- Set music track source source pitches
-  for _, track in pairs(self._data.music) do
-    track.source:setPitch(self.masterBgmPitch)
-  end
-end
-
 -- Starts playback of the currently-set music track.
 -- @param {string} trackName The name of the song to play (from defineMusic).
 -- @param {number} fadeLength How much to fade/xfade in the song, in frames.
-function Engine:playMusic(trackName, fadeLength)
+function Core:playMusic(trackName, fadeLength)
   local f = 'playMusic'
   MintCrate.Assert.self(f, self)
   
@@ -3812,7 +3650,7 @@ function Engine:playMusic(trackName, fadeLength)
 end
 
 -- Pauses playback of the currently-set music track.
-function Engine:pauseMusic()
+function Core:pauseMusic()
   local f = 'pauseMusic'
   MintCrate.Assert.self(f, self)
   
@@ -3824,7 +3662,7 @@ function Engine:pauseMusic()
 end
 
 -- Resumes playback of the currently-set music track.
-function Engine:resumeMusic()
+function Core:resumeMusic()
   local f = 'resumeMusic'
   MintCrate.Assert.self(f, self)
   
@@ -3839,7 +3677,7 @@ end
 
 -- Stops playback of the currently-set music track.
 -- @param {number} fadeLength How much to fade out the song, in frames.
-function Engine:stopMusic(fadeLength)
+function Core:stopMusic(fadeLength)
   local f = 'stopMusic'
   MintCrate.Assert.self(f, self)
   
@@ -3858,13 +3696,147 @@ function Engine:stopMusic(fadeLength)
   self:_stopMusic(self._currentMusic, fadeLength)
 end
 
+-- Internal function for playing music.
+-- @param {string} trackName The name of the song to play (from defineMusic).
+-- @param {number} fadeLength How much to fade in the song, in frames.
+function Core:_playMusic(trackName, fadeLength)
+  -- Default params
+  if (fadeLength == nil) then fadeLength = 0 end
+  
+  -- Get music track data
+  local track = self._data.music[trackName]
+  
+  -- Stop current track and reset fade lengths
+  love.audio.stop(track.source)
+  track.fadeInLength = nil
+  track.fadeOutLength = nil
+  
+  -- Set local volume: no fade specified
+  if (fadeLength == 0) then
+    track.volume = 1
+  
+  -- Set local volume: fade specified
+  else
+    track.volume = 0
+    track.fadeInLength = fadeLength
+  end
+  
+  -- Set music source volume
+  track.source:setVolume(track.volume * self.masterBgmVolume)
+  
+  -- Play music track
+  love.audio.play(track.source)
+end
+
+-- Internal function for stopping music.
+-- @param {string} trackName The name of the song to play (from defineMusic).
+-- @param {number} fadeLength How much to fade out the song, in frames.
+function Core:_stopMusic(trackName, fadeLength)
+  -- Get music track data
+  local track = self._data.music[trackName]
+  
+  -- Reset fade lengths
+  track.fadeInLength = nil
+  track.fadeOutLength = nil
+  
+  -- Stop audio immediately if it doesn't need to fade out
+  if (fadeLength == 0) then
+    love.audio.stop(track.source)
+  
+  -- Otherwise, set its fade value so it'll get faded out in the update function
+  else
+    track.fadeOutLength = fadeLength
+  end
+end
+
+-- Gets the current master/global sound effect volume.
+-- @returns {number} The current master/global sound effect volume.
+function Core:getMasterSoundVolume()
+  local f = 'getMasterSoundVolume'
+  MintCrate.Assert.self(f, self)
+  
+  return self.masterSfxVolume
+end
+
+-- Sets the current master/global sound effect volume.
+-- @param {number} newVolume New volume level, between 0 and 1.
+function Core:setMasterSoundVolume(newVolume)
+  local f = 'setMasterSoundVolume'
+  MintCrate.Assert.self(f, self)
+  
+  -- Validate: newVolume
+  MintCrate.Assert.type(f, 'newVolume', newVolume, 'number')
+  
+  -- Constrain volume value
+  self.masterSfxVolume = self.math.clamp(newVolume, 0, 1)
+  
+  -- Set all sound source volumes
+  for _, sound in pairs(self._data.sounds) do
+    sound.source:setVolume(sound.volume * self.masterSfxVolume)
+  end
+end
+
+-- Gets the current master/global music volume.
+-- @returns {number} The current master/global music volume.
+function Core:getMasterMusicVolume()
+  local f = 'getMasterMusicVolume'
+  MintCrate.Assert.self(f, self)
+  
+  return self.masterBgmVolume
+end
+
+-- Sets the current master/global music volume.
+-- @param {number} newVolume New volume level, between 0 and 1.
+function Core:setMasterMusicVolume(newVolume)
+  local f = 'setMasterMusicVolume'
+  MintCrate.Assert.self(f, self)
+  
+  -- Validate: newVolume
+  MintCrate.Assert.type(f, 'newVolume', newVolume, 'number')
+  
+  -- Constrain volume value
+  self.masterBgmVolume = self.math.clamp(newVolume, 0, 1)
+  
+  -- Set all music track source volumes
+  for _, track in pairs(self._data.music) do
+    track.source:setVolume(track.volume * self.masterBgmVolume)
+  end
+end
+
+-- Gets the current master/global music pitch rate.
+-- @returns {number} The current master/global music pitch rate.
+function Core:getMasterMusicPitch()
+  local f = 'getMasterMusicPitch'
+  MintCrate.Assert.self(f, self)
+  
+  return self.masterBgmPitch
+end
+
+-- Sets the current master/global music pitch rate.
+-- @param {number} newVolume New pitch rate, between 0.1 and 30.
+function Core:setMasterMusicPitch(newPitch)
+  local f = 'setMasterMusicPitch'
+  MintCrate.Assert.self(f, self)
+  
+  -- Validate: newPitch
+  MintCrate.Assert.type(f, 'newPitch', newPitch, 'number')
+  
+  -- Constrain pitch value
+  self.masterBgmPitch = self.math.clamp(newPitch, 0.1, 30)
+  
+  -- Set music track source source pitches
+  for _, track in pairs(self._data.music) do
+    track.source:setPitch(self.masterBgmPitch)
+  end
+end
+
 -- -----------------------------------------------------------------------------
 -- Methods for displaying debug data overlays in the game
 -- -----------------------------------------------------------------------------
 
 -- Shows/hides an overlay that shows the current frames-per-second rate.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:setFpsVisibility(enabled)
+function Core:setFpsVisibility(enabled)
   local f = 'setFpsVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -3877,7 +3849,7 @@ end
 
 -- Shows/hides an overlay that shows information regarding the current room.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:setRoomInfoVisibility(enabled)
+function Core:setRoomInfoVisibility(enabled)
   local f = 'setRoomInfoVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -3890,7 +3862,7 @@ end
 
 -- Shows/hides an overlay that shows information regarding the camera.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:setCameraInfoVisibility(enabled)
+function Core:setCameraInfoVisibility(enabled)
   local f = 'setCameraInfoVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -3903,7 +3875,7 @@ end
 
 -- Shows/hides an overlay that displays collision masks for tilemaps.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:setTilemapCollisionMaskVisibility(enabled)
+function Core:setTilemapCollisionMaskVisibility(enabled)
   local f = 'setTilemapCollisionMaskVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -3916,7 +3888,7 @@ end
 
 -- Shows/hides an overlay that displays behavior value numbers for tilemaps.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:setTilemapBehaviorValueVisibility(enabled)
+function Core:setTilemapBehaviorValueVisibility(enabled)
   local f = 'setTilemapBehaviorValueVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -3929,7 +3901,7 @@ end
 
 -- Shows/hides an overlay that displays collision masks for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:setActiveCollisionMaskVisibility(enabled)
+function Core:setActiveCollisionMaskVisibility(enabled)
   local f = 'setActiveCollisionMaskVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -3942,7 +3914,7 @@ end
 
 -- Shows/hides an overlay that displays data for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:setActiveInfoVisibility(enabled)
+function Core:setActiveInfoVisibility(enabled)
   local f = 'setActiveInfoVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -3955,7 +3927,7 @@ end
 
 -- Shows/hides an overlay that visualizes the origin point for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:setOriginPointVisibility(enabled)
+function Core:setOriginPointVisibility(enabled)
   local f = 'setOriginPointVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -3968,7 +3940,7 @@ end
 
 -- Shows/hides an overlay that visualizes the action point for Active instances.
 -- @param {boolean} enabled Whether the overlay should be shown or not.
-function Engine:setActionPointVisibility(enabled)
+function Core:setActionPointVisibility(enabled)
   local f = 'setActionPointVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -3981,7 +3953,7 @@ end
 
 -- Shows/hides all debug overlays.
 -- @param {boolean} enabled Whether the overlays should be shown or not.
-function Engine:setAllDebugOverlayVisibility(enabled)
+function Core:setAllDebugOverlayVisibility(enabled)
   local f = 'setAllDebugOverlayVisibility'
   MintCrate.Assert.self(f, self)
   
@@ -4002,4 +3974,4 @@ end
 
 -- -----------------------------------------------------------------------------
 
-return Engine
+return Core

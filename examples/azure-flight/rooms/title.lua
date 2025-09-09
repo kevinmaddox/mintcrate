@@ -7,11 +7,11 @@ function Title:new()
   self.__index = self
   
   if globals.enteringFromSplashScreen then
-    self:configureFadeIn(15, 0, {r=255,g=255,b=255})
+    self:configureRoomFadeIn(15, 0, {r=255,g=255,b=255})
   else
-    self:configureFadeIn(15, 15, {r=0,g=0,b=0})
+    self:configureRoomFadeIn(15, 15, {r=0,g=0,b=0})
   end
-  self:configureFadeOut(15, 30, {r=0,g=0,b=0})
+  self:configureRoomFadeOut(15, 30, {r=0,g=0,b=0})
   
   mint:playMusic('select-your-whatever-2k15')
   

@@ -20,8 +20,8 @@ function Game:new()
   setmetatable(o, self)
   self.__index = self
   
-  self:configureFadeIn(15, 0, {r=0,g=0,b=0})
-  self:configureFadeOut(15, 15, {r=0,g=0,b=0})
+  self:configureRoomFadeIn(15, 0, {r=0,g=0,b=0})
+  self:configureRoomFadeOut(15, 15, {r=0,g=0,b=0})
   
   mint:addBackdrop('mountains')
   
@@ -38,11 +38,11 @@ function Game:new()
   o.ready = mint:addBackdrop('ready', 0, 24)
   o.ready:setX(mint:getScreenWidth() / 2 - o.ready:getWidth() / 2)
   
-  o.instructions = mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 0, 'TAP & HOLD\nTO FLY', {alignment='center'})
+  o.instructions = mint:addText('ui-main', mint:getScreenWidth() / 2, 0, 'TAP & HOLD\nTO FLY', {alignment='center'})
   o.sineWaveTicks = 0
   
   o.readyHighScoreDisplay =
-    mint:addParagraph('title-high-score', 2, 0, 'HIGH '..globals.highScore)
+    mint:addText('title-high-score', 2, 0, 'HIGH '..globals.highScore)
   o.readyHighScoreDisplay:setY(mint:getScreenHeight() -
     o.readyHighScoreDisplay:getGlyphHeight() - 2)
   
@@ -113,8 +113,8 @@ function Game:update()
       
       -- Initialize score-tracking objects
       self.score = 0
-      self.scoreDisplay = mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 12, '0', {alignment='center'})
-      self.scoreDisplayHigh = mint:addParagraph('ui-gold-numbers', mint:getScreenWidth() / 2, 12, '', {alignment='center'})
+      self.scoreDisplay = mint:addText('ui-main', mint:getScreenWidth() / 2, 12, '0', {alignment='center'})
+      self.scoreDisplayHigh = mint:addText('ui-gold-numbers', mint:getScreenWidth() / 2, 12, '', {alignment='center'})
       self.scoreDisplayHigh:setVisibility(false)
       
       -- Drop starting platform into river
@@ -263,7 +263,7 @@ function Game:update()
     
     -- Create water splashes when player treads water
     if (
-      (self.harpy:getY() + self.harpy:getImageHeight()/2) >= self.WATER_LINE_Y
+      (self.harpy:getY() + self.harpy:getSpriteHeight()/2) >= self.WATER_LINE_Y
       and self.harpy.treadDelay <= 0
       and not self.harpy.wasHit
     ) then
@@ -341,9 +341,9 @@ function Game:update()
       
       self.harpy = self.harpy:destroy()
       
-      mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 35,
+      mint:addText('ui-main', mint:getScreenWidth() / 2, 35,
         'SCORE '..self.score, {alignment='center'})
-      mint:addParagraph('ui-main', mint:getScreenWidth() / 2, 53,
+      mint:addText('ui-main', mint:getScreenWidth() / 2, 53,
         'BEST '..globals.highScore, {alignment='center'})
       
       self.btnRetry = Button:new(56, 72, 128, 'RETRY', false, function()
@@ -453,10 +453,10 @@ function Game:update()
       
       -- Set opacity and scaling values
       local entityBottomY =
-        shadow.entity:getY() + (shadow.entity:getImageHeight() / 2)
+        shadow.entity:getY() + (shadow.entity:getSpriteHeight() / 2)
       
       local maxScale =
-        shadow.entity:getImageWidth() / shadow:getImageWidth()
+        shadow.entity:getSpriteWidth() / shadow:getSpriteWidth()
       local scale = (entityBottomY / 157) * maxScale
       
       shadow:setScaleX(scale)

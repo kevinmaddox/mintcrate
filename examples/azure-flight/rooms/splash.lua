@@ -6,14 +6,14 @@ function Splash:new()
   setmetatable(o, self)
   self.__index = self
   
-  self:setBackgroundColor(255, 255, 255)
-  self:configureFadeIn(15, 15, {r=255,g=255,b=255})
-  self:configureFadeOut(15, 30, {r=255,g=255,b=255})
+  self:setRoomBackgroundColor(255, 255, 255)
+  self:configureRoomFadeIn(15, 15, {r=255,g=255,b=255})
+  self:configureRoomFadeOut(15, 30, {r=255,g=255,b=255})
   
   o.harpy = mint:addBackdrop("harpy", 0, 52)
   o.harpy:setX((mint:getScreenWidth()/2) - (o.harpy:getWidth()/2) - 4)
   
-  o.copyright = mint:addParagraph("system_dialog", mint:getScreenWidth()/2, o.harpy:getY() + 40, "Studio Densetsu", {alignment="center"})
+  o.copyright = mint:addText("system_dialog", mint:getScreenWidth()/2, o.harpy:getY() + 40, "Studio Densetsu", {alignment="center"})
   
   mint:delayFunction(function()
     mint:changeRoom(Title)

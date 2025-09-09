@@ -6,19 +6,19 @@
 local pkg = (...):match("(.-)[^%.]+$")
 
 MintCrate = {}
-MintCrate.Engine       = require(pkg .. "engine")
+MintCrate.Core         = require(pkg .. "core")
 MintCrate.Error        = require(pkg .. "error")
 MintCrate.Assert       = require(pkg .. "assert")
 MintCrate.Entity       = require(pkg .. "entity")
 MintCrate.Active       = require(pkg .. "active")
 MintCrate.Backdrop     = require(pkg .. "backdrop")
-MintCrate.Paragraph    = require(pkg .. "paragraph")
+MintCrate.Text         = require(pkg .. "text")
 MintCrate.Room         = require(pkg .. "room")
 MintCrate.InputHandler = require(pkg .. "inputhandler")
 MintCrate.Util         = require(pkg .. "util")
 MintCrate.MathX        = require(pkg .. "mathx")
 
--- Creates and returns an instance of the MintCrate engine (see class Engine).
+-- Creates and returns an instance of the MintCrate framework (see class Core).
 -- @param baseWidth The game's unscaled, base width resolution, in pixels.
 -- @param baseHeight The game's unscaled, base height resolution, in pixels.
 -- @param startingRoom The room to initially load into.
@@ -31,7 +31,7 @@ function MintCrate:new(
   options
 )
   -- Create MintCrate instance
-  local engine = MintCrate.Engine:new(
+  local mc = MintCrate.Core:new(
     baseWidth,
     baseHeight,
     startingRoom,
@@ -39,12 +39,12 @@ function MintCrate:new(
   )
   
   -- Store module path for loading system image resources
-  engine._sysImgPath = pkg.."img.encoded."
+  mc._sysImgPath = pkg.."img.encoded."
   
-  -- Store libs into engine instance so that user can access them easily.
-  engine.util   = MintCrate.Util
-  engine.math   = MintCrate.MathX
+  -- Store libs into instance so that user can access them easily
+  mc.util   = MintCrate.Util
+  mc.math   = MintCrate.MathX
 
   -- Return MintCrate instance
-  return engine
+  return mc
 end
