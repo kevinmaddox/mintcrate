@@ -22,29 +22,6 @@ function Room:new(roomName, roomWidth, roomHeight)
   setmetatable(o, self)
   self.__index = self
   
-  local f = 'new'
-  
-  -- Validate: roomName
-  MintCrate.Assert.type(f, 'roomName', roomName, 'string')
-  
-  -- Validate: roomWidth
-  MintCrate.Assert.type(f, 'roomWidth', roomWidth, 'number')
-  
-  MintCrate.Assert.condition(f,
-    'roomWidth',
-    (roomWidth > 0),
-    'must be a value greater than 0'
-  )
-  
-  -- Validate: roomHeight
-  MintCrate.Assert.type(f, 'roomHeight', roomHeight, 'number')
-  
-  MintCrate.Assert.condition(f,
-    'roomHeight',
-    (roomHeight > 0),
-    'must be a value greater than 0'
-  )
-  
   -- Set room name
   self._roomName = roomName
   

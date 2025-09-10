@@ -15,7 +15,7 @@ Game = {type = MintCrate.Room.type}
 --]]
 
 function Game:new()
-  local o = MintCrate.Room:new("Game", 240, 160)
+  local o = mint:addRoom("Game", 240, 160)
   setmetatable(self, {__index = MintCrate.Room})
   setmetatable(o, self)
   self.__index = self
@@ -36,14 +36,14 @@ function Game:new()
   o.dangerIconUp:setOpacity(0.6)
   
   o.ready = mint:addBackdrop('ready', 0, 24)
-  o.ready:setX(mint:getScreenWidth() / 2 - o.ready:getWidth() / 2)
+  o.ready:setX(mint:getBaseWidth() / 2 - o.ready:getWidth() / 2)
   
-  o.instructions = mint:addText('ui-main', mint:getScreenWidth() / 2, 0, 'TAP & HOLD\nTO FLY', {alignment='center'})
+  o.instructions = mint:addText('ui-main', mint:getBaseWidth() / 2, 0, 'TAP & HOLD\nTO FLY', {alignment='center'})
   o.sineWaveTicks = 0
   
   o.readyHighScoreDisplay =
     mint:addText('title-high-score', 2, 0, 'HIGH '..globals.highScore)
-  o.readyHighScoreDisplay:setY(mint:getScreenHeight() -
+  o.readyHighScoreDisplay:setY(mint:getBaseHeight() -
     o.readyHighScoreDisplay:getGlyphHeight() - 2)
   
   o.poles = {
@@ -113,8 +113,8 @@ function Game:update()
       
       -- Initialize score-tracking objects
       self.score = 0
-      self.scoreDisplay = mint:addText('ui-main', mint:getScreenWidth() / 2, 12, '0', {alignment='center'})
-      self.scoreDisplayHigh = mint:addText('ui-gold-numbers', mint:getScreenWidth() / 2, 12, '', {alignment='center'})
+      self.scoreDisplay = mint:addText('ui-main', mint:getBaseWidth() / 2, 12, '0', {alignment='center'})
+      self.scoreDisplayHigh = mint:addText('ui-gold-numbers', mint:getBaseWidth() / 2, 12, '', {alignment='center'})
       self.scoreDisplayHigh:setVisibility(false)
       
       -- Drop starting platform into river
@@ -195,7 +195,7 @@ function Game:update()
     for _, boulder in ipairs(self.boulders) do
       if (
         not boulder.isFalling
-        and mint:testCollision(self.harpy, boulder)
+        and mint:testActiveCollision(self.harpy, boulder)
       ) then
         -- Play sound
         if (not self.harpy.wasHit) then
@@ -250,7 +250,7 @@ function Game:update()
     if (
       (
         boulder:getXSpeed() > 0 and
-        boulder:getX() > (mint:getScreenWidth() + boulder:getRadius())
+        boulder:getX() > (mint:getBaseWidth() + boulder:getRadius())
       ) or
       (
         boulder:getXSpeed() < 0 and
@@ -311,7 +311,7 @@ function Game:update()
     end
     
     -- Show Game Over screen if the player goes too low
-    if (self.harpy:getY() > mint:getScreenHeight()) then
+    if (self.harpy:getY() > mint:getBaseHeight()) then
       mint:playSound('splash-big')
       
       self:createWaterSplash(self.harpy:getX())
@@ -341,9 +341,9 @@ function Game:update()
       
       self.harpy = self.harpy:destroy()
       
-      mint:addText('ui-main', mint:getScreenWidth() / 2, 35,
+      mint:addText('ui-main', mint:getBaseWidth() / 2, 35,
         'SCORE '..self.score, {alignment='center'})
-      mint:addText('ui-main', mint:getScreenWidth() / 2, 53,
+      mint:addText('ui-main', mint:getBaseWidth() / 2, 53,
         'BEST '..globals.highScore, {alignment='center'})
       
       self.btnRetry = Button:new(56, 72, 128, 'RETRY', false, function()
@@ -389,7 +389,7 @@ function Game:update()
     boulder:rotate(boulder:getXSpeed() / (30 / 60))
     
     -- Remove boulder if it falls into the water
-    if boulder:getY() > mint:getScreenHeight() + boulder:getRadius() then
+    if boulder:getY() > mint:getBaseHeight() + boulder:getRadius() then
       mint:playSound('splash')
       self:createWaterSplash(boulder:getX())
       self:createDroplets(boulder:getX())
@@ -569,7 +569,7 @@ function Game:repositionBoulder(boulder)
   if (dir == 1) then
     boulder:setX(0 - boulder:getRadius())
   else
-    boulder:setX(mint:getScreenWidth() + boulder:getRadius())
+    boulder:setX(mint:getBaseWidth() + boulder:getRadius())
   end
   
   boulder:setY(

@@ -8,6 +8,7 @@ local pkg = (...):match("(.-)[^%.]+$")
 MintCrate = {}
 MintCrate.Core         = require(pkg .. "core")
 MintCrate.Error        = require(pkg .. "error")
+MintCrate.Warn         = require(pkg .. "warn")
 MintCrate.Assert       = require(pkg .. "assert")
 MintCrate.Entity       = require(pkg .. "entity")
 MintCrate.Active       = require(pkg .. "active")

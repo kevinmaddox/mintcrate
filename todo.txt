@@ -59,14 +59,14 @@ MintCrate To-do List
   [x] Get rid of toggles, make sure it's all where you have to set it to true/false
   [x] Paragraph probably should just be Text
   [x] engine.lua should be core.lua
-[ ] Dump/log utility
-[ ] Flesh out clicking on Actives
+[x] Dump/log utility
 [x] Findings/issues
   [x] Remove pathPrefix from engine core constructor
   [x] Alter it so that tilemap calls aren't in Room but are instead in Engine core
   [x] Collisions still work on x,y point even if active lacks a collider; this should not happen
-[ ] Debug collision mask rectangle looks jumpy when moving
 [x] Make everything nice and clean
+[ ] Flesh out clicking on Actives
+[ ] Debug collision mask rectangle looks jumpy when moving
 [ ] Reconsider fonts/text, and how it affects localizations
 [ ] Testing
   [ ] Ensure that you can't break camera bounds... maybe add some extra conditional validation?

@@ -1484,14 +1484,14 @@ function Core:_changeRoom(room, persistAudio)
   -- Validation: room width
   if (self._currentRoom._roomWidth < self._baseWidth) then
     MintCrate.Error(nil,
-      "Width of room '" .. self._currentRoom:getRoomName() .. " " ..
+      "Width of room '" .. self._currentRoomName .. " " ..
       "is smaller than the game's base width resolution. This is not allowed.")
   end
   
   -- Validation: room height
   if (self._currentRoom._roomHeight < self._baseHeight) then
     MintCrate.Error(nil,
-      "Height of room '" .. self._currentRoom:getRoomName() .. " " ..
+      "Height of room '" .. self._currentRoomName .. " " ..
       "is smaller than the game's base height resolution. This is not allowed.")
   end
   
@@ -1586,6 +1586,50 @@ end
 -- -----------------------------------------------------------------------------
 -- Methods for creating game objects
 -- -----------------------------------------------------------------------------
+
+-- Creates a Room object to house gameplay.
+-- @param {string} roomName The room's name (identifier for debugging purposes).
+-- @param {number} roomWidth The width of the room, in pixels.
+-- @param {number} roomHeight The height of the room, in pixels.
+-- @returns {Room} A new instance of the Room class.
+function Core:addRoom(roomName, roomWidth, roomHeight)
+  local f = 'new'
+  MintCrate.Assert.self(f, self)
+  
+  -- Default params
+  if (roomWidth  == nil) then roomWidth = self._baseWidth   end
+  if (roomHeight == nil) then roomHeight = self._baseHeight end
+  
+  -- Validate: roomName
+  MintCrate.Assert.type(f, 'roomName', roomName, 'string')
+  
+  -- Validate: roomWidth
+  MintCrate.Assert.type(f, 'roomWidth', roomWidth, 'number')
+  
+  MintCrate.Assert.condition(f,
+    'roomWidth',
+    (roomWidth > 0),
+    'must be a value greater than 0'
+  )
+  
+  -- Validate: roomHeight
+  MintCrate.Assert.type(f, 'roomHeight', roomHeight, 'number')
+  
+  MintCrate.Assert.condition(f,
+    'roomHeight',
+    (roomHeight > 0),
+    'must be a value greater than 0'
+  )
+  
+  -- Store room name (to be used for various engine functions, like logging)
+  self._currentRoomName = roomName
+  
+  -- Create new room
+  local room = MintCrate.Room:new("Dummy Level", 480, 320)
+  
+  -- Return room
+  return room
+end
 
 -- Creates an Active object to be manipulated by the currently-active room.
 -- @param {string} name The name of the Active (from defineActives()).
@@ -2785,7 +2829,7 @@ function Core:sys_draw()
   if (self._showRoomInfo) then
     self:_drawText(
       {
-        self._currentRoom:getRoomName(),
+        self._currentRoomName,
         self._currentRoom:getRoomWidth() .. " x " ..
           self._currentRoom:getRoomHeight(),
         "ACTS: " .. #self._instances.actives,
@@ -3828,6 +3872,61 @@ function Core:setMasterMusicPitch(newPitch)
   for _, track in pairs(self._data.music) do
     track.source:setPitch(self.masterBgmPitch)
   end
+end
+
+-- -----------------------------------------------------------------------------
+-- Methods for logging errors
+-- -----------------------------------------------------------------------------
+
+-- Logs text to a file in the user's app data directory.
+-- @param {string} filename The log filename, including extension.
+-- @param {string} msg The text content to write to the log file.
+-- @returns {boolean} Whether logging was successful or not.
+function Core:log(filename, msg)
+  local f = 'log'
+  
+  -- Validate: filename
+  MintCrate.Assert.type(f, 'filename', filename, 'string')
+  
+  -- Validate: msg
+  MintCrate.Assert.type(f, 'msg', msg, 'string')
+  
+  -- Prepare to log data
+  local success = true
+  local errorMsg = ""
+  
+  -- Create log file if it doesn't exist yet
+  if (not love.filesystem.getInfo(filename)) then
+    success, errorMsg = love.filesystem.write(filename, "")
+    
+    -- Print error message to console if log file could not be created
+    if (not success) then
+      MintCrate.Warn("Could not create log file. Error message: " .. errorMsg)
+    end
+  end
+  
+  -- Add some additional details to the new log entry
+  local currentRoomName = self._currentRoomName or "(MintCrate initialization)"
+  
+  local formattedMsg = 
+       "\n"
+    .. os.date("%Y-%m-%d %H:%M:%S") .. " | "
+    .. currentRoomName .. " | "
+    .. "Acts: " .. #self._instances.actives
+    .. ", Baks: " .. #self._instances.backdrops
+    .. ", Text: " .. #self._instances.text .. " | "
+    .. msg
+  
+  -- Append text content to log file
+  success, errorMsg = love.filesystem.append(filename, formattedMsg)
+  
+  -- Print error message to console if data could not be logged
+  if (not success) then
+    MintCrate.Warn("Could not write to log file. Error message: " .. errorMsg)
+  end
+  
+  -- Return success of logging operation
+  return success
 end
 
 -- -----------------------------------------------------------------------------

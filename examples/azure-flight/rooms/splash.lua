@@ -1,7 +1,7 @@
 Splash = {type = MintCrate.Room.type}
 
 function Splash:new()
-  local o = MintCrate.Room:new("Splash", 240, 160)
+  local o = mint:addRoom("Splash", 240, 160)
   setmetatable(self, {__index = MintCrate.Room})
   setmetatable(o, self)
   self.__index = self
@@ -11,9 +11,9 @@ function Splash:new()
   self:configureRoomFadeOut(15, 30, {r=255,g=255,b=255})
   
   o.harpy = mint:addBackdrop("harpy", 0, 52)
-  o.harpy:setX((mint:getScreenWidth()/2) - (o.harpy:getWidth()/2) - 4)
+  o.harpy:setX((mint:getBaseWidth()/2) - (o.harpy:getWidth()/2) - 4)
   
-  o.copyright = mint:addText("system_dialog", mint:getScreenWidth()/2, o.harpy:getY() + 40, "Studio Densetsu", {alignment="center"})
+  o.copyright = mint:addText("system_dialog", mint:getBaseWidth()/2, o.harpy:getY() + 40, "Studio Densetsu", {alignment="center"})
   
   mint:delayFunction(function()
     mint:changeRoom(Title)

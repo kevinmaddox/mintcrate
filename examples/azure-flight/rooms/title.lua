@@ -1,7 +1,7 @@
 Title = {type = MintCrate.Room.type}
 
 function Title:new()
-  local o = MintCrate.Room:new("Title", 240, 160)
+  local o = mint:addRoom("Title", 240, 160)
   setmetatable(self, {__index = MintCrate.Room})
   setmetatable(o, self)
   self.__index = self
@@ -20,7 +20,7 @@ function Title:new()
   o.bg:setY(-o.bg:getTextureHeight())
   
   o.logoShadow = mint:addBackdrop('logo-shadow', 0, 10)
-  o.logoShadow:setX(mint:getScreenWidth() / 2 - o.logoShadow:getWidth() / 2)
+  o.logoShadow:setX(mint:getBaseWidth() / 2 - o.logoShadow:getWidth() / 2)
   
   o.logo = mint:addBackdrop('logo', 0, 0)
   o.logo:setX(o.logoShadow:getX())
