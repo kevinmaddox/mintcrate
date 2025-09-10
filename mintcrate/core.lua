@@ -1625,7 +1625,7 @@ function Core:addRoom(roomName, roomWidth, roomHeight)
   self._currentRoomName = roomName
   
   -- Create new room
-  local room = MintCrate.Room:new("Dummy Level", 480, 320)
+  local room = MintCrate.Room:new(roomName, roomWidth, roomHeight)
   
   -- Return room
   return room
@@ -1933,8 +1933,8 @@ function Core:setCameraX(x)
     x1 = 0
     x2 = self._currentRoom._roomWidth
   else
-    x1 = self._bounds.x1
-    x2 = self._bounds.x2
+    x1 = self._cameraBounds.x1
+    x2 = self._cameraBounds.x2
   end
   
   -- Bind camera
@@ -1963,8 +1963,8 @@ function Core:setCameraY(y)
     y1 = 0
     y2 = self._currentRoom._roomHeight
   else
-    y1 = self._bounds.y1
-    y2 = self._bounds.y2
+    y1 = self._cameraBounds.y1
+    y2 = self._cameraBounds.y2
   end
   
   -- Bind camera
@@ -2040,24 +2040,102 @@ function Core:bindCamera(x1, y1, x2, y2)
   -- Validate: x1
   MintCrate.Assert.type(f, 'x1', x1, 'number')
   
+  MintCrate.Assert.condition(f,
+    "x1",
+    (self.math.isIntegral(x1)),
+    'must be an integer')
+  
+  MintCrate.Assert.condition(f,
+    "x1",
+    (x1 >= 0 and x1 < self._currentRoom.roomWidth),
+    'must be within room bounds')
+  
   -- Validate: x2
   MintCrate.Assert.type(f, 'x2', x2, 'number')
+  
+  MintCrate.Assert.condition(f,
+    "x2",
+    (self.math.isIntegral(x1)),
+    'must be an integer')
+  
+  MintCrate.Assert.condition(f,
+    "x2",
+    (x2 >= 0 and x2 < self._currentRoom.roomWidth),
+    'must be within room bounds')
   
   -- Validate: y1
   MintCrate.Assert.type(f, 'y1', y1, 'number')
   
+  MintCrate.Assert.condition(f,
+    "y1",
+    (self.math.isIntegral(x1)),
+    'must be an integer')
+  
+  MintCrate.Assert.condition(f,
+    "y1",
+    (y1 >= 0 and y1 < self._currentRoom.roomHeight),
+    'must be within room bounds')
+  
   -- Validate: y2
   MintCrate.Assert.type(f, 'y2', y2, 'number')
   
-  -- Set bounds and indicate that the camera is currently bound
-  self._bounds = {x1 = x1, y1 = y1, x2 = x2, y2 = y2}
+  MintCrate.Assert.condition(f,
+    "y2",
+    (self.math.isIntegral(x1)),
+    'must be an integer')
+  
+  MintCrate.Assert.condition(f,
+    "y2",
+    (y2 >= 0 and y2 < self._currentRoom.roomHeight),
+    'must be within room bounds')
+  
+  -- Validate: x1 & x2
+  if (x1 >= x2) then
+    MintCrate.Error(f, "x1 must be less than x2.")
+  end
+  
+  -- Validate: y1 & y2
+  if (y1 >= y2) then
+    MintCrate.Error(f, "y1 must be less than y2.")
+  end
+  
+  -- Validate: bounds width
+  if ((x2 - x1) < self._baseWidth) then
+    MintCrate.Error(f,
+      "Width of camera bounds must be at least the width " ..
+      "of the game's base resolution.")
+  end
+  
+  -- Validate: bounds height
+  if ((y2 - y1) < self._baseWidth) then
+    MintCrate.Error(f,
+      "Height of camera bounds must be at least the height " ..
+      "of the game's base resolution.")
+  end
+  
+  -- Set bounds
+  self._cameraBounds = {
+    x1 = x1,
+    y1 = y1,
+    x2 = x2,
+    y2 = y2
+  }
+  
+  -- Indicate that the camera is currently bound
   self._cameraIsBound = true
 end
 
 -- Unbinds the camera if previously bound.
 function Core:unbindCamera()
-  -- Unset bounds and indicate that the camera is currently unbound
-  self._cameraBounds = {x1 = 0, x2 = 0, y1 = 0, y2 = 0}
+  -- Unset bounds
+  self._cameraBounds = {
+    x1 = 0,
+    x2 = 0,
+    y1 = 0,
+    y2 = 0
+  }
+  
+  -- Indicate that the camera is currently unbound
   self._cameraIsBound = false
 end
 
@@ -3250,26 +3328,6 @@ function Core:mouseOverActive(active)
   
   -- Return result of hover test
   return over
-end
-
--- Returns whether an Active object was clicked.
--- @param {number} mouseButton Which mouse button was used to click.
--- @param {Active} active The active to check for being clicked upon.
-function Core:wasActiveClicked(mouseButton, active)
-  local f = 'wasActiveClicked'
-  MintCrate.Assert.self(f, self)
-  
-  -- Validate: mouseButton
-  MintCrate.Assert.type(f, 'mouseButton', mouseButton, 'number')
-  
-  -- Validate: active
-  MintCrate.Assert.type(f, 'active', active, 'Active')
-  
-  -- Return result of click test
-  return (
-        self:mousePressed(mouseButton)
-    and self:mouseOverActive(active)
-  )
 end
 
 -- -----------------------------------------------------------------------------

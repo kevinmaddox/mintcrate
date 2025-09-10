@@ -1,13 +1,13 @@
-Level = {}
+Level = {type = MintCrate.Room.type}
 
 function Level:new()
-  local o = MintCrate.Room:new("Level", 640, 240)
+  local o = mint:addRoom("Level", 640, 240)
   setmetatable(self, {__index = MintCrate.Room})
   setmetatable(o, self)
   self.__index = self
   
-  o:setTilemap('level_snow-forest')
-  o:setBackgroundColor(184, 184, 248)
+  mint:setTilemap('level_snow-forest')
+  o:setRoomBackgroundColor(184, 184, 248)
   
   o.player = mint:addActive('miamori', 64, 128)
   o.player.xSpeed = 0
@@ -20,26 +20,13 @@ function Level:new()
   
   o.bg = mint:addBackdrop('bg', 0, 64, {width = 800, height = 224})
   
-  mint:setMusic('snow-forest')
+  mint:playMusic('snow-forest')
   -- mint:playMusic()
-  
-  o.myFunc = function()
-    o.player.ySpeed = -3
-  end
   
   return o
 end
 
 function Level:update()
-  
-  if input:pressed('fire2') then
-    mint:delayFunction(self.myFunc, 60)
-  end
-  
-  if input:pressed('fire1') then
-    mint:clearFunction(self.myFunc)
-  end
-  
   local collisions
   local previousY
   
@@ -204,7 +191,8 @@ function Level:update()
   -- Other room stuff ----------------------------------------------------------
   
   -- Center camera on player
-  mint:centerCamera(self.player:getX(), self.player:getY())
+  mint:centerCameraX(self.player:getX())
+  mint:centerCameraY(self.player:getY())
   
   -- Update background trees position
   self.bg:setX(mint:getCameraX() / 2)

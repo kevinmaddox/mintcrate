@@ -37,10 +37,10 @@ function love.load()
     -- Miamori
     {name = 'miamori'},
     {name = 'miamori_collider', width = 15, height = 20, offset = {-8, -20}},
-    {name = 'miamori_idle',  offset = {-11, -25}, actionPoints={16, 15}},
+    {name = 'miamori_idle',  offset = {-11, -25}, actionPoints={{16, 15}}},
     {name = 'miamori_walk',  offset = {-11, -25}, actionPoints={{16, 16}, {16, 15}, {16, 16}, {16, 15}}, frameCount = 4, frameDuration = 10},
-    {name = 'miamori_slide', offset = {-11, -20}, actionPoints={16, 10}},
-    {name = 'miamori_jump',  offset = {-11, -27}, actionPoints={16, 15}}
+    {name = 'miamori_slide', offset = {-11, -20}, actionPoints={{16, 10}}},
+    {name = 'miamori_jump',  offset = {-11, -27}, actionPoints={{16, 15}}}
   })
   
   -- Backdrops
@@ -80,9 +80,9 @@ end
 
 function love.update()
   -- Debug controls
-  if mint:keyPressed("d") then mint:showAllDebugOverlays() end
-  for i=1, 4 do if mint:keyPressed(i) then mint:setWindowScale(i) end end
-  if mint:keyPressed('f') then mint:setFullscreen(not mint:getFullscreen()) end
+  if mint:keyPressed("d") then mint:setAllDebugOverlayVisibility(true) end
+  for i=1, 4 do if mint:keyPressed(tostring(i)) then mint:setWindowScale(i) end end
+  if mint:keyPressed('f') then mint:setFullscreenMode(not mint:isFullscreenEnabled()) end
   if mint:keyPressed('escape') then mint:quit() end
   
   mint:sys_update()

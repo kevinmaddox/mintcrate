@@ -65,9 +65,7 @@ MintCrate To-do List
   [x] Alter it so that tilemap calls aren't in Room but are instead in Engine core
   [x] Collisions still work on x,y point even if active lacks a collider; this should not happen
 [x] Make everything nice and clean
-[ ] Flesh out clicking on Actives
 [ ] Debug collision mask rectangle looks jumpy when moving
-[ ] Reconsider fonts/text, and how it affects localizations
 [ ] Testing
   [ ] Ensure that you can't break camera bounds... maybe add some extra conditional validation?
   [ ] Go through every class and try to break stuff
@@ -80,6 +78,7 @@ MintCrate To-do List
     [ ] Paragraph
     [ ] MathX
     [ ] Util
+[ ] Reconsider fonts/text, and how it affects localizations
 [ ] Long-term: Make the JSON parser handle more bad-JSON errors
 
 Decisions
