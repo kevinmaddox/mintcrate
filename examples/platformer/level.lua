@@ -113,7 +113,7 @@ function Level:update()
         math.floor(self.player:getWidth()/2))
     else
       self.player:setX(collisions[1].rightEdgeX +
-        math.floor(self.player:getWidth()/2)+1)
+        math.floor(self.player:getWidth()/2))
     end
     self.player.xSpeed = 0
     self.player.slideTimer = 0

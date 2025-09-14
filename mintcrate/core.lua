@@ -47,6 +47,10 @@ function Core:new(
     options.windowIconPath = ""
   end
   
+  if (options.framerate == nil) then
+    options.framerate = 60
+  end
+  
   -- Validate: baseWidth
   MintCrate.Assert.type(f,
     'baseWidth',
@@ -108,6 +112,22 @@ function Core:new(
     'options.windowIconPath',
     options.windowIconPath,
     'string')
+  
+  -- Validate: options.framerate
+  MintCrate.Assert.type(f,
+    'options.framerate',
+    options.framerate,
+    'number')
+  
+  MintCrate.Assert.condition(f,
+    "options.framerate",
+    (options.framerate > 0),
+    'must be a value greater than zero')
+  
+  MintCrate.Assert.condition(f,
+    "options.framerate",
+    (options.framerate <= 60),
+    'cannot exceed 60')
   
   -- Initialize Love
   love.graphics.setLineStyle("rough")
@@ -187,7 +207,7 @@ function Core:new(
   o._showActiveActionPoints   = false
 
   -- FPS limiter
-  o._fpsMinDt       = 1 / 60
+  o._fpsMinDt       = 1 / options.framerate
   o._fpsNextTime    = love.timer.getTime()
   o._fpsCurrentTime = o._fpsNextTime
 
@@ -2585,6 +2605,14 @@ function Core:sys_draw()
       if (active:isFlippedHorizontally()) then flippedX = -1 end
       if (active:isFlippedVertically()  ) then flippedY = -1 end
       
+      -- Account for 1-pixel offset if graphic is flipped
+      -- This is because love flips sprites based on a conceptual space that's
+      -- in-between pixels, rather than the actual pixel edge of the image
+      local flipOffsetX = 0
+      local flipOffsetY = 0
+      if (active:isFlippedHorizontally()) then flipOffsetX = 1 end
+      if (active:isFlippedVertically()  ) then flipOffsetY = 1 end
+      
       -- Set alpha rendering value
       love.graphics.setColor(1, 1, 1, active:getOpacity())
       
@@ -2595,7 +2623,7 @@ function Core:sys_draw()
         active:getX(), active:getY(),
         math.rad(active:getAngle()),
         (active:getScaleX() * flippedX), (active:getScaleY() * flippedY),
-        -animation.offsetX, -animation.offsetY
+        -animation.offsetX + flipOffsetX, -animation.offsetY + flipOffsetY
       )
       
       -- Reset alpha rendering value
@@ -2649,8 +2677,8 @@ function Core:sys_draw()
           
           love.graphics.rectangle(
             "fill",
-            math.floor(mask.x) + 0.5, math.floor(mask.y) + 0.5,
-            math.floor(mask.w) - 1.0, math.floor(mask.h) - 1.0
+            mask.x + 0.5, mask.y + 0.5,
+            mask.w - 1.0, mask.h - 1.0
           )
           
           -- Draw border
@@ -2658,8 +2686,8 @@ function Core:sys_draw()
           
           love.graphics.rectangle(
             "line",
-            math.floor(mask.x) + 0.5, math.floor(mask.y) + 0.5,
-            math.floor(mask.w) - 1.0, math.floor(mask.h) - 1.0
+            mask.x + 0.5, mask.y + 0.5,
+            mask.w - 1.0, mask.h - 1.0
           )
         end
         
@@ -2718,8 +2746,8 @@ function Core:sys_draw()
           -- Draw mask
           love.graphics.rectangle(
             "fill",
-            math.floor(collider.x) + 0.5, math.floor(collider.y) + 0.5,
-            math.floor(collider.w) - 1.0, math.floor(collider.h) - 1.0
+            collider.x + 0.5, collider.y + 0.5,
+            collider.w - 1.0, collider.h - 1.0
           )
           
           -- Draw border
@@ -2727,9 +2755,10 @@ function Core:sys_draw()
           
           love.graphics.rectangle(
             "line",
-            math.floor(collider.x) + 0.5, math.floor(collider.y) + 0.5,
-            math.floor(collider.w) - 1.0, math.floor(collider.h) - 1.0
+            collider.x + 0.5, collider.y + 0.5,
+            collider.w - 1.0, collider.h - 1.0
           )
+          
         -- Otherwise, draw circular collision mask
         else
           -- Draw mask
@@ -2752,8 +2781,8 @@ function Core:sys_draw()
         
         -- Draw action point
         love.graphics.draw(img,
-          active:getActionPointX() - math.floor(img:getWidth()/2),
-          active:getActionPointY() - math.floor(img:getHeight()/2))
+          active:getActionPointX() - math.floor(img:getWidth()  / 2),
+          active:getActionPointY() - math.floor(img:getHeight() / 2))
         
         -- TODO: Remove me?
         -- self:_drawText(
@@ -2772,8 +2801,8 @@ function Core:sys_draw()
         
         -- Draw origin point
         love.graphics.draw(img,
-          active:getX() - math.floor(img:getWidth()/2),
-          active:getY() - math.floor(img:getHeight()/2))
+          active:getX() - math.floor(img:getWidth()  / 2),
+          active:getY() - math.floor(img:getHeight() / 2))
         
         -- TODO: Remove me?
         -- self:_drawText(

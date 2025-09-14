@@ -11,7 +11,8 @@ function love.load()
     {
       windowScale = 2,
       windowTitle = "MintCrate - Platformer Example",
-      pathPrefix = "../../"
+      pathPrefix = "../../",
+      framerate = 60
       -- icon = "icon.png"
     }
   )
@@ -36,7 +37,7 @@ function love.load()
   mint:defineActives({
     -- Miamori
     {name = 'miamori'},
-    {name = 'miamori_collider', width = 15, height = 20, offset = {-8, -20}},
+    {name = 'miamori_collider', width = 14, height = 20, offset = {-7, -20}},
     {name = 'miamori_idle',  offset = {-11, -25}, actionPoints={{16, 15}}},
     {name = 'miamori_walk',  offset = {-11, -25}, actionPoints={{16, 16}, {16, 15}, {16, 16}, {16, 15}}, frameCount = 4, frameDuration = 10},
     {name = 'miamori_slide', offset = {-11, -20}, actionPoints={{16, 10}}},
@@ -72,6 +73,9 @@ function love.load()
     -- {name = 'strongest'}
   -- })
   
+  debugOverlaysEnabled = false
+  mint:setAllDebugOverlayVisibility(true)
+  
   -- Loading complete
   mint:ready()
 end
@@ -80,7 +84,10 @@ end
 
 function love.update()
   -- Debug controls
-  if mint:keyPressed("d") then mint:setAllDebugOverlayVisibility(true) end
+  if mint:keyPressed("d") then
+    debugOverlaysEnabled = not debugOverlaysEnabled
+    mint:setAllDebugOverlayVisibility(debugOverlaysEnabled)
+  end
   for i=1, 4 do if mint:keyPressed(tostring(i)) then mint:setWindowScale(i) end end
   if mint:keyPressed('f') then mint:setFullscreenMode(not mint:isFullscreenEnabled()) end
   if mint:keyPressed('escape') then mint:quit() end

@@ -65,7 +65,8 @@ MintCrate To-do List
   [x] Alter it so that tilemap calls aren't in Room but are instead in Engine core
   [x] Collisions still work on x,y point even if active lacks a collider; this should not happen
 [x] Make everything nice and clean
-[ ] Debug collision mask rectangle looks jumpy when moving
+[x] Debug collision mask rectangle looks jumpy when moving
+[x] Issue with action point mirroring position
 [ ] Testing
   [ ] Ensure that you can't break camera bounds... maybe add some extra conditional validation?
   [ ] Go through every class and try to break stuff
